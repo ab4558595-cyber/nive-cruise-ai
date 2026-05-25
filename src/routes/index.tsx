@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square } from "lucide-react";
+import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage, type Msg } from "@/components/ChatMessage";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -40,8 +41,33 @@ function Index() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [activePlan, setActivePlan] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ? { email: session.user.email } : null);
+      if (session?.user) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+        setIsAdmin(!!roles?.some((r) => r.role === "admin"));
+        const { data: plan } = await supabase
+          .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
+          .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
+        setActivePlan(plan?.plan_id ?? null);
+      }
+    };
+    init();
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setUser(s?.user ? { email: s.user.email } : null);
+      if (!s) { setIsAdmin(false); setActivePlan(null); }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -184,7 +210,34 @@ function Index() {
             <span className="hidden sm:inline">Clear</span>
           </Button>
         )}
+        <div className="flex items-center gap-1.5">
+          {activePlan && (
+            <span className="hidden rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:inline-flex">
+              {activePlan.toUpperCase()}
+            </span>
+          )}
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Link to="/pricing"><Tag className="h-4 w-4" /><span className="hidden sm:inline">Pricing</span></Link>
+          </Button>
+          {isAdmin && (
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Link to="/admin"><Shield className="h-4 w-4" /><span className="hidden sm:inline">Admin</span></Link>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
+              <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Link to="/auth"><LogIn className="h-4 w-4" /><span className="hidden sm:inline">Sign in</span></Link>
+            </Button>
+          )}
+        </div>
       </header>
+
+
+
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
