@@ -234,6 +234,9 @@ function Index() {
             </Button>
           )}
         </div>
+      </header>
+
+
 
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
