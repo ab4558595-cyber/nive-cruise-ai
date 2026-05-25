@@ -210,7 +210,31 @@ function Index() {
             <span className="hidden sm:inline">Clear</span>
           </Button>
         )}
-      </header>
+        <div className="flex items-center gap-1.5">
+          {activePlan && (
+            <span className="hidden rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:inline-flex">
+              {activePlan.toUpperCase()}
+            </span>
+          )}
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Link to="/pricing"><Tag className="h-4 w-4" /><span className="hidden sm:inline">Pricing</span></Link>
+          </Button>
+          {isAdmin && (
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Link to="/admin"><Shield className="h-4 w-4" /><span className="hidden sm:inline">Admin</span></Link>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
+              <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Link to="/auth"><LogIn className="h-4 w-4" /><span className="hidden sm:inline">Sign in</span></Link>
+            </Button>
+          )}
+        </div>
+
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
