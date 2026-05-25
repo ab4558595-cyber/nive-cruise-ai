@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square } from "lucide-react";
+import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage, type Msg } from "@/components/ChatMessage";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -40,8 +41,33 @@ function Index() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [activePlan, setActivePlan] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ? { email: session.user.email } : null);
+      if (session?.user) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+        setIsAdmin(!!roles?.some((r) => r.role === "admin"));
+        const { data: plan } = await supabase
+          .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
+          .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
+        setActivePlan(plan?.plan_id ?? null);
+      }
+    };
+    init();
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setUser(s?.user ? { email: s.user.email } : null);
+      if (!s) { setIsAdmin(false); setActivePlan(null); }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
