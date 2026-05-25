@@ -72,11 +72,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Cruise AI — Write Any Code, Any Platform" },
+      { name: "description", content: "Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps." },
+      { name: "author", content: "Cruise AI" },
+      { property: "og:title", content: "Cruise AI — Write Any Code, Any Platform" },
+      { property: "og:description", content: "Elite AI coding copilot for Arduino, mobile, web, backend, and more." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
