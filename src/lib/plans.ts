@@ -1,5 +1,5 @@
-// ⚠️ EDIT THIS UPI ID to your real one (e.g. yourname@okicici, yourname@paytm)
-export const UPI_ID = "bansal.monikaji1982@okicici";
+// UPI ID for receiving payments
+export const UPI_ID = "8766208760@ybl";
 export const UPI_PAYEE_NAME = "Cruise AI";
 export const OWNER_EMAIL = "bansal.monikaji1982@gmail.com";
 
