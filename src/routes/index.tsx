@@ -87,23 +87,34 @@ function Index() {
     abortRef.current = controller;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({ messages: next }),
         signal: controller.signal,
       });
 
       if (!resp.ok || !resp.body) {
-        if (resp.status === 429) toast.error("Rate limit reached. Please wait a moment.");
+        let msg = "Failed to get response";
+        try {
+          const j = await resp.json();
+          if (j?.error) msg = j.error;
+        } catch { /* ignore */ }
+        if (resp.status === 401) toast.error(msg, { action: { label: "Sign in", onClick: () => (window.location.href = "/auth") } });
+        else if (resp.status === 429) toast.error(msg, { action: { label: "Upgrade", onClick: () => (window.location.href = "/pricing") } });
         else if (resp.status === 402) toast.error("AI credits exhausted. Add funds in workspace settings.");
-        else toast.error("Failed to get response");
+        else toast.error(msg);
+        setMessages((m) => m.slice(0, -1));
         setIsLoading(false);
         return;
       }
+
 
       setMessages((m) => [...m, { role: "assistant", content: "" }]);
 
