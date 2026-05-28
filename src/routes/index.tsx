@@ -48,6 +48,18 @@ function Index() {
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
+  const [previewDismissed, setPreviewDismissed] = useState(false);
+
+  const latestAssistant = useMemo(
+    () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
+    [messages],
+  );
+  useEffect(() => {
+    if (previewDismissed) return;
+    const spec = detectPreview(latestAssistant);
+    if (spec) setPreviewSpec(spec);
+  }, [latestAssistant, previewDismissed]);
 
   useEffect(() => {
     const init = async () => {
