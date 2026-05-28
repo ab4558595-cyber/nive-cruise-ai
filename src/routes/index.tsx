@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage, type Msg } from "@/components/ChatMessage";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { LivePreview, detectPreview, type PreviewSpec } from "@/components/LivePreview";
+
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -46,6 +48,18 @@ function Index() {
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
+  const [previewDismissed, setPreviewDismissed] = useState(false);
+
+  const latestAssistant = useMemo(
+    () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
+    [messages],
+  );
+  useEffect(() => {
+    if (previewDismissed) return;
+    const spec = detectPreview(latestAssistant);
+    if (spec) setPreviewSpec(spec);
+  }, [latestAssistant, previewDismissed]);
 
   useEffect(() => {
     const init = async () => {
@@ -210,18 +224,28 @@ function Index() {
             <p className="text-[11px] text-muted-foreground">Elite coding copilot · any language · any platform</p>
           </div>
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMessages([])}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Clear</span>
-          </Button>
-        )}
         <div className="flex items-center gap-1.5">
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setMessages([]); setPreviewSpec(null); setPreviewDismissed(false); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Clear</span>
+            </Button>
+          )}
+          {previewDismissed && detectPreview(latestAssistant) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setPreviewDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <PlayCircle className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
+            </Button>
+          )}
           {activePlan && (
             <span className="hidden rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:inline-flex">
               {activePlan.toUpperCase()}
@@ -248,101 +272,103 @@ function Index() {
       </header>
 
 
-
-
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        {messages.length === 0 ? (
-          <div className="mx-auto flex max-w-2xl flex-col items-center justify-center px-4 py-12 text-center sm:py-20">
-            <div
-              className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-primary-foreground"
-              style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}
-            >
-              <Sparkles className="h-8 w-8" />
-            </div>
-            <h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-              What do you want to <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">build</span>?
-            </h2>
-            <p className="mb-10 max-w-md text-sm text-muted-foreground sm:text-base">
-              From Arduino firmware to full-stack apps — describe it and Cruise AI will write the code.
-            </p>
-            <div className="grid w-full gap-3 sm:grid-cols-2">
-              {SUGGESTIONS.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <button
-                    key={s.label}
-                    onClick={() => send(s.prompt)}
-                    className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/50 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-[var(--shadow-glow)]"
-                  >
-                    <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-primary">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="text-sm font-medium">{s.label}</div>
-                    <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{s.prompt}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
-            {messages.map((m, i) => (
-              <ChatMessage key={i} message={m} />
-            ))}
-            {isLoading && messages[messages.length - 1]?.role === "user" && (
-              <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
-                <span className="inline-flex gap-1">
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
-                </span>
-                Cruise AI is thinking…
+      <div className="flex min-h-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto">
+            {messages.length === 0 ? (
+              <div className="mx-auto flex max-w-2xl flex-col items-center justify-center px-4 py-12 text-center sm:py-20">
+                <div
+                  className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-primary-foreground"
+                  style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}
+                >
+                  <Sparkles className="h-8 w-8" />
+                </div>
+                <h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  What do you want to <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">build</span>?
+                </h2>
+                <p className="mb-10 max-w-md text-sm text-muted-foreground sm:text-base">
+                  From Arduino firmware to full-stack apps — describe it and Cruise AI will write the code. Web apps render live in a side panel.
+                </p>
+                <div className="grid w-full gap-3 sm:grid-cols-2">
+                  {SUGGESTIONS.map((s) => {
+                    const Icon = s.icon;
+                    return (
+                      <button
+                        key={s.label}
+                        onClick={() => send(s.prompt)}
+                        className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/50 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card hover:shadow-[var(--shadow-glow)]"
+                      >
+                        <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-primary">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="text-sm font-medium">{s.label}</div>
+                        <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{s.prompt}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
+                {messages.map((m, i) => (
+                  <ChatMessage key={i} message={m} />
+                ))}
+                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                  <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                    <span className="inline-flex gap-1">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+                    </span>
+                    Cruise AI is thinking…
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      <div className="border-t border-border/60 bg-background/80 px-3 py-3 backdrop-blur-md sm:px-4">
-        <div className="mx-auto max-w-3xl">
-          <div
-            className="relative flex items-end gap-2 rounded-2xl border border-border/70 bg-card/70 p-2 shadow-[var(--shadow-elegant)] transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow)]"
-          >
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Describe what you want to code… (e.g. 'ESP32 web server that toggles a relay')"
-              className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
-              disabled={isLoading}
-            />
-            {isLoading ? (
-              <Button
-                size="icon"
-                onClick={stop}
-                variant="secondary"
-                className="h-9 w-9 shrink-0 rounded-xl"
-                aria-label="Stop"
+          <div className="border-t border-border/60 bg-background/80 px-3 py-3 backdrop-blur-md sm:px-4">
+            <div className="mx-auto max-w-3xl">
+              <div
+                className="relative flex items-end gap-2 rounded-2xl border border-border/70 bg-card/70 p-2 shadow-[var(--shadow-elegant)] transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow)]"
               >
-                <Square className="h-4 w-4 fill-current" />
-              </Button>
-            ) : (
-              <Button
-                size="icon"
-                onClick={() => send(input)}
-                disabled={!input.trim()}
-                className="h-9 w-9 shrink-0 rounded-xl text-primary-foreground transition-opacity hover:opacity-90"
-                style={{ background: "var(--gradient-brand)" }}
-                aria-label="Send"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            )}
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  placeholder="Describe what you want to code… (e.g. 'a snake game in HTML/JS')"
+                  className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+                  disabled={isLoading}
+                />
+                {isLoading ? (
+                  <Button size="icon" onClick={stop} variant="secondary" className="h-9 w-9 shrink-0 rounded-xl" aria-label="Stop">
+                    <Square className="h-4 w-4 fill-current" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    onClick={() => send(input)}
+                    disabled={!input.trim()}
+                    className="h-9 w-9 shrink-0 rounded-xl text-primary-foreground transition-opacity hover:opacity-90"
+                    style={{ background: "var(--gradient-brand)" }}
+                    aria-label="Send"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                Cruise AI can make mistakes — always review code before deploying to hardware or production.
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Cruise AI can make mistakes — always review code before deploying to hardware or production.
-          </p>
         </div>
+
+        {previewSpec && !previewDismissed && (
+          <div className="hidden w-[45%] min-w-[380px] max-w-[720px] md:block">
+            <LivePreview spec={previewSpec} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); }} />
+          </div>
+        )}
       </div>
     </div>
   );
