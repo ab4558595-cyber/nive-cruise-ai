@@ -224,18 +224,28 @@ function Index() {
             <p className="text-[11px] text-muted-foreground">Elite coding copilot · any language · any platform</p>
           </div>
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setMessages([])}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Clear</span>
-          </Button>
-        )}
         <div className="flex items-center gap-1.5">
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setMessages([]); setPreviewSpec(null); setPreviewDismissed(false); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Clear</span>
+            </Button>
+          )}
+          {previewDismissed && detectPreview(latestAssistant) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setPreviewDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <PlayCircle className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
+            </Button>
+          )}
           {activePlan && (
             <span className="hidden rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:inline-flex">
               {activePlan.toUpperCase()}
