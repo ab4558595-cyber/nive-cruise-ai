@@ -113,6 +113,10 @@ Deno.serve(async (req) => {
       }
     }
 
+    const planExtras = cfg.multilingual
+      ? `\n\nPLAN FEATURES (${cfg.label}): You may reply in ANY language the user writes in (Tamil, Hindi, Spanish, Arabic, etc.). You have access to long context, deeper reasoning, and richer multi-file outputs. Use them.`
+      : `\n\nPLAN FEATURES (${cfg.label}): Reply in ENGLISH ONLY. Multilingual replies (Tamil, Hindi, etc.), long-context, and the pro reasoning model are paid features on Starter / Pro. If the user writes in a non-English language, briefly answer in English and add ONE friendly line: "Multilingual replies are available on Starter and Pro — see /pricing." Do NOT switch languages.`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -121,7 +125,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: cfg.model,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+        messages: [{ role: "system", content: BASE_PROMPT + planExtras }, ...messages],
         stream: true,
       }),
     });
