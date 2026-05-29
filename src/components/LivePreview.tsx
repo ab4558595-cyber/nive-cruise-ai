@@ -1,23 +1,74 @@
 import { useMemo, useState } from "react";
 import { Sandpack } from "@codesandbox/sandpack-react";
-import { X, ExternalLink, Code2, Eye } from "lucide-react";
+import { X, ExternalLink, Code2, Eye, FileCode, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export type PreviewSpec = {
   template: "static" | "react" | "vanilla";
   files: Record<string, string>;
+  entry?: string;
 };
 
-/** Detect HTML / React / JS in an assistant message and produce a Sandpack spec. */
+const FILENAME_RE = /(?:\*\*|##\s*|`)([\w./-]+\.(?:html?|css|jsx?|tsx?|json|md|svg))(?:\*\*|`)?/i;
+
+function guessLangFromName(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  return { ts: "ts", tsx: "tsx", js: "js", jsx: "jsx", css: "css", html: "html", json: "json", md: "md" }[ext] ?? "text";
+}
+
+function normalizePath(p: string): string {
+  let out = p.trim().replace(/^\.?\/+/, "");
+  if (!out.startsWith("/")) out = "/" + out;
+  return out;
+}
+
+/** Detect HTML / React / multi-file projects in an assistant message. */
 export function detectPreview(content: string): PreviewSpec | null {
   if (!content) return null;
-  const blocks = [...content.matchAll(/```(\w+)?\n([\s\S]*?)```/g)].map((m) => ({
-    lang: (m[1] || "").toLowerCase(),
-    code: m[2],
-  }));
+
+  // Walk the content sequentially so we can attach a filename header that
+  // appears immediately before a fenced code block (Cruise AI convention).
+  const re = /```(\w+)?\n([\s\S]*?)```/g;
+  const blocks: { lang: string; code: string; name?: string }[] = [];
+  let m: RegExpExecArray | null;
+  let cursor = 0;
+  while ((m = re.exec(content)) !== null) {
+    const preceding = content.slice(cursor, m.index).split("\n").slice(-4).join("\n");
+    const nameMatch = preceding.match(FILENAME_RE);
+    blocks.push({
+      lang: (m[1] || "").toLowerCase(),
+      code: m[2],
+      name: nameMatch?.[1],
+    });
+    cursor = re.lastIndex;
+  }
   if (blocks.length === 0) return null;
 
-  // Full HTML doc
+  // ---- Multi-file React-style project (any block has a /src or App.* filename)
+  const named = blocks.filter((b) => b.name);
+  const reactish = named.filter((b) =>
+    /\.(tsx|jsx)$/i.test(b.name!) || /^src\//i.test(b.name!.replace(/^\/+/, "")),
+  );
+  if (reactish.length >= 1 && named.length >= 2) {
+    const files: Record<string, string> = {};
+    for (const b of named) files[normalizePath(b.name!)] = b.code;
+    // Ensure an entry exists
+    if (!files["/App.tsx"] && !files["/App.jsx"] && !files["/src/App.tsx"] && !files["/src/App.jsx"]) {
+      const firstTsx = Object.keys(files).find((k) => /\.(tsx|jsx)$/.test(k));
+      if (firstTsx && firstTsx !== "/App.tsx") files["/App.tsx"] = files[firstTsx];
+    }
+    return { template: "react", files };
+  }
+
+  // ---- Multi-file static (index.html + others)
+  if (named.some((b) => /index\.html?$/i.test(b.name!))) {
+    const files: Record<string, string> = {};
+    for (const b of named) files[normalizePath(b.name!)] = b.code;
+    return { template: "static", files, entry: "/index.html" };
+  }
+
+  // ---- Single full HTML doc
   const htmlBlock =
     blocks.find((b) => /^html?$/.test(b.lang) && /<html[\s>]/i.test(b.code)) ||
     blocks.find((b) => /^html?$/.test(b.lang)) ||
@@ -34,7 +85,7 @@ export function detectPreview(content: string): PreviewSpec | null {
     return { template: "static", files: { "/index.html": code } };
   }
 
-  // React component (must look like a component to avoid false positives)
+  // ---- Single React component
   const jsx = blocks.find(
     (b) => ["jsx", "tsx"].includes(b.lang) && /(export\s+default|function\s+App|=>\s*\()/.test(b.code),
   );
@@ -43,7 +94,7 @@ export function detectPreview(content: string): PreviewSpec | null {
     return { template: "react", files: { [`/App.${ext}`]: jsx.code } };
   }
 
-  // CSS+JS snippet → wrap in HTML (only if there's something to render)
+  // ---- JS that touches the DOM → wrap
   const js = blocks.find((b) => ["js", "javascript"].includes(b.lang));
   const css = blocks.find((b) => b.lang === "css");
   if (js && /document\.|window\.|getElementById|querySelector/.test(js.code)) {
@@ -53,19 +104,43 @@ export function detectPreview(content: string): PreviewSpec | null {
   return null;
 }
 
-export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () => void }) {
+const PAID_PLANS = new Set(["starter", "pro"]);
+
+export function LivePreview({
+  spec,
+  onClose,
+  plan,
+}: {
+  spec: PreviewSpec;
+  onClose: () => void;
+  plan?: string | null;
+}) {
+  const isPaid = plan ? PAID_PLANS.has(plan) : false;
   const [mode, setMode] = useState<"preview" | "code">("preview");
-  const key = useMemo(() => JSON.stringify(spec.files).length + ":" + spec.template + ":" + mode, [spec, mode]);
+  const fileNames = useMemo(() => Object.keys(spec.files), [spec.files]);
+  const [activeFile, setActiveFile] = useState<string>(fileNames[0] ?? "");
+  const key = useMemo(
+    () => JSON.stringify(spec.files).length + ":" + spec.template + ":" + mode,
+    [spec, mode],
+  );
+
+  const tryCode = () => {
+    if (!isPaid) return;
+    setMode("code");
+  };
 
   return (
     <div className="flex h-full flex-col border-l border-border/60 bg-background">
       <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span className="text-xs font-medium">Live preview</span>
-          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
-            {spec.template === "react" ? "React" : "HTML/JS"}
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span className="text-xs font-medium tracking-tight">Live preview</span>
+          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+            {spec.template === "react" ? "React" : "HTML"}
           </span>
+          {fileNames.length > 1 && (
+            <span className="text-[10px] text-muted-foreground">· {fileNames.length} files</span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <div className="mr-1 flex rounded-md border border-border/60 p-0.5">
@@ -78,12 +153,17 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
               <Eye className="h-3 w-3" /> Preview
             </button>
             <button
-              onClick={() => setMode("code")}
+              onClick={tryCode}
+              title={isPaid ? "View source" : "Source view is a Starter / Pro feature"}
               className={`flex items-center gap-1 rounded px-2 py-0.5 text-[11px] transition-colors ${
-                mode === "code" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+                mode === "code"
+                  ? "bg-primary/15 text-primary"
+                  : isPaid
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground/60"
               }`}
             >
-              <Code2 className="h-3 w-3" /> Code
+              {isPaid ? <Code2 className="h-3 w-3" /> : <Lock className="h-3 w-3" />} Code
             </button>
           </div>
           <Button
@@ -91,7 +171,7 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
             variant="ghost"
             className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => {
-              const file = spec.files["/index.html"] || Object.values(spec.files)[0];
+              const file = spec.files[spec.entry ?? "/index.html"] || Object.values(spec.files)[0];
               const blob = new Blob([file], { type: "text/html" });
               window.open(URL.createObjectURL(blob), "_blank");
             }}
@@ -124,16 +204,48 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
               layout: "preview",
             }}
           />
-        ) : (
-          <div className="h-full overflow-auto bg-[#0b0b12] p-3">
-            {Object.entries(spec.files).map(([name, content]) => (
-              <div key={name} className="mb-3">
-                <div className="mb-1 font-mono text-[11px] text-muted-foreground">{name}</div>
-                <pre className="overflow-auto rounded-md border border-border/40 bg-black/40 p-3 font-mono text-[12px] leading-relaxed text-foreground">
-                  <code>{content}</code>
-                </pre>
+        ) : isPaid ? (
+          <div className="flex h-full">
+            {fileNames.length > 1 && (
+              <aside className="w-48 shrink-0 overflow-auto border-r border-border/60 bg-card/40 p-2">
+                <div className="mb-1 px-1 text-[10px] uppercase tracking-wider text-muted-foreground">Files</div>
+                {fileNames.map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setActiveFile(name)}
+                    className={`flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-[12px] transition-colors ${
+                      activeFile === name
+                        ? "bg-primary/15 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <FileCode className="h-3 w-3 shrink-0" />
+                    <span className="truncate font-mono">{name.replace(/^\//, "")}</span>
+                  </button>
+                ))}
+              </aside>
+            )}
+            <div className="flex-1 overflow-auto bg-[#0b0b12] p-3">
+              <div className="mb-1 font-mono text-[11px] text-muted-foreground">
+                {activeFile} · {guessLangFromName(activeFile)}
               </div>
-            ))}
+              <pre className="overflow-auto rounded-md border border-border/40 bg-black/40 p-3 font-mono text-[12px] leading-relaxed text-foreground">
+                <code>{spec.files[activeFile]}</code>
+              </pre>
+            </div>
+          </div>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+            <Lock className="h-8 w-8 text-muted-foreground" />
+            <div>
+              <div className="text-sm font-medium">Source view is paid</div>
+              <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+                Browsing the generated file tree and copying individual files is part of Starter and Pro. Free plan keeps the live preview.
+              </p>
+            </div>
+            <Button asChild size="sm" className="mt-1">
+              <Link to="/pricing">See plans</Link>
+            </Button>
           </div>
         )}
       </div>

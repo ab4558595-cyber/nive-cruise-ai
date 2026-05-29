@@ -25,9 +25,10 @@ Engineering rules:
 - If ambiguity would change the output, ask ONE focused question; otherwise build it.
 
 Live preview (CRITICAL):
-- When the user asks for a web app, website, game, demo, or anything that runs in a browser, output a SINGLE self-contained \`\`\`html block with inline <style> and <script>. This renders in the side preview panel automatically.
-- For React-only requests, output ONE \`\`\`tsx block exporting \`export default function App()\` with all logic inline.
-- Never split web demos across files unless the user asks.`;
+- For small web demos / games / single pages: output ONE self-contained \`\`\`html block with inline <style> and <script>.
+- For real projects that need multiple files (React app with components, static site with separate CSS/JS, small library): output a FILE TREE — for each file write a line **path/to/file.ext** on its own immediately before its fenced code block. Use src/ for React (src/App.tsx, src/components/Button.tsx) and bare paths for static (index.html, styles.css, app.js). The preview panel renders the tree automatically.
+- For React-only single-component requests: ONE \`\`\`tsx block with \`export default function App()\`.
+- Never invent multi-file structure for something that fits in one file. Never split a snake game into 6 files.`;
 
 // Plan tiers — keep in sync with src/lib/plans.ts
 const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; multilingual: boolean; longContext: boolean; label: string }> = {
