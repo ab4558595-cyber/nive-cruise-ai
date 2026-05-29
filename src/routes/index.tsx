@@ -366,7 +366,7 @@ function Index() {
 
         {previewSpec && !previewDismissed && (
           <div className="hidden w-[45%] min-w-[380px] max-w-[720px] md:block">
-            <LivePreview spec={previewSpec} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); }} />
+            <LivePreview spec={previewSpec} plan={activePlan} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); }} />
           </div>
         )}
       </div>
