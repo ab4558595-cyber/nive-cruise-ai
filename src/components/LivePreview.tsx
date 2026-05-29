@@ -110,19 +110,32 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <Sandpack
-          key={key}
-          template={spec.template === "react" ? "react" : "static"}
-          files={spec.files}
-          theme="dark"
-          options={{
-            showNavigator: mode === "preview",
-            showTabs: mode === "code",
-            showLineNumbers: mode === "code",
-            editorHeight: "100%",
-            layout: mode === "preview" ? "preview" : "console",
-          }}
-        />
+        {mode === "preview" ? (
+          <Sandpack
+            key={key}
+            template={spec.template === "react" ? "react" : "static"}
+            files={spec.files}
+            theme="dark"
+            options={{
+              showNavigator: true,
+              showTabs: false,
+              showLineNumbers: false,
+              editorHeight: "100%",
+              layout: "preview",
+            }}
+          />
+        ) : (
+          <div className="h-full overflow-auto bg-[#0b0b12] p-3">
+            {Object.entries(spec.files).map(([name, content]) => (
+              <div key={name} className="mb-3">
+                <div className="mb-1 font-mono text-[11px] text-muted-foreground">{name}</div>
+                <pre className="overflow-auto rounded-md border border-border/40 bg-black/40 p-3 font-mono text-[12px] leading-relaxed text-foreground">
+                  <code>{content}</code>
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
