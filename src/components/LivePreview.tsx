@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Sandpack } from "@codesandbox/sandpack-react";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Code2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type PreviewSpec = {
@@ -18,41 +18,45 @@ export function detectPreview(content: string): PreviewSpec | null {
   if (blocks.length === 0) return null;
 
   // Full HTML doc
-  const html = blocks.find((b) => /^html?$/.test(b.lang) && /<html[\s>]/i.test(b.code))
-    || blocks.find((b) => /^html?$/.test(b.lang));
-  if (html) {
+  const htmlBlock =
+    blocks.find((b) => /^html?$/.test(b.lang) && /<html[\s>]/i.test(b.code)) ||
+    blocks.find((b) => /^html?$/.test(b.lang)) ||
+    blocks.find((b) => /<!doctype html|<html[\s>]/i.test(b.code));
+  if (htmlBlock) {
     const css = blocks.find((b) => b.lang === "css")?.code;
     const js = blocks.find((b) => ["js", "javascript"].includes(b.lang))?.code;
-    let code = html.code;
+    let code = htmlBlock.code;
+    if (!/<html[\s>]/i.test(code)) {
+      code = `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head><body>${code}</body></html>`;
+    }
     if (css && !/<style/i.test(code)) code = code.replace(/<\/head>/i, `<style>${css}</style></head>`);
     if (js && !/<script[^>]*>[\s\S]+?<\/script>/i.test(code)) code = code.replace(/<\/body>/i, `<script>${js}</script></body>`);
     return { template: "static", files: { "/index.html": code } };
   }
 
-  // React component
-  const jsx = blocks.find((b) => ["jsx", "tsx"].includes(b.lang));
+  // React component (must look like a component to avoid false positives)
+  const jsx = blocks.find(
+    (b) => ["jsx", "tsx"].includes(b.lang) && /(export\s+default|function\s+App|=>\s*\()/.test(b.code),
+  );
   if (jsx) {
     const ext = jsx.lang === "tsx" ? "tsx" : "jsx";
-    return {
-      template: "react",
-      files: {
-        [`/App.${ext}`]: jsx.code,
-      },
-    };
+    return { template: "react", files: { [`/App.${ext}`]: jsx.code } };
   }
 
-  // Plain CSS+JS or JS that looks like a snippet -> wrap in HTML
+  // CSS+JS snippet → wrap in HTML (only if there's something to render)
   const js = blocks.find((b) => ["js", "javascript"].includes(b.lang));
   const css = blocks.find((b) => b.lang === "css");
-  if (js || css) {
-    const code = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Preview</title>${css ? `<style>${css.code}</style>` : ""}</head><body><div id="app"></div>${js ? `<script>${js.code}</script>` : ""}</body></html>`;
+  if (js && /document\.|window\.|getElementById|querySelector/.test(js.code)) {
+    const code = `<!DOCTYPE html><html><head><meta charset="utf-8"/>${css ? `<style>${css.code}</style>` : ""}</head><body><div id="app"></div><script>${js.code}</script></body></html>`;
     return { template: "static", files: { "/index.html": code } };
   }
   return null;
 }
 
 export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () => void }) {
-  const key = useMemo(() => JSON.stringify(spec.files).length + ":" + spec.template, [spec]);
+  const [mode, setMode] = useState<"preview" | "code">("preview");
+  const key = useMemo(() => JSON.stringify(spec.files).length + ":" + spec.template + ":" + mode, [spec, mode]);
+
   return (
     <div className="flex h-full flex-col border-l border-border/60 bg-background">
       <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
@@ -64,6 +68,24 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
           </span>
         </div>
         <div className="flex items-center gap-1">
+          <div className="mr-1 flex rounded-md border border-border/60 p-0.5">
+            <button
+              onClick={() => setMode("preview")}
+              className={`flex items-center gap-1 rounded px-2 py-0.5 text-[11px] transition-colors ${
+                mode === "preview" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Eye className="h-3 w-3" /> Preview
+            </button>
+            <button
+              onClick={() => setMode("code")}
+              className={`flex items-center gap-1 rounded px-2 py-0.5 text-[11px] transition-colors ${
+                mode === "code" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Code2 className="h-3 w-3" /> Code
+            </button>
+          </div>
           <Button
             size="sm"
             variant="ghost"
@@ -76,25 +98,44 @@ export function LivePreview({ spec, onClose }: { spec: PreviewSpec; onClose: () 
           >
             <ExternalLink className="h-3.5 w-3.5" /> Open
           </Button>
-          <Button size="sm" variant="ghost" onClick={onClose} className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" aria-label="Close preview">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onClose}
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+            aria-label="Close preview"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <Sandpack
-          key={key}
-          template={spec.template === "react" ? "react" : "static"}
-          files={spec.files}
-          theme="dark"
-          options={{
-            showNavigator: true,
-            showTabs: false,
-            showLineNumbers: false,
-            editorHeight: "100%",
-            layout: "preview",
-          }}
-        />
+        {mode === "preview" ? (
+          <Sandpack
+            key={key}
+            template={spec.template === "react" ? "react" : "static"}
+            files={spec.files}
+            theme="dark"
+            options={{
+              showNavigator: true,
+              showTabs: false,
+              showLineNumbers: false,
+              editorHeight: "100%",
+              layout: "preview",
+            }}
+          />
+        ) : (
+          <div className="h-full overflow-auto bg-[#0b0b12] p-3">
+            {Object.entries(spec.files).map(([name, content]) => (
+              <div key={name} className="mb-3">
+                <div className="mb-1 font-mono text-[11px] text-muted-foreground">{name}</div>
+                <pre className="overflow-auto rounded-md border border-border/40 bg-black/40 p-3 font-mono text-[12px] leading-relaxed text-foreground">
+                  <code>{content}</code>
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
