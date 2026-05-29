@@ -20,7 +20,13 @@ export const PLANS: Plan[] = [
     price: 0,
     period: "forever",
     tagline: "Try Cruise AI with limits",
-    features: ["20 prompts / day", "Standard model", "Community support"],
+    features: [
+      "5 prompts / day",
+      "Standard model",
+      "English replies only",
+      "Live web preview",
+      "Community support",
+    ],
   },
   {
     id: "starter",
@@ -28,7 +34,14 @@ export const PLANS: Plan[] = [
     price: 49,
     period: "30 days",
     tagline: "For hobbyists and tinkerers",
-    features: ["Unlimited prompts", "Priority queue", "All languages & platforms", "Email support"],
+    features: [
+      "200 prompts / day",
+      "Faster Gemini 3.5 Flash model",
+      "Reply in ANY language (Tamil, Hindi, Spanish…)",
+      "All platforms (web, mobile, embedded, ML)",
+      "Live preview + Code/Preview toggle",
+      "Email support",
+    ],
     highlight: true,
   },
   {
@@ -37,7 +50,14 @@ export const PLANS: Plan[] = [
     price: 149,
     period: "30 days",
     tagline: "For serious builders",
-    features: ["Everything in Starter", "Pro reasoning model", "Long-context (1M tokens)", "Faster responses"],
+    features: [
+      "Unlimited prompts",
+      "Gemini 3.1 Pro reasoning model",
+      "Long-context (1M tokens) for big codebases",
+      "Multi-file project outputs",
+      "Multilingual + priority queue",
+      "Highest-quality production-grade code",
+    ],
   },
 ];
 
