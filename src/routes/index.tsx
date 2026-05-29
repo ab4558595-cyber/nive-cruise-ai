@@ -221,7 +221,7 @@ function Index() {
             <h1 className="text-base font-semibold leading-tight tracking-tight">
               Cruise <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">AI</span>
             </h1>
-            <p className="text-[11px] text-muted-foreground">Elite coding copilot · any language · any platform</p>
+            <p className="text-[11px] text-muted-foreground">A coding companion for messy real projects.</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -284,10 +284,10 @@ function Index() {
                   <Sparkles className="h-8 w-8" />
                 </div>
                 <h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  What do you want to <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">build</span>?
+                  What are we <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">building</span> today?
                 </h2>
                 <p className="mb-10 max-w-md text-sm text-muted-foreground sm:text-base">
-                  From Arduino firmware to full-stack apps — describe it and Cruise AI will write the code. Web apps render live in a side panel.
+                  Tell me what you need — a firmware sketch, a web app, a Python script. I'll write it, organise the files, and run the web ones live on the right.
                 </p>
                 <div className="grid w-full gap-3 sm:grid-cols-2">
                   {SUGGESTIONS.map((s) => {
@@ -358,7 +358,7 @@ function Index() {
                 )}
               </div>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                Cruise AI can make mistakes — always review code before deploying to hardware or production.
+                Review the code before flashing it to a board or shipping it to prod — I get things wrong too.
               </p>
             </div>
           </div>
