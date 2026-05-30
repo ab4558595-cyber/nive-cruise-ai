@@ -241,15 +241,34 @@ function Index() {
         </div>
         <div className="flex items-center gap-1.5">
           {messages.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setMessages([]); setPreviewSpec(null); setPreviewDismissed(false); }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Clear</span>
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const md = messages.map((m) => `### ${m.role === "user" ? "You" : "Cruise AI"}\n\n${m.content}`).join("\n\n---\n\n");
+                  const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `cruise-chat-${Date.now()}.md`; a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Conversation exported");
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setMessages([]); setPreviewSpec(null); setPreviewDismissed(false); }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Clear</span>
+              </Button>
+            </>
           )}
           {previewDismissed && detectPreview(latestAssistant) && (
             <Button
