@@ -148,3 +148,27 @@
     color: var(--color-foreground);
   }
 }
+
+/* Cloudy white global background */
+html, body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, oklch(0.94 0.03 245 / 0.9), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, oklch(0.92 0.04 260 / 0.85), transparent 60%),
+    radial-gradient(900px 500px at 50% 110%, oklch(0.95 0.025 230 / 0.8), transparent 60%),
+    linear-gradient(180deg, oklch(0.985 0.005 240), oklch(0.95 0.02 245));
+  background-attachment: fixed;
+  color: var(--color-foreground);
+}
+
+/* Hide the "Edit with Lovable" / "Made with Lovable" badge on deployed sites */
+#lovable-badge,
+[data-lovable-badge],
+a[href*="lovable.dev"][class*="badge"],
+a[href*="lovable.app"][class*="badge"],
+iframe[src*="lovable.dev/badge"],
+div[id^="lovable-badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
