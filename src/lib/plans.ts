@@ -11,21 +11,23 @@ export type Plan = {
   tagline: string;
   features: string[];
   highlight?: boolean;
+  badge?: string;
 };
 
 export const PLANS: Plan[] = [
   {
-    id: "free",
-    name: "Free",
+    id: "trial",
+    name: "Free Trial",
     price: 0,
-    period: "forever",
-    tagline: "Try Cruise AI with limits",
+    period: "1 day",
+    tagline: "Auto-granted to new accounts",
+    badge: "New users only",
     features: [
-      "5 prompts / day",
-      "Standard model",
-      "English replies only",
+      "Full access for 24 hours",
+      "30 prompts during trial",
+      "Gemini 2.5 Flash model",
       "Live web preview",
-      "Community support",
+      "Expires automatically — upgrade to keep building",
     ],
   },
   {
