@@ -8,6 +8,8 @@ import { ChatMessage, type Msg } from "@/components/ChatMessage";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LivePreview, detectPreview, type PreviewSpec } from "@/components/LivePreview";
+import { FileTree } from "@/components/FileTree";
+import { parseFiles } from "@/lib/parseFiles";
 
 
 export const Route = createFileRoute("/")({
