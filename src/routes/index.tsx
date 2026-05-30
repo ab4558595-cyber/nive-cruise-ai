@@ -64,20 +64,22 @@ function Index() {
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ? { email: session.user.email } : null);
-      if (session?.user) {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-        setIsAdmin(!!roles?.some((r) => r.role === "admin"));
-        const { data: plan } = await supabase
-          .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
-          .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
-        setActivePlan(plan?.plan_id ?? null);
+      if (!session?.user) {
+        window.location.replace("/welcome");
+        return;
       }
+      setUser({ email: session.user.email });
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+      setIsAdmin(!!roles?.some((r) => r.role === "admin"));
+      const { data: plan } = await supabase
+        .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
+        .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
+      setActivePlan(plan?.plan_id ?? null);
     };
     init();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setUser(s?.user ? { email: s.user.email } : null);
-      if (!s) { setIsAdmin(false); setActivePlan(null); }
+      if (!s) { setIsAdmin(false); setActivePlan(null); window.location.replace("/welcome"); }
     });
     return () => sub.subscription.unsubscribe();
   }, []);

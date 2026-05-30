@@ -160,15 +160,23 @@ html, body {
   color: var(--color-foreground);
 }
 
-/* Hide the "Edit with Lovable" / "Made with Lovable" badge on deployed sites */
+/* Hide the "Edit with Lovable" / "Made with Lovable" badge everywhere */
 #lovable-badge,
+#lovable-badge-container,
+[id^="lovable-badge"],
 [data-lovable-badge],
-a[href*="lovable.dev"][class*="badge"],
-a[href*="lovable.app"][class*="badge"],
-iframe[src*="lovable.dev/badge"],
-div[id^="lovable-badge"] {
+[class*="lovable-badge"],
+a[href*="lovable.dev"],
+a[href*="lovable.app/badge"],
+iframe[src*="lovable.dev"],
+iframe[src*="lovable.app/badge"],
+div[style*="lovable"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
 }
