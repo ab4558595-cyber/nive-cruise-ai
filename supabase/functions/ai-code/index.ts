@@ -32,9 +32,9 @@ Live preview (CRITICAL):
 
 // Plan tiers — keep in sync with src/lib/plans.ts
 const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30, model: "google/gemini-2.5-flash",      multilingual: false, longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200, model: "google/gemini-3.5-flash",    multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "google/gemini-3.1-pro-preview", multilingual: true, longContext: true, label: "Pro" },
+  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview",      multilingual: true,  longContext: false, label: "Trial" },
+  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",            multilingual: true,  longContext: false, label: "Starter" },
+  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                     multilingual: true,  longContext: true,  label: "Pro" },
 };
 
 Deno.serve(async (req) => {

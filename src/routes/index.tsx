@@ -39,8 +39,16 @@ const SUGGESTIONS = [
   },
 ];
 
+const STORAGE_KEY = "cruise-ai-conversation-v1";
+
 function Index() {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Msg[]) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<{ email?: string } | null>(null);
@@ -50,6 +58,11 @@ function Index() {
   const abortRef = useRef<AbortController | null>(null);
   const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
+
+  // Persist conversation
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch { /* quota */ }
+  }, [messages]);
 
   const latestAssistant = useMemo(
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
@@ -312,9 +325,21 @@ function Index() {
               </div>
             ) : (
               <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
-                {messages.map((m, i) => (
-                  <ChatMessage key={i} message={m} />
-                ))}
+                {messages.map((m, i) => {
+                  const isLastAssistant = m.role === "assistant" && i === messages.length - 1;
+                  return (
+                    <ChatMessage
+                      key={i}
+                      message={m}
+                      onRegenerate={isLastAssistant && !isLoading ? () => {
+                        const lastUser = [...messages].slice(0, i).reverse().find((x) => x.role === "user");
+                        if (!lastUser) return;
+                        setMessages(messages.slice(0, i));
+                        send(lastUser.content);
+                      } : undefined}
+                    />
+                  );
+                })}
                 {isLoading && messages[messages.length - 1]?.role === "user" && (
                   <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
                     <span className="inline-flex gap-1">
