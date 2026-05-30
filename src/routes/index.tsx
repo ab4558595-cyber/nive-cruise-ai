@@ -8,6 +8,8 @@ import { ChatMessage, type Msg } from "@/components/ChatMessage";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LivePreview, detectPreview, type PreviewSpec } from "@/components/LivePreview";
+import { FileTree } from "@/components/FileTree";
+import { parseFiles } from "@/lib/parseFiles";
 
 
 export const Route = createFileRoute("/")({
@@ -58,6 +60,8 @@ function Index() {
   const abortRef = useRef<AbortController | null>(null);
   const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
+  const [sideTab, setSideTab] = useState<"files" | "preview">("files");
+  const [sideDismissed, setSideDismissed] = useState(false);
 
   // Persist conversation
   useEffect(() => {
@@ -68,11 +72,18 @@ function Index() {
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
     [messages],
   );
+  const parsedFiles = useMemo(() => parseFiles(latestAssistant), [latestAssistant]);
   useEffect(() => {
     if (previewDismissed) return;
     const spec = detectPreview(latestAssistant);
     if (spec) setPreviewSpec(spec);
   }, [latestAssistant, previewDismissed]);
+  useEffect(() => {
+    // auto-pick the most useful tab when content changes
+    if (parsedFiles.length >= 2) setSideTab("files");
+    else if (previewSpec) setSideTab("preview");
+  }, [parsedFiles.length, previewSpec]);
+
 
   useEffect(() => {
     const init = async () => {
@@ -414,10 +425,47 @@ function Index() {
           </div>
         </div>
 
-        {previewSpec && !previewDismissed && (
-          <div className="hidden w-[45%] min-w-[380px] max-w-[720px] md:block">
-            <LivePreview spec={previewSpec} plan={activePlan} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); }} />
+        {(parsedFiles.length > 0 || previewSpec) && !sideDismissed && (
+          <div className="hidden w-[48%] min-w-[400px] max-w-[760px] flex-col md:flex">
+            <div className="flex items-center gap-1 border-b border-l border-border/60 bg-card/40 px-2 py-1.5">
+              {parsedFiles.length > 0 && (
+                <button
+                  onClick={() => setSideTab("files")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${sideTab === "files" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Files <span className="ml-1 rounded-full bg-white/5 px-1.5 text-[10px]">{parsedFiles.length}</span>
+                </button>
+              )}
+              {previewSpec && (
+                <button
+                  onClick={() => setSideTab("preview")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${sideTab === "preview" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Preview
+                </button>
+              )}
+              <div className="ml-auto">
+                <Button variant="ghost" size="sm" onClick={() => { setSideDismissed(true); setPreviewDismissed(true); }} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground">
+                  Hide
+                </Button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1">
+              {sideTab === "files" && parsedFiles.length > 0 ? (
+                <FileTree content={latestAssistant} onClose={() => setSideDismissed(true)} />
+              ) : previewSpec ? (
+                <LivePreview spec={previewSpec} plan={activePlan} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); setSideTab("files"); }} />
+              ) : null}
+            </div>
           </div>
+        )}
+        {sideDismissed && (parsedFiles.length > 0 || previewSpec) && (
+          <button
+            onClick={() => { setSideDismissed(false); setPreviewDismissed(false); }}
+            className="absolute right-4 top-20 hidden rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary shadow-lg backdrop-blur md:block"
+          >
+            Show files / preview
+          </button>
         )}
       </div>
     </div>
