@@ -425,10 +425,47 @@ function Index() {
           </div>
         </div>
 
-        {previewSpec && !previewDismissed && (
-          <div className="hidden w-[45%] min-w-[380px] max-w-[720px] md:block">
-            <LivePreview spec={previewSpec} plan={activePlan} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); }} />
+        {(parsedFiles.length > 0 || previewSpec) && !sideDismissed && (
+          <div className="hidden w-[48%] min-w-[400px] max-w-[760px] flex-col md:flex">
+            <div className="flex items-center gap-1 border-b border-l border-border/60 bg-card/40 px-2 py-1.5">
+              {parsedFiles.length > 0 && (
+                <button
+                  onClick={() => setSideTab("files")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${sideTab === "files" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Files <span className="ml-1 rounded-full bg-white/5 px-1.5 text-[10px]">{parsedFiles.length}</span>
+                </button>
+              )}
+              {previewSpec && (
+                <button
+                  onClick={() => setSideTab("preview")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${sideTab === "preview" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Preview
+                </button>
+              )}
+              <div className="ml-auto">
+                <Button variant="ghost" size="sm" onClick={() => { setSideDismissed(true); setPreviewDismissed(true); }} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground">
+                  Hide
+                </Button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1">
+              {sideTab === "files" && parsedFiles.length > 0 ? (
+                <FileTree content={latestAssistant} onClose={() => setSideDismissed(true)} />
+              ) : previewSpec ? (
+                <LivePreview spec={previewSpec} plan={activePlan} onClose={() => { setPreviewDismissed(true); setPreviewSpec(null); setSideTab("files"); }} />
+              ) : null}
+            </div>
           </div>
+        )}
+        {sideDismissed && (parsedFiles.length > 0 || previewSpec) && (
+          <button
+            onClick={() => { setSideDismissed(false); setPreviewDismissed(false); }}
+            className="absolute right-4 top-20 hidden rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary shadow-lg backdrop-blur md:block"
+          >
+            Show files / preview
+          </button>
         )}
       </div>
     </div>
