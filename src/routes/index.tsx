@@ -403,7 +403,11 @@ function Index() {
                   </Button>
                 )}
               </div>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
+                <span>Enter to send · Shift+Enter for newline</span>
+                <span className={input.length > 4000 ? "text-destructive" : ""}>{input.length} chars</span>
+              </div>
+              <p className="mt-1 text-center text-[11px] text-muted-foreground">
                 Review the code before flashing it to a board or shipping it to prod — I get things wrong too.
               </p>
             </div>
