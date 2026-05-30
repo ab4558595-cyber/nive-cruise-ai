@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield, PlayCircle } from "lucide-react";
+import { Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag, LogIn, LogOut, Shield, PlayCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
