@@ -76,10 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps." },
       { name: "author", content: "Cruise AI" },
       { property: "og:title", content: "Cruise AI — Write Any Code, Any Platform" },
-      { property: "og:description", content: "Elite AI coding copilot for Arduino, mobile, web, backend, and more." },
+      { property: "og:description", content: "Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Cruise AI — Write Any Code, Any Platform" },
+      { name: "twitter:description", content: "Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4f284cb5-d11a-48f6-adf6-1288c58dc6b7" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4f284cb5-d11a-48f6-adf6-1288c58dc6b7" },
     ],
     links: [
       {
@@ -96,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
