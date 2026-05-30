@@ -60,6 +60,8 @@ function Index() {
   const abortRef = useRef<AbortController | null>(null);
   const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
+  const [sideTab, setSideTab] = useState<"files" | "preview">("files");
+  const [sideDismissed, setSideDismissed] = useState(false);
 
   // Persist conversation
   useEffect(() => {
@@ -70,11 +72,18 @@ function Index() {
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
     [messages],
   );
+  const parsedFiles = useMemo(() => parseFiles(latestAssistant), [latestAssistant]);
   useEffect(() => {
     if (previewDismissed) return;
     const spec = detectPreview(latestAssistant);
     if (spec) setPreviewSpec(spec);
   }, [latestAssistant, previewDismissed]);
+  useEffect(() => {
+    // auto-pick the most useful tab when content changes
+    if (parsedFiles.length >= 2) setSideTab("files");
+    else if (previewSpec) setSideTab("preview");
+  }, [parsedFiles.length, previewSpec]);
+
 
   useEffect(() => {
     const init = async () => {
