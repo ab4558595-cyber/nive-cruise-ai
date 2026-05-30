@@ -39,8 +39,16 @@ const SUGGESTIONS = [
   },
 ];
 
+const STORAGE_KEY = "cruise-ai-conversation-v1";
+
 function Index() {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as Msg[]) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<{ email?: string } | null>(null);
@@ -50,6 +58,11 @@ function Index() {
   const abortRef = useRef<AbortController | null>(null);
   const [previewSpec, setPreviewSpec] = useState<PreviewSpec | null>(null);
   const [previewDismissed, setPreviewDismissed] = useState(false);
+
+  // Persist conversation
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch { /* quota */ }
+  }, [messages]);
 
   const latestAssistant = useMemo(
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
