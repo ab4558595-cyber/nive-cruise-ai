@@ -1,24 +1,71 @@
 import ReactMarkdown from "react-markdown";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Copy, RefreshCcw, Check } from "lucide-react";
+import { useState } from "react";
 import { CodeBlock } from "./CodeBlock";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export type Msg = { role: "user" | "assistant"; content: string };
 
-export function ChatMessage({ message }: { message: Msg }) {
+export function ChatMessage({
+  message,
+  onRegenerate,
+}: {
+  message: Msg;
+  onRegenerate?: () => void;
+}) {
   const isUser = message.role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      toast.success("Copied to clipboard");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Couldn't copy");
+    }
+  };
+
   return (
-    <div className={cn("flex gap-3 px-4 py-5", !isUser && "bg-muted/30")}>
+    <div className={cn("group flex gap-3 px-4 py-5 transition-colors", !isUser && "bg-muted/40")}>
       <div
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
-          isUser ? "bg-primary text-primary-foreground" : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm",
+          isUser
+            ? "bg-primary text-primary-foreground"
+            : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white",
         )}
       >
         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
       </div>
       <div className="min-w-0 flex-1 space-y-2 overflow-hidden text-sm leading-relaxed">
-        <div className="text-xs font-medium text-muted-foreground">{isUser ? "You" : "AI Coder"}</div>
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold tracking-wide text-muted-foreground">
+            {isUser ? "You" : "Cruise AI"}
+          </div>
+          {message.content && (
+            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button
+                onClick={copy}
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                aria-label="Copy message"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              </button>
+              {!isUser && onRegenerate && (
+                <button
+                  onClick={onRegenerate}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label="Regenerate"
+                >
+                  <RefreshCcw className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         {message.content ? (
           <ReactMarkdown
             components={{
@@ -45,12 +92,21 @@ export function ChatMessage({ message }: { message: Msg }) {
                   {children}
                 </a>
               ),
+              blockquote: ({ children }) => (
+                <blockquote className="my-2 border-l-2 border-primary/40 pl-3 italic text-muted-foreground">
+                  {children}
+                </blockquote>
+              ),
             }}
           >
             {message.content}
           </ReactMarkdown>
         ) : (
-          <span className="inline-block h-4 w-4 animate-pulse rounded-full bg-muted-foreground/40" />
+          <span className="inline-flex gap-1">
+            <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+          </span>
         )}
       </div>
     </div>
