@@ -32,8 +32,7 @@ Live preview (CRITICAL):
 
 // Plan tiers — keep in sync with src/lib/plans.ts
 const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  anonymous: { dailyLimit: 3, model: "google/gemini-2.5-flash-lite", multilingual: false, longContext: false, label: "Anonymous" },
-  free:      { dailyLimit: 5, model: "google/gemini-2.5-flash",      multilingual: false, longContext: false, label: "Free" },
+  trial:     { dailyLimit: 30, model: "google/gemini-2.5-flash",      multilingual: false, longContext: false, label: "Trial" },
   starter:   { dailyLimit: 200, model: "google/gemini-3.5-flash",    multilingual: true,  longContext: false, label: "Starter" },
   pro:       { dailyLimit: null, model: "google/gemini-3.1-pro-preview", multilingual: true, longContext: true, label: "Pro" },
 };
@@ -55,13 +54,12 @@ Deno.serve(async (req) => {
     const jwt = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
 
     let userId: string | null = null;
-    let planId = "anonymous";
+    let planId: string | null = null;
 
     if (jwt) {
       const { data: u } = await admin.auth.getUser(jwt);
       if (u?.user) {
         userId = u.user.id;
-        planId = "free";
         const { data: plan } = await admin
           .from("user_plans")
           .select("plan_id")
@@ -75,42 +73,44 @@ Deno.serve(async (req) => {
       }
     }
 
-    const cfg = PLAN_CONFIG[planId] ?? PLAN_CONFIG.free;
+    // Require sign-in
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "Please sign in to use Cruise AI. New accounts get a 1-day free trial.", code: "AUTH_REQUIRED" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Require an active plan (trial / starter / pro)
+    if (!planId || !PLAN_CONFIG[planId]) {
+      return new Response(
+        JSON.stringify({
+          error: "Your free trial has ended. Upgrade to Starter or Pro to keep building.",
+          code: "PLAN_EXPIRED",
+        }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const cfg = PLAN_CONFIG[planId];
 
     // Enforce daily limit
     if (cfg.dailyLimit !== null) {
       const today = new Date().toISOString().slice(0, 10);
-      const ownerKey = userId ?? `ip:${req.headers.get("x-forwarded-for") ?? "anon"}`;
-
-      if (userId) {
-        const { count } = await admin
-          .from("usage_logs")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("day", today);
-        if ((count ?? 0) >= cfg.dailyLimit) {
-          return new Response(
-            JSON.stringify({
-              error: `Daily limit reached for your ${planId.toUpperCase()} plan (${cfg.dailyLimit} prompts/day). Upgrade for more.`,
-              code: "PLAN_LIMIT",
-              plan: planId,
-            }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          );
-        }
-      } else {
-        // Anonymous users get a hard, low cap with no tracking — gently push to sign in.
-        // (We don't persist anonymous usage; the per-request cap doubles as a soft guard.)
-        void ownerKey;
-        if ((messages?.length ?? 0) > 6) {
-          return new Response(
-            JSON.stringify({
-              error: "Please sign in to continue chatting. Free accounts get 20 prompts/day.",
-              code: "AUTH_REQUIRED",
-            }),
-            { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-          );
-        }
+      const { count } = await admin
+        .from("usage_logs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("day", today);
+      if ((count ?? 0) >= cfg.dailyLimit) {
+        return new Response(
+          JSON.stringify({
+            error: `Daily limit reached for your ${cfg.label} plan (${cfg.dailyLimit} prompts/day). Upgrade for more.`,
+            code: "PLAN_LIMIT",
+            plan: planId,
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
     }
 
