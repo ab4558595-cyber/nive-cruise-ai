@@ -80,6 +80,15 @@ Deno.serve(async (req) => {
           .limit(1)
           .maybeSingle();
         if (plan?.plan_id) planId = plan.plan_id;
+
+        // Admins always get Pro, no limits
+        const { data: roleRow } = await admin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleRow) planId = "pro";
       }
     }
 
