@@ -31,10 +31,10 @@ Live preview (CRITICAL):
 - Never invent multi-file structure for something that fits in one file. Never split a snake game into 6 files.`;
 
 // Plan tiers — keep in sync with src/lib/plans.ts
-const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModel: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModel: "deepseek/deepseek-v4-flash:free",          multilingual: true,  longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModel: "qwen/qwen3-coder:free",                    multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModel: "openai/gpt-oss-120b:free",                 multilingual: true,  longContext: true,  label: "Pro" },
+const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModels: string[]; multilingual: boolean; longContext: boolean; label: string }> = {
+  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModels: ["openai/gpt-oss-120b:free", "deepseek/deepseek-v4-flash:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Trial" },
+  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModels: ["qwen/qwen3-coder:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Starter" },
+  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModels: ["openai/gpt-oss-120b:free", "qwen/qwen3-coder:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: true,  label: "Pro" },
 };
 
 const PRESET_PROMPTS: Record<string, string> = {
@@ -152,23 +152,26 @@ Deno.serve(async (req) => {
 
     if (OPENROUTER_API_KEY) {
       try {
-         const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
-            "X-Title": "Cruise AI",
-          },
-          body: JSON.stringify({ model: cfg.orModel, messages: fullMessages, stream: true }),
-        });
-        if (orResp.ok) {
-          response = orResp;
-          usedProvider = "openrouter";
-          usedModel = cfg.orModel;
-        } else {
+        for (const model of cfg.orModels) {
+          const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
+              "X-Title": "Cruise AI",
+            },
+            body: JSON.stringify({ model, messages: fullMessages, stream: true }),
+          });
+          if (orResp.ok) {
+            response = orResp;
+            usedProvider = "openrouter";
+            usedModel = model;
+            break;
+          }
+
           const errText = await orResp.text();
-          console.error("OpenRouter failed, falling back to Lovable AI:", orResp.status, errText.slice(0, 300));
+          console.error(`OpenRouter model ${model} failed, trying next:`, orResp.status, errText.slice(0, 300));
         }
       } catch (e) {
         console.error("OpenRouter threw, falling back:", e);
