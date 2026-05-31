@@ -209,7 +209,8 @@ Deno.serve(async (req) => {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
         "x-cruise-plan": planId,
-        "x-cruise-model": cfg.model,
+        "x-cruise-provider": usedProvider,
+        "x-cruise-model": usedModel,
       },
     });
   } catch (e) {
