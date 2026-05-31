@@ -29,7 +29,7 @@ function TreeRow({ node, depth, openSet, onToggle, onPick, activePath }: {
       <div>
         <button
           onClick={() => onToggle(node.path)}
-          className="flex w-full items-center gap-1 rounded px-1.5 py-1 text-left text-xs text-zinc-300 hover:bg-white/5"
+          className="flex w-full items-center gap-1 rounded px-1.5 py-1 text-left text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
           style={{ paddingLeft: depth * 12 + 6 }}
         >
           {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
@@ -47,8 +47,8 @@ function TreeRow({ node, depth, openSet, onToggle, onPick, activePath }: {
     <button
       onClick={() => onPick(node.file!)}
       className={cn(
-        "flex w-full items-center gap-1.5 rounded px-1.5 py-1 text-left text-xs hover:bg-white/5",
-        active ? "bg-primary/15 text-foreground" : "text-zinc-300",
+        "flex w-full items-center gap-1.5 rounded px-1.5 py-1 text-left text-xs hover:bg-accent",
+        active ? "bg-primary/15 text-foreground" : "text-muted-foreground",
       )}
       style={{ paddingLeft: depth * 12 + 22 }}
     >
