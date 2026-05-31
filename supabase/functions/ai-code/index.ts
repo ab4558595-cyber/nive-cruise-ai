@@ -37,11 +37,21 @@ const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; mu
   pro:       { dailyLimit: null, model: "openai/gpt-5.5",                     multilingual: true,  longContext: true,  label: "Pro" },
 };
 
+const PRESET_PROMPTS: Record<string, string> = {
+  default:   "",
+  concise:   "\n\nSTYLE: Be terse. Lead with the code. Follow with a max-2-line summary. No fluff.",
+  teacher:   "\n\nSTYLE: Explain like a friendly senior tutor. Walk through reasoning step-by-step BEFORE the code, then show the code, then summarize what the learner should remember.",
+  debug:     "\n\nSTYLE: Act as a debugging partner. First identify the most likely root cause(s) with evidence. Then provide a minimal patch. Then list 2-3 things to verify.",
+  refactor:  "\n\nSTYLE: Refactor for clarity, types, naming, and structure WITHOUT changing behavior. Show before/after of the key parts, then list the wins (readability, perf, safety).",
+  review:    "\n\nSTYLE: Act as a senior code reviewer. Group findings by severity (Blocker / Major / Minor / Nit). Be specific, point at line-level issues, and propose concrete improvements.",
+  translate: "\n\nSTYLE: Port code between languages faithfully. Preserve behavior. Call out any idiom differences or stdlib gaps.",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, preset } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
