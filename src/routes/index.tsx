@@ -150,7 +150,7 @@ function Index() {
         try { const j = await resp.json(); if (j?.error) msg = j.error; } catch {}
         if (resp.status === 401) toast.error(msg, { action: { label: "Sign in", onClick: () => (window.location.href = "/auth") } });
         else if (resp.status === 429) toast.error(msg, { action: { label: "Upgrade", onClick: () => (window.location.href = "/pricing") } });
-        else if (resp.status === 402) toast.error("AI credits exhausted. Add funds in workspace settings.");
+        else if (resp.status === 402) toast.error(msg);
         else toast.error(msg);
         store.setActiveMessages((m) => m.slice(0, -1));
         setIsLoading(false);
@@ -494,7 +494,7 @@ function Index() {
               <div className="flex items-center gap-1 border-b border-l border-border/60 bg-card/40 px-2 py-1.5">
                 {parsedFiles.length > 0 && (
                   <button onClick={() => setSideTab("files")} className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${sideTab === "files" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                    Files <span className="ml-1 rounded-full bg-white/5 px-1.5 text-[10px]">{parsedFiles.length}</span>
+                    Files <span className="ml-1 rounded-full bg-accent px-1.5 text-[10px] text-muted-foreground">{parsedFiles.length}</span>
                   </button>
                 )}
                 {previewSpec && (

@@ -35,8 +35,9 @@ export function ChatMessage({
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm",
           isUser
             ? "bg-primary text-primary-foreground"
-            : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white",
+            : "text-primary-foreground",
         )}
+        style={!isUser ? { background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" } : undefined}
       >
         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
       </div>
