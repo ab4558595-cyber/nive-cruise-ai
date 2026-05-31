@@ -115,25 +115,25 @@ export function FileTree({ content, onClose }: { content: string; onClose: () =>
   if (files.length === 0) return null;
 
   return (
-    <div className="flex h-full flex-col border-l border-border/60 bg-[#0d1117]">
-      <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-        <div className="flex items-center gap-2 text-xs font-medium text-zinc-200">
+    <div className="flex h-full flex-col border-l border-border/60 bg-card/95 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-foreground">
           <FileCode2 className="h-4 w-4 text-primary" />
           Project files
-          <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-zinc-400">{files.length}</span>
+          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] text-muted-foreground">{files.length}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={downloadZip} className="h-7 px-2 text-xs text-zinc-300 hover:bg-white/10 hover:text-white">
+          <Button size="sm" variant="ghost" onClick={downloadZip} className="h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
             <Download className="h-3.5 w-3.5" /> ZIP
           </Button>
-          <Button size="sm" variant="ghost" onClick={onClose} className="h-7 w-7 p-0 text-zinc-300 hover:bg-white/10 hover:text-white">
+          <Button size="sm" variant="ghost" onClick={onClose} className="h-7 w-7 p-0 text-muted-foreground hover:bg-accent hover:text-foreground">
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <div className="w-48 shrink-0 overflow-y-auto border-r border-white/10 py-1.5">
+        <div className="w-48 shrink-0 overflow-y-auto border-r border-border/60 py-1.5">
           {tree.map((n) => (
             <TreeRow key={n.path} node={n} depth={0} openSet={openSet} onToggle={toggle} onPick={setActive} activePath={active?.path ?? ""} />
           ))}
@@ -142,13 +142,13 @@ export function FileTree({ content, onClose }: { content: string; onClose: () =>
         <div className="flex min-w-0 flex-1 flex-col">
           {active ? (
             <>
-              <div className="flex items-center justify-between border-b border-white/10 px-3 py-1.5 text-xs text-zinc-300">
+              <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 text-xs text-muted-foreground">
                 <span className="truncate font-mono">{active.path}</span>
                 <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" onClick={copyActive} className="h-7 px-2 text-zinc-300 hover:bg-white/10 hover:text-white">
+                  <Button size="sm" variant="ghost" onClick={copyActive} className="h-7 px-2 text-muted-foreground hover:bg-accent hover:text-foreground">
                     {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={downloadActive} className="h-7 px-2 text-zinc-300 hover:bg-white/10 hover:text-white">
+                  <Button size="sm" variant="ghost" onClick={downloadActive} className="h-7 px-2 text-muted-foreground hover:bg-accent hover:text-foreground">
                     <Download className="h-3.5 w-3.5" />
                   </Button>
                 </div>
