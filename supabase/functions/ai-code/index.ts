@@ -37,11 +37,21 @@ const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; mu
   pro:       { dailyLimit: null, model: "openai/gpt-5.5",                     multilingual: true,  longContext: true,  label: "Pro" },
 };
 
+const PRESET_PROMPTS: Record<string, string> = {
+  default:   "",
+  concise:   "\n\nSTYLE: Be terse. Lead with the code. Follow with a max-2-line summary. No fluff.",
+  teacher:   "\n\nSTYLE: Explain like a friendly senior tutor. Walk through reasoning step-by-step BEFORE the code, then show the code, then summarize what the learner should remember.",
+  debug:     "\n\nSTYLE: Act as a debugging partner. First identify the most likely root cause(s) with evidence. Then provide a minimal patch. Then list 2-3 things to verify.",
+  refactor:  "\n\nSTYLE: Refactor for clarity, types, naming, and structure WITHOUT changing behavior. Show before/after of the key parts, then list the wins (readability, perf, safety).",
+  review:    "\n\nSTYLE: Act as a senior code reviewer. Group findings by severity (Blocker / Major / Minor / Nit). Be specific, point at line-level issues, and propose concrete improvements.",
+  translate: "\n\nSTYLE: Port code between languages faithfully. Preserve behavior. Call out any idiom differences or stdlib gaps.",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, preset } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -118,6 +128,9 @@ Deno.serve(async (req) => {
       ? `\n\nPLAN FEATURES (${cfg.label}): You may reply in ANY language the user writes in (Tamil, Hindi, Spanish, Arabic, etc.). You have access to long context, deeper reasoning, and richer multi-file outputs. Use them.`
       : `\n\nPLAN FEATURES (${cfg.label}): Reply in ENGLISH ONLY. Multilingual replies (Tamil, Hindi, etc.), long-context, and the pro reasoning model are paid features on Starter / Pro. If the user writes in a non-English language, briefly answer in English and add ONE friendly line: "Multilingual replies are available on Starter and Pro — see /pricing." Do NOT switch languages.`;
 
+    const presetKey = typeof preset === "string" && PRESET_PROMPTS[preset] !== undefined ? preset : "default";
+    const presetExtras = PRESET_PROMPTS[presetKey];
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -126,7 +139,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: cfg.model,
-        messages: [{ role: "system", content: BASE_PROMPT + planExtras }, ...messages],
+        messages: [{ role: "system", content: BASE_PROMPT + planExtras + presetExtras }, ...messages],
         stream: true,
       }),
     });

@@ -1,0 +1,14 @@
+{
+  "name": "Cruise AI",
+  "short_name": "Cruise AI",
+  "description": "An elite coding copilot that writes production-quality code for any language or platform.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b14",
+  "theme_color": "#5b4dff",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48 32x32 16x16", "type": "image/x-icon" }
+  ]
+}
