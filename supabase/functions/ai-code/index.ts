@@ -31,10 +31,10 @@ Live preview (CRITICAL):
 - Never invent multi-file structure for something that fits in one file. Never split a snake game into 6 files.`;
 
 // Plan tiers — keep in sync with src/lib/plans.ts
-const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview",      multilingual: true,  longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",            multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                     multilingual: true,  longContext: true,  label: "Pro" },
+const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModel: string; multilingual: boolean; longContext: boolean; label: string }> = {
+  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: false, label: "Trial" },
+  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModel: "qwen/qwen3-coder:free",                     multilingual: true,  longContext: false, label: "Starter" },
+  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: true,  label: "Pro" },
 };
 
 const PRESET_PROMPTS: Record<string, string> = {
@@ -131,18 +131,50 @@ Deno.serve(async (req) => {
     const presetKey = typeof preset === "string" && PRESET_PROMPTS[preset] !== undefined ? preset : "default";
     const presetExtras = PRESET_PROMPTS[presetKey];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: [{ role: "system", content: BASE_PROMPT + planExtras + presetExtras }, ...messages],
-        stream: true,
-      }),
-    });
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+    const systemMessage = { role: "system", content: BASE_PROMPT + planExtras + presetExtras };
+    const fullMessages = [systemMessage, ...messages];
+
+    // Try OpenRouter first (free models), fall back to Lovable AI
+    let response: Response | null = null;
+    let usedProvider = "lovable";
+    let usedModel = cfg.model;
+
+    if (OPENROUTER_API_KEY) {
+      try {
+        const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
+            "X-Title": "Cruise AI",
+          },
+          body: JSON.stringify({ model: cfg.orModel, messages: fullMessages, stream: true }),
+        });
+        if (orResp.ok) {
+          response = orResp;
+          usedProvider = "openrouter";
+          usedModel = cfg.orModel;
+        } else {
+          const errText = await orResp.text();
+          console.error("OpenRouter failed, falling back to Lovable AI:", orResp.status, errText.slice(0, 300));
+        }
+      } catch (e) {
+        console.error("OpenRouter threw, falling back:", e);
+      }
+    }
+
+    if (!response) {
+      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
+      });
+    }
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -177,7 +209,8 @@ Deno.serve(async (req) => {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
         "x-cruise-plan": planId,
-        "x-cruise-model": cfg.model,
+        "x-cruise-provider": usedProvider,
+        "x-cruise-model": usedModel,
       },
     });
   } catch (e) {
