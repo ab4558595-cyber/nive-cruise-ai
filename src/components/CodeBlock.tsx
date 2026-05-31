@@ -43,20 +43,20 @@ export function CodeBlock({ language, value }: { language: string; value: string
   };
 
   return (
-    <div className="relative my-3 overflow-hidden rounded-lg border border-border bg-[#282c34]">
-      <div className="flex items-center justify-between border-b border-white/10 px-3 py-1.5 text-xs text-zinc-300">
+    <div className="relative my-3 overflow-hidden rounded-lg border border-border bg-card/95 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-border/60 px-3 py-1.5 text-xs text-muted-foreground">
         <div className="flex items-center gap-2">
           <span className="font-mono uppercase tracking-wide">{lang}</span>
-          <span className="text-zinc-500">· {lineCount} line{lineCount === 1 ? "" : "s"}</span>
+          <span className="text-muted-foreground/70">· {lineCount} line{lineCount === 1 ? "" : "s"}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={() => setWrap((w) => !w)} className="h-7 px-2 text-zinc-300 hover:bg-white/10 hover:text-white" title={wrap ? "Disable wrap" : "Enable wrap"}>
+          <Button size="sm" variant="ghost" onClick={() => setWrap((w) => !w)} className="h-7 px-2 text-muted-foreground hover:bg-accent hover:text-foreground" title={wrap ? "Disable wrap" : "Enable wrap"}>
             <WrapText className="h-3.5 w-3.5" />
           </Button>
-          <Button size="sm" variant="ghost" onClick={download} className="h-7 px-2 text-zinc-300 hover:bg-white/10 hover:text-white" title="Download">
+          <Button size="sm" variant="ghost" onClick={download} className="h-7 px-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Download">
             <Download className="h-3.5 w-3.5" />
           </Button>
-          <Button size="sm" variant="ghost" onClick={copy} className="h-7 text-zinc-300 hover:bg-white/10 hover:text-white">
+          <Button size="sm" variant="ghost" onClick={copy} className="h-7 text-muted-foreground hover:bg-accent hover:text-foreground">
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? "Copied" : "Copy"}
           </Button>
