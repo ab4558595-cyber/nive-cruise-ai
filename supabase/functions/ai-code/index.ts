@@ -32,9 +32,9 @@ Live preview (CRITICAL):
 
 // Plan tiers — keep in sync with src/lib/plans.ts
 const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModel: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModel: "qwen/qwen3-coder:free",                     multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: true,  label: "Pro" },
+  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModel: "deepseek/deepseek-v4-flash:free",          multilingual: true,  longContext: false, label: "Trial" },
+  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModel: "qwen/qwen3-coder:free",                    multilingual: true,  longContext: false, label: "Starter" },
+  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModel: "openai/gpt-oss-120b:free",                 multilingual: true,  longContext: true,  label: "Pro" },
 };
 
 const PRESET_PROMPTS: Record<string, string> = {
@@ -100,8 +100,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Require an active plan (trial / starter / pro)
-    if (!planId || !PLAN_CONFIG[planId]) {
+    // Require an active plan unless a working free OpenRouter key is configured
+    if ((!planId || !PLAN_CONFIG[planId]) && !Deno.env.get("OPENROUTER_API_KEY")) {
       return new Response(
         JSON.stringify({
           error: "Your free trial has ended. Upgrade to Starter or Pro to keep building.",
@@ -111,7 +111,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const cfg = PLAN_CONFIG[planId];
+    const effectivePlanId = planId && PLAN_CONFIG[planId] ? planId : "trial";
+    const cfg = PLAN_CONFIG[effectivePlanId];
 
     // Enforce daily limit
     if (cfg.dailyLimit !== null) {
@@ -151,7 +152,7 @@ Deno.serve(async (req) => {
 
     if (OPENROUTER_API_KEY) {
       try {
-        const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+         const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
@@ -217,7 +218,7 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
-        "x-cruise-plan": planId,
+        "x-cruise-plan": effectivePlanId,
         "x-cruise-provider": usedProvider,
         "x-cruise-model": usedModel,
       },
