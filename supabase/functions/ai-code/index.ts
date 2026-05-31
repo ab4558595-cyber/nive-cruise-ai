@@ -31,10 +31,10 @@ Live preview (CRITICAL):
 - Never invent multi-file structure for something that fits in one file. Never split a snake game into 6 files.`;
 
 // Plan tiers — keep in sync with src/lib/plans.ts
-const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview",      multilingual: true,  longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",            multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                     multilingual: true,  longContext: true,  label: "Pro" },
+const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModel: string; multilingual: boolean; longContext: boolean; label: string }> = {
+  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: false, label: "Trial" },
+  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModel: "qwen/qwen3-coder:free",                     multilingual: true,  longContext: false, label: "Starter" },
+  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModel: "deepseek/deepseek-chat-v3.1:free",          multilingual: true,  longContext: true,  label: "Pro" },
 };
 
 const PRESET_PROMPTS: Record<string, string> = {
