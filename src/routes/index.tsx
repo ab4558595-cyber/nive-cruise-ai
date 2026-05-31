@@ -79,9 +79,9 @@ function Index() {
     if (spec) setPreviewSpec(spec);
   }, [latestAssistant, previewDismissed]);
   useEffect(() => {
-    // auto-pick the most useful tab when content changes
-    if (parsedFiles.length >= 2) setSideTab("files");
-    else if (previewSpec) setSideTab("preview");
+    // auto-pick the most useful tab as soon as content is detectable
+    if (previewSpec) setSideTab("preview");
+    else if (parsedFiles.length >= 1) setSideTab("files");
   }, [parsedFiles.length, previewSpec]);
 
 

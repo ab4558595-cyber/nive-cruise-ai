@@ -1,6 +1,10 @@
 // Shared parser: extracts named files from an assistant message.
 // Convention: a line like **path/to/file.ext** or `path/to/file.ext`
 // immediately before a fenced ```lang block marks that block as a file.
+//
+// Designed to be tolerant of *partial* streams: if the message ends inside
+// an unclosed code fence we temporarily close it so the in-progress block
+// is still surfaced in the file tree / preview while the model is typing.
 
 export type ParsedFile = {
   path: string;     // normalized, no leading slash, forward slashes
@@ -21,6 +25,16 @@ const EXT_LANG: Record<string, string> = {
   xml: "xml", svg: "xml", dockerfile: "docker", env: "bash",
 };
 
+// Reverse map: prism language id → preferred file extension
+const LANG_EXT: Record<string, string> = {
+  typescript: "ts", tsx: "tsx", javascript: "js", jsx: "jsx",
+  python: "py", ruby: "rb", go: "go", rust: "rs", java: "java", kotlin: "kt",
+  swift: "swift", c: "c", cpp: "cpp", csharp: "cs", php: "php", bash: "sh",
+  shell: "sh", html: "html", css: "css", scss: "scss", json: "json",
+  yaml: "yml", toml: "toml", markdown: "md", sql: "sql", xml: "xml",
+  docker: "dockerfile", arduino: "ino",
+};
+
 function langFromPath(path: string): string {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   return EXT_LANG[ext] || "text";
@@ -30,29 +44,78 @@ function normalizePath(p: string): string {
   return p.trim().replace(/^\.?\/+/, "").replace(/\\/g, "/");
 }
 
+// Sniff a language from raw source so unlabeled blocks still get an extension.
+function sniffLang(code: string): string | null {
+  const s = code.slice(0, 600);
+  if (/<!doctype html|<html[\s>]/i.test(s)) return "html";
+  if (/^\s*import\s+SwiftUI|struct\s+\w+\s*:\s*View/m.test(s)) return "swift";
+  if (/#include\s+<\w+\.h>|void\s+setup\(\)|void\s+loop\(\)/.test(s)) return "cpp";
+  if (/^\s*package\s+main|^\s*func\s+main\s*\(/m.test(s)) return "go";
+  if (/^\s*fn\s+main\s*\(|use\s+std::/m.test(s)) return "rust";
+  if (/^\s*def\s+\w+\(|^\s*import\s+\w+|^\s*from\s+\w+\s+import/m.test(s)) return "python";
+  if (/^\s*public\s+class\s+\w+|System\.out\.println/m.test(s)) return "java";
+  if (/<\?php/.test(s)) return "php";
+  if (/^\s*using\s+System;|namespace\s+\w+/m.test(s)) return "csharp";
+  if (/(^|\n)\s*(import|export)\s.*from\s+['"]/.test(s) && /:\s*(string|number|boolean|\w+\[\])/.test(s)) return "typescript";
+  if (/(^|\n)\s*(import|export)\s.*from\s+['"]/.test(s)) return "javascript";
+  if (/<\w+[^>]*>[\s\S]*<\/\w+>/.test(s) && /return\s*\(/.test(s)) return "jsx";
+  if (/^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE)\s/im.test(s)) return "sql";
+  return null;
+}
+
+// Close an unterminated fence so a streaming message still parses.
+function closeOpenFence(content: string): string {
+  const fenceCount = (content.match(/```/g) || []).length;
+  if (fenceCount % 2 === 1) return content + "\n```";
+  return content;
+}
+
 export function parseFiles(content: string): ParsedFile[] {
   if (!content) return [];
-  const re = /```(\w+)?\n([\s\S]*?)```/g;
+  const text = closeOpenFence(content);
+  const re = /```(\w+)?\n?([\s\S]*?)```/g;
   const out: ParsedFile[] = [];
   let m: RegExpExecArray | null;
   let cursor = 0;
   let unnamedIdx = 0;
-  while ((m = re.exec(content)) !== null) {
-    const preceding = content.slice(cursor, m.index).split("\n").slice(-4).join("\n");
+  const seen = new Set<string>();
+  while ((m = re.exec(text)) !== null) {
+    const preceding = text.slice(cursor, m.index).split("\n").slice(-4).join("\n");
     const nameMatch = preceding.match(FILENAME_RE);
-    const lang = (m[1] || "").toLowerCase();
-    const code = m[2];
+    const rawLang = (m[1] || "").toLowerCase();
+    const code = m[2] || "";
+    if (!code.trim()) { cursor = re.lastIndex; continue; }
+
+    let path: string | null = null;
+    let language = rawLang;
+
     if (nameMatch) {
-      const path = normalizePath(nameMatch[1]);
-      out.push({ path, language: lang || langFromPath(path), content: code });
+      path = normalizePath(nameMatch[1]);
+      if (!language) language = langFromPath(path);
     } else if (out.length === 0 && /<html[\s>]|<!doctype/i.test(code)) {
-      // single HTML doc → still surface as a file
-      out.push({ path: "index.html", language: "html", content: code });
-    } else if (lang && code.split("\n").length > 4) {
-      // unnamed but substantial — give it a synthetic name so we don't lose it
-      unnamedIdx++;
-      const ext = Object.entries(EXT_LANG).find(([, v]) => v === lang)?.[0] ?? lang ?? "txt";
-      out.push({ path: `snippets/snippet-${unnamedIdx}.${ext}`, language: lang, content: code });
+      path = "index.html";
+      language = "html";
+    } else {
+      // Unnamed block — try to sniff and synthesize a name so it still
+      // appears in the file tree (multi-language support).
+      const sniffed = language || sniffLang(code) || "";
+      if (sniffed || code.split("\n").length > 2) {
+        language = sniffed || "text";
+        unnamedIdx++;
+        const ext = LANG_EXT[language] ||
+          Object.entries(EXT_LANG).find(([, v]) => v === language)?.[0] ||
+          (language && language.length <= 8 ? language : "txt");
+        path = `snippets/snippet-${unnamedIdx}.${ext}`;
+      }
+    }
+
+    if (path) {
+      // Dedupe (streaming may re-match earlier blocks)
+      let unique = path;
+      let n = 2;
+      while (seen.has(unique)) unique = path.replace(/(\.[^.]+)?$/, `-${n}$1`), n++;
+      seen.add(unique);
+      out.push({ path: unique, language: language || "text", content: code });
     }
     cursor = re.lastIndex;
   }

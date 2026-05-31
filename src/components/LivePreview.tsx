@@ -27,18 +27,22 @@ function normalizePath(p: string): string {
 export function detectPreview(content: string): PreviewSpec | null {
   if (!content) return null;
 
+  // Close any unterminated fence so we can preview *while streaming*.
+  const fenceCount = (content.match(/```/g) || []).length;
+  const text = fenceCount % 2 === 1 ? content + "\n```" : content;
+
   // Walk the content sequentially so we can attach a filename header that
   // appears immediately before a fenced code block (Cruise AI convention).
-  const re = /```(\w+)?\n([\s\S]*?)```/g;
+  const re = /```(\w+)?\n?([\s\S]*?)```/g;
   const blocks: { lang: string; code: string; name?: string }[] = [];
   let m: RegExpExecArray | null;
   let cursor = 0;
-  while ((m = re.exec(content)) !== null) {
-    const preceding = content.slice(cursor, m.index).split("\n").slice(-4).join("\n");
+  while ((m = re.exec(text)) !== null) {
+    const preceding = text.slice(cursor, m.index).split("\n").slice(-4).join("\n");
     const nameMatch = preceding.match(FILENAME_RE);
     blocks.push({
       lang: (m[1] || "").toLowerCase(),
-      code: m[2],
+      code: m[2] || "",
       name: nameMatch?.[1],
     });
     cursor = re.lastIndex;
