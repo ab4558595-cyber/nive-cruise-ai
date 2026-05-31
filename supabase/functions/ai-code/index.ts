@@ -131,18 +131,50 @@ Deno.serve(async (req) => {
     const presetKey = typeof preset === "string" && PRESET_PROMPTS[preset] !== undefined ? preset : "default";
     const presetExtras = PRESET_PROMPTS[presetKey];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: [{ role: "system", content: BASE_PROMPT + planExtras + presetExtras }, ...messages],
-        stream: true,
-      }),
-    });
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+    const systemMessage = { role: "system", content: BASE_PROMPT + planExtras + presetExtras };
+    const fullMessages = [systemMessage, ...messages];
+
+    // Try OpenRouter first (free models), fall back to Lovable AI
+    let response: Response | null = null;
+    let usedProvider = "lovable";
+    let usedModel = cfg.model;
+
+    if (OPENROUTER_API_KEY) {
+      try {
+        const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
+            "X-Title": "Cruise AI",
+          },
+          body: JSON.stringify({ model: cfg.orModel, messages: fullMessages, stream: true }),
+        });
+        if (orResp.ok) {
+          response = orResp;
+          usedProvider = "openrouter";
+          usedModel = cfg.orModel;
+        } else {
+          const errText = await orResp.text();
+          console.error("OpenRouter failed, falling back to Lovable AI:", orResp.status, errText.slice(0, 300));
+        }
+      } catch (e) {
+        console.error("OpenRouter threw, falling back:", e);
+      }
+    }
+
+    if (!response) {
+      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
+      });
+    }
 
     if (!response.ok) {
       if (response.status === 429) {
