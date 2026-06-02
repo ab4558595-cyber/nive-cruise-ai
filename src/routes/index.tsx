@@ -314,16 +314,16 @@ function Index() {
             <ThemeToggle />
             {messages.length > 0 && (
               <>
-                <Button variant="ghost" size="sm" onClick={exportMarkdown} className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={exportMarkdown} aria-label="Export conversation as Markdown" className="text-muted-foreground hover:text-foreground">
                   <Download className="h-4 w-4" /><span className="hidden sm:inline">Export</span>
                 </Button>
-                <Button variant="ghost" size="sm" onClick={store.clearActive} className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={store.clearActive} aria-label="Clear current chat" className="text-muted-foreground hover:text-foreground">
                   <Trash2 className="h-4 w-4" /><span className="hidden sm:inline">Clear</span>
                 </Button>
               </>
             )}
             {previewDismissed && detectPreview(latestAssistant) && (
-              <Button variant="ghost" size="sm" onClick={() => { setPreviewDismissed(false); setSideDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }} className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" onClick={() => { setPreviewDismissed(false); setSideDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }} aria-label="Show live preview" className="text-muted-foreground hover:text-foreground">
                 <PlayCircle className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
               </Button>
             )}
