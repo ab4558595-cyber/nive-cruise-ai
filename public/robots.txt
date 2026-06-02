@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout/
+
+Sitemap: https://nive-cruise-ai.lovable.app/sitemap.xml
