@@ -12,8 +12,12 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Cruise AI" },
-      { name: "description", content: "Sign in or create your Cruise AI account." },
+      { name: "description", content: "Sign in or create your Cruise AI account to start building apps with our elite coding copilot." },
+      { property: "og:title", content: "Sign in to Cruise AI" },
+      { property: "og:description", content: "Access your Cruise AI account or sign up to start generating production-quality code." },
+      { property: "og:url", content: "/auth" },
     ],
+    links: [{ rel: "canonical", href: "/auth" }],
   }),
   component: AuthPage,
 });
