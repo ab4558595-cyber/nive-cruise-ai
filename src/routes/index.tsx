@@ -302,7 +302,7 @@ function Index() {
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold leading-tight tracking-tight">
-                {store.active.title || "New chat"}
+                {store.active.title || "Cruise AI — Elite coding copilot"}
               </h1>
               <p className="text-[11px] text-muted-foreground">Cruise AI · ⌘K for commands</p>
             </div>
