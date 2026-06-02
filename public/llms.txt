@@ -1,0 +1,10 @@
+# Cruise AI
+
+> Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps.
+
+## Pages
+
+- [Home](/): Chat with Cruise AI to generate code with live preview.
+- [Welcome](/welcome): Product overview and free trial signup.
+- [Pricing](/pricing): Free, Starter (₹49) and Pro (₹149) plans.
+- [Sign in](/auth): Sign in or create a Cruise AI account.
