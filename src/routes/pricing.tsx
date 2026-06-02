@@ -69,7 +69,7 @@ function Pricing() {
                   Most popular
                 </span>
               )}
-              <h3 className="text-lg font-semibold">{plan.name}</h3>
+              <h2 className="text-lg font-semibold">{plan.name}</h2>
               <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">₹{plan.price}</span>
