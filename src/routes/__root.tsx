@@ -94,6 +94,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         children: `try{var t=localStorage.getItem('cruise-ai-theme')||'dark';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}`,
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Cruise AI",
+          url: "https://nive-cruise-ai.lovable.app",
+          logo: "https://nive-cruise-ai.lovable.app/favicon.ico",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Cruise AI",
+          url: "https://nive-cruise-ai.lovable.app",
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,
