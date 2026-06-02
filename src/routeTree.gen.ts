@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -20,6 +21,11 @@ import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/pricing'
+    | '/sitemap.xml'
     | '/welcome'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/pricing'
+    | '/sitemap.xml'
     | '/welcome'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/pricing'
+    | '/sitemap.xml'
     | '/welcome'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WelcomeRoute: typeof WelcomeRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   WelcomeRoute: WelcomeRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,

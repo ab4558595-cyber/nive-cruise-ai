@@ -9,7 +9,9 @@ export const Route = createFileRoute("/welcome")({
       { name: "description", content: "Cruise AI writes production-quality code for web, mobile, embedded, and ML. Start with a 1-day free trial." },
       { property: "og:title", content: "Welcome to Cruise AI" },
       { property: "og:description", content: "Production code for any platform. 1-day free trial for new accounts." },
+      { property: "og:url", content: "/welcome" },
     ],
+    links: [{ rel: "canonical", href: "/welcome" }],
   }),
   component: Welcome,
 });

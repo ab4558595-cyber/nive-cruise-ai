@@ -7,10 +7,28 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — Cruise AI" },
-      { name: "description", content: "Simple, affordable plans for Cruise AI. Pay with UPI." },
-      { property: "og:title", content: "Cruise AI Pricing" },
-      { property: "og:description", content: "Plans starting free. Pay with UPI." },
+      { name: "description", content: "Simple, affordable plans for Cruise AI — pay with UPI. Free trial, Starter at ₹49/month, and Pro at ₹149/month for unlimited prompts." },
+      { property: "og:title", content: "Cruise AI Pricing — Free, Starter & Pro plans" },
+      { property: "og:description", content: "Compare Cruise AI plans. Start free, upgrade for higher limits, faster models, and unlimited prompts. UPI payments accepted." },
+      { property: "og:url", content: "/pricing" },
     ],
+    links: [{ rel: "canonical", href: "/pricing" }],
+    scripts: PLANS.filter((p) => p.price > 0).map((p) => ({
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: `Cruise AI ${p.name}`,
+        description: p.tagline,
+        brand: { "@type": "Brand", name: "Cruise AI" },
+        offers: {
+          "@type": "Offer",
+          price: p.price.toString(),
+          priceCurrency: "INR",
+          availability: "https://schema.org/InStock",
+        },
+      }),
+    })),
   }),
   component: Pricing,
 });
@@ -51,7 +69,7 @@ function Pricing() {
                   Most popular
                 </span>
               )}
-              <h3 className="text-lg font-semibold">{plan.name}</h3>
+              <h2 className="text-lg font-semibold">{plan.name}</h2>
               <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">₹{plan.price}</span>

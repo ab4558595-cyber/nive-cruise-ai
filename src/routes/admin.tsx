@@ -9,7 +9,17 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Cruise AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin — Cruise AI" },
+      { name: "description", content: "Cruise AI admin console for reviewing and approving pending UPI payment requests." },
+      { property: "og:title", content: "Admin — Cruise AI" },
+      { property: "og:description", content: "Internal admin console for managing Cruise AI payment approvals." },
+      { property: "og:url", content: "/admin" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin" }],
+  }),
   component: Admin,
 });
 

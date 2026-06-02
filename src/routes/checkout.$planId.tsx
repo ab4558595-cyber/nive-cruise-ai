@@ -12,7 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitPayment } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/checkout/$planId")({
-  head: () => ({ meta: [{ title: "Checkout — Cruise AI" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: "Checkout — Cruise AI" },
+      { name: "description", content: "Complete your Cruise AI plan purchase securely with UPI. Access activates once your payment is verified." },
+      { property: "og:title", content: "Checkout — Cruise AI" },
+      { property: "og:description", content: "Pay for your Cruise AI plan via UPI and unlock instant access after approval." },
+      { property: "og:url", content: `/checkout/${params.planId}` },
+    ],
+    links: [{ rel: "canonical", href: `/checkout/${params.planId}` }],
+  }),
   component: Checkout,
 });
 
@@ -41,7 +50,7 @@ function Checkout() {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="rounded-2xl border border-border/60 bg-card/70 p-6 text-center backdrop-blur-md">
-          <h2 className="mb-2 text-xl font-semibold">Sign in to continue</h2>
+          <h1 className="mb-2 text-xl font-semibold">Sign in to continue</h1>
           <p className="mb-4 text-sm text-muted-foreground">You need an account to purchase {plan.name}.</p>
           <Button asChild className="text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
             <Link to="/auth">Sign in / Sign up</Link>

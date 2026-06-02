@@ -26,6 +26,16 @@ import {
 
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Cruise AI — Elite coding copilot for any platform" },
+      { name: "description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:title", content: "Cruise AI — Elite coding copilot for any platform" },
+      { property: "og:description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
   component: Index,
 });
 
@@ -292,7 +302,7 @@ function Index() {
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold leading-tight tracking-tight">
-                {store.active.title || "New chat"}
+                {store.active.title || "Cruise AI — Elite coding copilot"}
               </h1>
               <p className="text-[11px] text-muted-foreground">Cruise AI · ⌘K for commands</p>
             </div>
@@ -304,16 +314,16 @@ function Index() {
             <ThemeToggle />
             {messages.length > 0 && (
               <>
-                <Button variant="ghost" size="sm" onClick={exportMarkdown} className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={exportMarkdown} aria-label="Export conversation as Markdown" className="text-muted-foreground hover:text-foreground">
                   <Download className="h-4 w-4" /><span className="hidden sm:inline">Export</span>
                 </Button>
-                <Button variant="ghost" size="sm" onClick={store.clearActive} className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={store.clearActive} aria-label="Clear current chat" className="text-muted-foreground hover:text-foreground">
                   <Trash2 className="h-4 w-4" /><span className="hidden sm:inline">Clear</span>
                 </Button>
               </>
             )}
             {previewDismissed && detectPreview(latestAssistant) && (
-              <Button variant="ghost" size="sm" onClick={() => { setPreviewDismissed(false); setSideDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }} className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" onClick={() => { setPreviewDismissed(false); setSideDismissed(false); setPreviewSpec(detectPreview(latestAssistant)); }} aria-label="Show live preview" className="text-muted-foreground hover:text-foreground">
                 <PlayCircle className="h-4 w-4" /><span className="hidden sm:inline">Preview</span>
               </Button>
             )}
