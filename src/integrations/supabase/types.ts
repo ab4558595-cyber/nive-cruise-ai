@@ -71,6 +71,57 @@ export type Database = {
         }
         Relationships: []
       }
+      sitemap_status_snapshots: {
+        Row: {
+          checked_at: string
+          errors: number | null
+          fetch_error: string | null
+          id: string
+          is_pending: boolean | null
+          is_sitemaps_index: boolean | null
+          last_downloaded: string | null
+          last_submitted: string | null
+          raw_payload: Json | null
+          site_url: string
+          sitemap_url: string
+          total_indexed: number | null
+          total_submitted: number | null
+          warnings: number | null
+        }
+        Insert: {
+          checked_at?: string
+          errors?: number | null
+          fetch_error?: string | null
+          id?: string
+          is_pending?: boolean | null
+          is_sitemaps_index?: boolean | null
+          last_downloaded?: string | null
+          last_submitted?: string | null
+          raw_payload?: Json | null
+          site_url: string
+          sitemap_url: string
+          total_indexed?: number | null
+          total_submitted?: number | null
+          warnings?: number | null
+        }
+        Update: {
+          checked_at?: string
+          errors?: number | null
+          fetch_error?: string | null
+          id?: string
+          is_pending?: boolean | null
+          is_sitemaps_index?: boolean | null
+          last_downloaded?: string | null
+          last_submitted?: string | null
+          raw_payload?: Json | null
+          site_url?: string
+          sitemap_url?: string
+          total_indexed?: number | null
+          total_submitted?: number | null
+          warnings?: number | null
+        }
+        Relationships: []
+      }
       usage_logs: {
         Row: {
           created_at: string
