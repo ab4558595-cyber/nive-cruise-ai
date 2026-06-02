@@ -72,6 +72,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "dqG5fQpUDEML2dcgVfR3wvoWhYCkwrNfsoNZbdLp0p8" },
       { title: "Cruise AI — Write Any Code, Any Platform" },
       { name: "description", content: "Cruise AI is an elite coding copilot that writes production-quality code for any language or platform — from Arduino firmware to full-stack web apps." },
       { name: "author", content: "Cruise AI" },
