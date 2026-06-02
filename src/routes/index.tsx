@@ -26,6 +26,16 @@ import {
 
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Cruise AI — Elite coding copilot for any platform" },
+      { name: "description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:title", content: "Cruise AI — Elite coding copilot for any platform" },
+      { property: "og:description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
   component: Index,
 });
 
