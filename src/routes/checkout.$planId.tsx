@@ -12,7 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { submitPayment } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/checkout/$planId")({
-  head: () => ({ meta: [{ title: "Checkout — Cruise AI" }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: "Checkout — Cruise AI" },
+      { name: "description", content: "Complete your Cruise AI plan purchase securely with UPI. Access activates once your payment is verified." },
+      { property: "og:title", content: "Checkout — Cruise AI" },
+      { property: "og:description", content: "Pay for your Cruise AI plan via UPI and unlock instant access after approval." },
+      { property: "og:url", content: `/checkout/${params.planId}` },
+    ],
+    links: [{ rel: "canonical", href: `/checkout/${params.planId}` }],
+  }),
   component: Checkout,
 });
 
