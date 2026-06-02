@@ -50,7 +50,7 @@ function Checkout() {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="rounded-2xl border border-border/60 bg-card/70 p-6 text-center backdrop-blur-md">
-          <h2 className="mb-2 text-xl font-semibold">Sign in to continue</h2>
+          <h1 className="mb-2 text-xl font-semibold">Sign in to continue</h1>
           <p className="mb-4 text-sm text-muted-foreground">You need an account to purchase {plan.name}.</p>
           <Button asChild className="text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
             <Link to="/auth">Sign in / Sign up</Link>
