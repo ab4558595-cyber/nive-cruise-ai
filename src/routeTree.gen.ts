@@ -68,9 +68,9 @@ const BusinessSyntheticDataRoute = BusinessSyntheticDataRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessPricingRoute = BusinessPricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => BusinessRoute,
+  id: '/business/pricing',
+  path: '/business/pricing',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessMarketingRoute = BusinessMarketingRouteImport.update({
   id: '/business/marketing',
@@ -179,6 +179,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WelcomeRoute: typeof WelcomeRoute
   BusinessMarketingRoute: typeof BusinessMarketingRoute
+  BusinessPricingRoute: typeof BusinessPricingRoute
   BusinessSyntheticDataRoute: typeof BusinessSyntheticDataRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
@@ -252,10 +253,10 @@ declare module '@tanstack/react-router' {
     }
     '/business/pricing': {
       id: '/business/pricing'
-      path: '/pricing'
+      path: '/business/pricing'
       fullPath: '/business/pricing'
       preLoaderRoute: typeof BusinessPricingRouteImport
-      parentRoute: typeof BusinessRoute
+      parentRoute: typeof rootRouteImport
     }
     '/business/marketing': {
       id: '/business/marketing'
@@ -282,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WelcomeRoute: WelcomeRoute,
   BusinessMarketingRoute: BusinessMarketingRoute,
+  BusinessPricingRoute: BusinessPricingRoute,
   BusinessSyntheticDataRoute: BusinessSyntheticDataRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   BusinessIndexRoute: BusinessIndexRoute,
@@ -290,13 +292,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
