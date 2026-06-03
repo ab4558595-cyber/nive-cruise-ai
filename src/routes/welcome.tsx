@@ -27,40 +27,41 @@ const LOGOS = [
 function Welcome() {
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
-      {/* Hero wrapper - holds the ribbon background that bleeds behind nav + hero */}
-      <div className="relative overflow-hidden">
-        {/* Flowing ribbon artwork - absolutely positioned, behind content */}
+      <div className="relative overflow-hidden bg-white">
         <Ribbon />
 
         {/* Nav */}
-        <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-          <Link to="/welcome" className="flex items-center gap-2">
-            <span className="text-[22px] font-bold tracking-tight text-[#0a2540]">nive</span>
-          </Link>
+        <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
+          <div className="flex items-center gap-10">
+            <Link to="/welcome" className="flex items-center gap-2 whitespace-nowrap">
+              <span className="text-[22px] font-bold tracking-tight text-[#0a2540]">nive</span>
+            </Link>
 
-          <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
-            <NavItem label="Products" />
-            <NavItem label="Solutions" />
-            <NavItem label="Developers" />
-            <NavItem label="Resources" />
-            <Link to="/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
-          </nav>
+            <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
+              <NavItem label="Products" />
+              <NavItem label="Solutions" />
+              <NavItem label="Developers" />
+              <NavItem label="Resources" />
+              <Link to="/pricing" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Pricing</Link>
+            </nav>
+          </div>
 
           <div className="flex items-center gap-2.5">
             <Link
               to="/auth"
-              className="hidden rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
+              className="hidden whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
             >
               Sign in
             </Link>
             <Link
               to="/auth"
-              className="inline-flex items-center gap-1 rounded-full bg-[#635bff] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#0a2540]"
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[#635bff] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#0a2540]"
             >
               Get started <span aria-hidden>›</span>
             </Link>
           </div>
         </header>
+
 
         {/* Hero content */}
         <section className="relative z-10 mx-auto max-w-[1280px] px-6 pb-28 pt-16 sm:px-10 sm:pt-24 lg:pb-40 lg:pt-32">
