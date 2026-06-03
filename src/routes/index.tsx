@@ -23,6 +23,7 @@ import { createVoiceInput, isVoiceSupported } from "@/lib/voiceInput";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
+import { Ribbon } from "@/components/Ribbon";
 
 
 export const Route = createFileRoute("/")({
@@ -268,7 +269,7 @@ function Index() {
   const PresetIcon = presetMeta.icon;
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative flex h-screen overflow-hidden bg-white text-[#0a2540]" style={{ fontFamily: "Inter, 'Sohne', system-ui, sans-serif" }}>
       <Toaster richColors position="top-center" />
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={palette} />
@@ -285,15 +286,8 @@ function Index() {
         onCollapse={() => setSidebarCollapsed((v) => !v)}
       />
 
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Painterly Sunset Aurora Mesh */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #0a0a10 0%, #0d0a14 100%)" }} />
-          <div className="absolute -top-[20%] -left-[10%] h-[70%] w-[70%] rounded-full opacity-40 blur-[120px] animate-pulse" style={{ background: "#6c5ce7" }} />
-          <div className="absolute top-[10%] -right-[10%] h-[60%] w-[60%] rounded-full opacity-30 blur-[120px]" style={{ background: "#ff6b35" }} />
-          <div className="absolute -bottom-[20%] left-[20%] h-[70%] w-[80%] rounded-full opacity-30 blur-[150px]" style={{ background: "#e84393" }} />
-          <div className="absolute top-[30%] left-[40%] h-[40%] w-[40%] rounded-full opacity-20 blur-[100px]" style={{ background: "#f7931e" }} />
-        </div>
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        <Ribbon />
 
         <header className="flex items-center justify-between border-b border-border/60 px-3 py-2.5 backdrop-blur-md sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
