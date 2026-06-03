@@ -130,12 +130,15 @@ function MarketingPage() {
         <Link to="/business" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
-        <Link
-          to="/business"
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to overview
-        </Link>
+        <div className="flex items-center gap-3">
+          <UsageBadge usage={usage} />
+          <Link
+            to="/business"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to overview
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-6 sm:px-10 sm:pt-10">
