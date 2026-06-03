@@ -11,10 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Cruise AI" },
-      { name: "description", content: "Cruise AI admin console for reviewing and approving pending UPI payment requests." },
-      { property: "og:title", content: "Admin — Cruise AI" },
-      { property: "og:description", content: "Internal admin console for managing Cruise AI payment approvals." },
+      { title: "Admin — Nive AI" },
+      { name: "description", content: "Nive AI admin console for reviewing and approving pending UPI payment requests." },
+      { property: "og:title", content: "Admin — Nive AI" },
+      { property: "og:description", content: "Internal admin console for managing Nive AI payment approvals." },
       { property: "og:url", content: "/admin" },
       { name: "robots", content: "noindex,nofollow" },
     ],

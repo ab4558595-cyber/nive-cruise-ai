@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Cruise AI" },
-      { name: "description", content: "Simple, affordable plans for Cruise AI — pay with UPI. Free trial, Starter at ₹49/month, and Pro at ₹149/month for unlimited prompts." },
-      { property: "og:title", content: "Cruise AI Pricing — Free, Starter & Pro plans" },
-      { property: "og:description", content: "Compare Cruise AI plans. Start free, upgrade for higher limits, faster models, and unlimited prompts. UPI payments accepted." },
+      { title: "Pricing — Nive AI" },
+      { name: "description", content: "Simple, affordable plans for Nive AI — pay with UPI. Free trial, Starter at ₹49/month, and Pro at ₹149/month for unlimited prompts." },
+      { property: "og:title", content: "Nive AI Pricing — Free, Starter & Pro plans" },
+      { property: "og:description", content: "Compare Nive AI plans. Start free, upgrade for higher limits, faster models, and unlimited prompts. UPI payments accepted." },
       { property: "og:url", content: "/pricing" },
     ],
     links: [{ rel: "canonical", href: "/pricing" }],
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/pricing")({
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Product",
-        name: `Cruise AI ${p.name}`,
+        name: `Nive AI ${p.name}`,
         description: p.tagline,
-        brand: { "@type": "Brand", name: "Cruise AI" },
+        brand: { "@type": "Brand", name: "Nive AI" },
         offers: {
           "@type": "Offer",
           price: p.price.toString(),

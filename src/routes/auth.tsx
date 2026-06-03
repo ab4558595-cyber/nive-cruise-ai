@@ -11,10 +11,10 @@ import { Sparkles } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Cruise AI" },
-      { name: "description", content: "Sign in or create your Cruise AI account to start building apps with our elite coding copilot." },
-      { property: "og:title", content: "Sign in to Cruise AI" },
-      { property: "og:description", content: "Access your Cruise AI account or sign up to start generating production-quality code." },
+      { title: "Sign in — Nive AI" },
+      { name: "description", content: "Sign in or create your Nive AI account to start building apps with our elite coding copilot." },
+      { property: "og:title", content: "Sign in to Nive AI" },
+      { property: "og:description", content: "Access your Nive AI account or sign up to start generating production-quality code." },
       { property: "og:url", content: "/auth" },
     ],
     links: [{ rel: "canonical", href: "/auth" }],
@@ -65,7 +65,7 @@ function AuthPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
             <Sparkles className="h-4 w-4" />
           </div>
-          <span className="font-semibold">Cruise AI</span>
+          <span className="font-semibold">Nive AI</span>
         </Link>
 
         <h1 className="mb-1 text-2xl font-semibold">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>

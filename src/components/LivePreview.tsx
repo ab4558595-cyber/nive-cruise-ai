@@ -32,7 +32,7 @@ export function detectPreview(content: string): PreviewSpec | null {
   const text = fenceCount % 2 === 1 ? content + "\n```" : content;
 
   // Walk the content sequentially so we can attach a filename header that
-  // appears immediately before a fenced code block (Cruise AI convention).
+  // appears immediately before a fenced code block (Nive AI convention).
   const re = /```(\w+)?\n?([\s\S]*?)```/g;
   const blocks: { lang: string; code: string; name?: string }[] = [];
   let m: RegExpExecArray | null;

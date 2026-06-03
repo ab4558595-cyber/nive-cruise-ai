@@ -14,10 +14,10 @@ import { submitPayment } from "@/lib/payments.functions";
 export const Route = createFileRoute("/checkout/$planId")({
   head: ({ params }) => ({
     meta: [
-      { title: "Checkout — Cruise AI" },
-      { name: "description", content: "Complete your Cruise AI plan purchase securely with UPI. Access activates once your payment is verified." },
-      { property: "og:title", content: "Checkout — Cruise AI" },
-      { property: "og:description", content: "Pay for your Cruise AI plan via UPI and unlock instant access after approval." },
+      { title: "Checkout — Nive AI" },
+      { name: "description", content: "Complete your Nive AI plan purchase securely with UPI. Access activates once your payment is verified." },
+      { property: "og:title", content: "Checkout — Nive AI" },
+      { property: "og:description", content: "Pay for your Nive AI plan via UPI and unlock instant access after approval." },
       { property: "og:url", content: `/checkout/${params.planId}` },
     ],
     links: [{ rel: "canonical", href: `/checkout/${params.planId}` }],
@@ -62,7 +62,7 @@ function Checkout() {
 
   if (authed === null) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
-  const note = `Cruise AI ${plan.name}`;
+  const note = `Nive AI ${plan.name}`;
   const upi = buildUpiUri(plan.price, note);
   const qr = qrImageUrl(upi);
 

@@ -44,7 +44,7 @@ export function ChatMessage({
       <div className="min-w-0 flex-1 space-y-2 overflow-hidden text-sm leading-relaxed">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold tracking-wide text-muted-foreground">
-            {isUser ? "You" : "Cruise AI"}
+            {isUser ? "You" : "Nive AI"}
           </div>
           {message.content && (
             <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
