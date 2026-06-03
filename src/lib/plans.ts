@@ -3,8 +3,11 @@ export const UPI_ID = "8766208760@yapl";
 export const UPI_PAYEE_NAME = "Nive AI";
 export const OWNER_EMAIL = "bansal.monikaji1982@gmail.com";
 
+export type ProductKey = "code" | "business";
+
 export type Plan = {
   id: string;
+  product?: ProductKey;
   name: string;
   price: number; // INR
   period: string;
@@ -17,6 +20,7 @@ export type Plan = {
 export const PLANS: Plan[] = [
   {
     id: "trial",
+    product: "code",
     name: "Free Trial",
     price: 0,
     period: "1 day",
@@ -32,8 +36,9 @@ export const PLANS: Plan[] = [
   },
   {
     id: "starter",
+    product: "code",
     name: "Starter",
-    price: 49,
+    price: 149,
     period: "30 days",
     tagline: "For hobbyists and tinkerers",
     features: [
@@ -48,8 +53,9 @@ export const PLANS: Plan[] = [
   },
   {
     id: "pro",
+    product: "code",
     name: "Pro",
-    price: 149,
+    price: 299,
     period: "30 days",
     tagline: "For serious builders",
     features: [
@@ -61,7 +67,62 @@ export const PLANS: Plan[] = [
       "Highest-quality production-grade code",
     ],
   },
+  // ===== Nive AI for Business =====
+  {
+    id: "biz-trial",
+    product: "business",
+    name: "Pilot",
+    price: 0,
+    period: "7 days",
+    tagline: "Try the business suite free",
+    badge: "Free pilot",
+    features: [
+      "100 synthetic rows / day",
+      "5 marketing generations / day",
+      "1 brand profile",
+      "CSV export",
+      "Email support",
+    ],
+  },
+  {
+    id: "biz-growth",
+    product: "business",
+    name: "Growth",
+    price: 499,
+    period: "30 days",
+    tagline: "For small teams and marketers",
+    features: [
+      "50,000 synthetic rows / month",
+      "Unlimited marketing copy generation",
+      "5 brand voices + tone presets",
+      "Ad, email & social variants",
+      "CSV / JSON / Parquet export",
+      "Priority email support",
+    ],
+    highlight: true,
+  },
+  {
+    id: "biz-scale",
+    product: "business",
+    name: "Scale",
+    price: 1499,
+    period: "30 days",
+    tagline: "For data teams and agencies",
+    features: [
+      "Unlimited synthetic data generation",
+      "Schema-aware structured datasets",
+      "Bias & privacy guardrails (PII scrubbing)",
+      "Full marketing campaign generator",
+      "Multi-brand workspaces",
+      "API access + webhook integrations",
+      "Dedicated onboarding",
+    ],
+  },
 ];
+
+export function plansForProduct(product: ProductKey): Plan[] {
+  return PLANS.filter((p) => (p.product ?? "code") === product);
+}
 
 export function getPlan(id: string): Plan | undefined {
   return PLANS.find((p) => p.id === id);

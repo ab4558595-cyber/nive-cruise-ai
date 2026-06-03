@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as BusinessRouteImport } from './routes/business'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
+import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
 import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public/approve-payment'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -31,6 +33,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessRoute = BusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -53,6 +60,11 @@ const CheckoutPlanIdRoute = CheckoutPlanIdRouteImport.update({
   path: '/checkout/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessPricingRoute = BusinessPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => BusinessRoute,
+} as any)
 const ApiPublicApprovePaymentRoute = ApiPublicApprovePaymentRouteImport.update({
   id: '/api/public/approve-payment',
   path: '/api/public/approve-payment',
@@ -63,9 +75,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
+  '/business/pricing': typeof BusinessPricingRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
 }
@@ -73,9 +87,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
+  '/business/pricing': typeof BusinessPricingRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
 }
@@ -84,9 +100,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/welcome': typeof WelcomeRoute
+  '/business/pricing': typeof BusinessPricingRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
 }
@@ -96,9 +114,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/business'
     | '/pricing'
     | '/sitemap.xml'
     | '/welcome'
+    | '/business/pricing'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
   fileRoutesByTo: FileRoutesByTo
@@ -106,9 +126,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/business'
     | '/pricing'
     | '/sitemap.xml'
     | '/welcome'
+    | '/business/pricing'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
   id:
@@ -116,9 +138,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/business'
     | '/pricing'
     | '/sitemap.xml'
     | '/welcome'
+    | '/business/pricing'
     | '/checkout/$planId'
     | '/api/public/approve-payment'
   fileRoutesById: FileRoutesById
@@ -127,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  BusinessRoute: typeof BusinessRouteWithChildren
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -157,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business': {
+      id: '/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -185,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/pricing': {
+      id: '/business/pricing'
+      path: '/pricing'
+      fullPath: '/business/pricing'
+      preLoaderRoute: typeof BusinessPricingRouteImport
+      parentRoute: typeof BusinessRoute
+    }
     '/api/public/approve-payment': {
       id: '/api/public/approve-payment'
       path: '/api/public/approve-payment'
@@ -195,10 +234,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BusinessRouteChildren {
+  BusinessPricingRoute: typeof BusinessPricingRoute
+}
+
+const BusinessRouteChildren: BusinessRouteChildren = {
+  BusinessPricingRoute: BusinessPricingRoute,
+}
+
+const BusinessRouteWithChildren = BusinessRoute._addFileChildren(
+  BusinessRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  BusinessRoute: BusinessRouteWithChildren,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WelcomeRoute: WelcomeRoute,

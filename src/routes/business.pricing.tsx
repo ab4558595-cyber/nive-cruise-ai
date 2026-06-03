@@ -1,26 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ArrowLeft } from "lucide-react";
-import { PLANS, plansForProduct } from "@/lib/plans";
+import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 
-const CODE_PLANS = plansForProduct("code");
+const BUSINESS_PLANS = plansForProduct("business");
 
-export const Route = createFileRoute("/pricing")({
+export const Route = createFileRoute("/business/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Nive AI" },
-      { name: "description", content: "Simple, affordable plans for Nive AI — pay with UPI. Free trial, Starter at ₹49/month, and Pro at ₹149/month for unlimited prompts." },
-      { property: "og:title", content: "Nive AI Pricing — Free, Starter & Pro plans" },
-      { property: "og:description", content: "Compare Nive AI plans. Start free, upgrade for higher limits, faster models, and unlimited prompts. UPI payments accepted." },
-      { property: "og:url", content: "/pricing" },
+      { title: "Pricing — Nive AI for Business" },
+      { name: "description", content: "Pricing for Nive AI for Business: synthetic data generation and AI marketing copy. Start free, scale with Growth and Scale plans." },
+      { property: "og:title", content: "Nive AI for Business — Pricing" },
+      { property: "og:description", content: "Free pilot, Growth at ₹499/mo, and Scale at ₹1499/mo. Synthetic data + AI marketing in one suite." },
+      { property: "og:url", content: "/business/pricing" },
     ],
-    links: [{ rel: "canonical", href: "/pricing" }],
-    scripts: PLANS.filter((p) => p.price > 0 && (p.product ?? "code") === "code").map((p) => ({
+    links: [{ rel: "canonical", href: "/business/pricing" }],
+    scripts: BUSINESS_PLANS.filter((p) => p.price > 0).map((p) => ({
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Product",
-        name: `Nive AI ${p.name}`,
+        name: `Nive AI for Business — ${p.name}`,
         description: p.tagline,
         brand: { "@type": "Brand", name: "Nive AI" },
         offers: {
@@ -32,10 +32,10 @@ export const Route = createFileRoute("/pricing")({
       }),
     })),
   }),
-  component: Pricing,
+  component: BusinessPricing,
 });
 
-function Pricing() {
+function BusinessPricing() {
   return (
     <div
       className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
@@ -44,33 +44,39 @@ function Pricing() {
       <Ribbon />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
-          nive
+        <Link to="/business" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+          nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
-        <Link to="/" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
-          <ArrowLeft className="h-4 w-4" /> Back to chat
+        <Link
+          to="/business"
+          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to overview
         </Link>
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
         <div className="mb-14 max-w-2xl">
-          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Pricing</p>
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">
+            Business Suite Pricing
+          </p>
           <h1 className="text-[40px] font-bold leading-[1.05] tracking-tight text-[#0a2540] sm:text-[56px]">
-            Choose your{" "}
+            Plans for{" "}
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #ec4899 60%, #fb7185 100%)" }}
             >
-              plan
+              data & marketing teams
             </span>
           </h1>
           <p className="mt-4 text-[16px] text-[#425466]">
-            Simple, transparent pricing. Pay securely with UPI — access unlocks once your payment is approved.
+            Synthetic data generation and AI marketing copy in one workspace. Pay via UPI — access
+            unlocks once your payment is approved.
           </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {CODE_PLANS.map((plan) => (
+          {BUSINESS_PLANS.map((plan) => (
             <div
               key={plan.id}
               className={`relative flex flex-col rounded-2xl bg-white p-7 transition-all hover:-translate-y-1 ${
@@ -100,10 +106,10 @@ function Pricing() {
               </ul>
               {plan.price === 0 ? (
                 <Link
-                  to="/"
+                  to="/auth"
                   className="mt-7 inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-semibold text-[#0a2540] shadow-sm transition-all hover:border-[#cfd7df] hover:shadow"
                 >
-                  Use free
+                  Start free pilot
                 </Link>
               ) : (
                 <Link
