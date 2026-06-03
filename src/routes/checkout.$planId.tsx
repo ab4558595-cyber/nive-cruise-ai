@@ -48,19 +48,20 @@ function Checkout() {
 
   if (authed === false) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6">
-        <div className="rounded-2xl border border-border/60 bg-card/70 p-6 text-center backdrop-blur-md">
-          <h1 className="mb-2 text-xl font-semibold">Sign in to continue</h1>
-          <p className="mb-4 text-sm text-muted-foreground">You need an account to purchase {plan.name}.</p>
-          <Button asChild className="text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
-            <Link to="/auth">Sign in / Sign up</Link>
-          </Button>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <Ribbon />
+        <div className="relative z-10 rounded-2xl bg-white p-8 text-center shadow-[0_15px_50px_rgba(50,50,93,0.12),0_5px_15px_rgba(0,0,0,0.07)]">
+          <h1 className="mb-2 text-xl font-semibold text-[#0a2540]">Sign in to continue</h1>
+          <p className="mb-5 text-sm text-[#697386]">You need an account to purchase {plan.name}.</p>
+          <Link to="/auth" className="inline-flex items-center justify-center rounded-md bg-[#635bff] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#5048d6]">
+            Sign in / Sign up
+          </Link>
         </div>
       </div>
     );
   }
 
-  if (authed === null) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (authed === null) return <div className="flex min-h-screen items-center justify-center bg-white"><Loader2 className="h-6 w-6 animate-spin text-[#635bff]" /></div>;
 
   const note = `Nive AI ${plan.name}`;
   const upi = buildUpiUri(plan.price, note);
