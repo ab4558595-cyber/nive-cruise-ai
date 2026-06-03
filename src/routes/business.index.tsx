@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
@@ -13,7 +14,11 @@ export const Route = createFileRoute("/business/")({
     ],
     links: [{ rel: "canonical", href: "/business" }],
   }),
-  component: Business,
+  component: () => (
+    <BusinessAuthGate>
+      <Business />
+    </BusinessAuthGate>
+  ),
 });
 
 function Business() {

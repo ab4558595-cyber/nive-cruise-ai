@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { DAILY_LIMITS, type UsageSnapshot } from "./businessUsage.functions";
 
 const MarketingInput = z.object({
   product: z.string().trim().min(2).max(200),
@@ -23,6 +25,7 @@ export type MarketingResult = {
   cta: string;
   channel: string;
   tone: string;
+  usage: UsageSnapshot;
 };
 
 const SYSTEM = `You are a senior brand copywriter. Output strictly valid JSON matching:
@@ -34,10 +37,29 @@ const SYSTEM = `You are a senior brand copywriter. Output strictly valid JSON ma
 Match the requested tone and channel. No markdown, no commentary — JSON only.`;
 
 export const generateMarketing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => MarketingInput.parse(input))
-  .handler(async ({ data }): Promise<MarketingResult> => {
+  .handler(async ({ data, context }): Promise<MarketingResult> => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("OpenRouter API key not configured");
+
+    const { supabase, userId } = context as any;
+    const day = new Date().toISOString().slice(0, 10);
+    const limit = DAILY_LIMITS.marketing;
+    const { data: row, error: readErr } = await supabase
+      .from("business_tool_usage")
+      .select("count")
+      .eq("user_id", userId)
+      .eq("tool", "marketing")
+      .eq("day", day)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    const used = row?.count ?? 0;
+    if (used >= limit) {
+      throw new Error(
+        `Daily limit reached for marketing (${limit}/day). Resets at midnight UTC.`,
+      );
+    }
 
     const userPrompt = `Product / service: ${data.product}
 Target audience: ${data.audience || "broad consumer audience"}
@@ -90,6 +112,25 @@ Return only the JSON object.`;
       parsed = m ? JSON.parse(m[0]) : {};
     }
 
+    // Increment usage after a successful generation.
+    const nextCount = used + 1;
+    const { error: upErr } = await supabase
+      .from("business_tool_usage")
+      .upsert(
+        {
+          user_id: userId,
+          tool: "marketing",
+          day,
+          count: nextCount,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,tool,day" },
+      );
+    if (upErr) console.error("marketing usage upsert failed", upErr);
+
+    const tomorrow = new Date();
+    tomorrow.setUTCHours(24, 0, 0, 0);
+
     return {
       headline: (parsed.headline ?? "").toString().slice(0, 120),
       variants: Array.isArray(parsed.variants)
@@ -99,5 +140,12 @@ Return only the JSON object.`;
       cta: (parsed.cta ?? "Get started").toString().slice(0, 40),
       channel: data.channel,
       tone: data.tone,
+      usage: {
+        tool: "marketing",
+        limit,
+        used: nextCount,
+        remaining: Math.max(0, limit - nextCount),
+        resetsAtUtc: tomorrow.toISOString(),
+      },
     };
   });

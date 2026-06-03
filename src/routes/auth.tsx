@@ -30,7 +30,10 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
-  const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
+  const safeRedirect =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : "/";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +43,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { emailRedirectTo: `${window.location.origin}${safeRedirect}` },
         });
         if (error) throw error;
         toast.success("Account created!");
@@ -49,7 +52,12 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back");
       }
-      navigate({ to: safeRedirect });
+      // Use full-URL assign so /business/* paths with query strings are preserved.
+      if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
+        window.location.assign(safeRedirect);
+      } else {
+        navigate({ to: safeRedirect });
+      }
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {

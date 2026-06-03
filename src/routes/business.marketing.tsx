@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
+import { useUsage, UsageBadge } from "@/components/UsageBadge";
 import { generateMarketing, type MarketingResult } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/business/marketing")({
@@ -56,6 +57,7 @@ const EXAMPLES = [
 
 function MarketingPage() {
   const generate = useServerFn(generateMarketing);
+  const { usage, setUsage } = useUsage("marketing");
   const [product, setProduct] = useState("");
   const [audience, setAudience] = useState("");
   const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("professional");
@@ -72,12 +74,17 @@ function MarketingPage() {
       setError("Tell us what you're selling first.");
       return;
     }
+    if (usage && usage.remaining <= 0) {
+      setError(`Daily limit reached (${usage.limit}/day). Resets at midnight UTC.`);
+      return;
+    }
     setLoading(true);
     try {
       const data = await generate({
         data: { product: trimmed, audience: audience.trim(), tone, channel },
       });
       setResult(data);
+      setUsage(data.usage);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed. Try again.");
     } finally {
@@ -123,12 +130,15 @@ function MarketingPage() {
         <Link to="/business" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
-        <Link
-          to="/business"
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to overview
-        </Link>
+        <div className="flex items-center gap-3">
+          <UsageBadge usage={usage} />
+          <Link
+            to="/business"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to overview
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-6 sm:px-10 sm:pt-10">

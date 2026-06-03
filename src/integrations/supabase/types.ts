@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_tool_usage: {
+        Row: {
+          count: number
+          day: string
+          id: string
+          tool: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day?: string
+          id?: string
+          tool: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          id?: string
+          tool?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           amount: number
