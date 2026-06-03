@@ -149,6 +149,8 @@ function Business() {
 
 function FeatureCard({
   id,
+  href,
+  ctaLabel,
   icon,
   eyebrow,
   title,
@@ -156,6 +158,8 @@ function FeatureCard({
   bullets,
 }: {
   id: string;
+  href: "/business/synthetic-data" | "/business/marketing";
+  ctaLabel: string;
   icon: React.ReactNode;
   eyebrow: string;
   title: string;
@@ -165,7 +169,7 @@ function FeatureCard({
   return (
     <div
       id={id}
-      className="rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.08),0_5px_15px_rgba(0,0,0,0.04)] ring-1 ring-[#e3e8ee] transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,91,255,0.15)]"
+      className="flex flex-col rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.08),0_5px_15px_rgba(0,0,0,0.04)] ring-1 ring-[#e3e8ee] transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,91,255,0.15)]"
     >
       <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#635bff]/10 text-[#635bff]">
         {icon}
@@ -173,7 +177,7 @@ function FeatureCard({
       <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">{eyebrow}</p>
       <h3 className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-[#0a2540]">{title}</h3>
       <p className="mt-3 text-[15px] leading-relaxed text-[#425466]">{body}</p>
-      <ul className="mt-5 space-y-2 text-[14px] text-[#3c4257]">
+      <ul className="mt-5 flex-1 space-y-2 text-[14px] text-[#3c4257]">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-2">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#635bff]" />
@@ -181,6 +185,12 @@ function FeatureCard({
           </li>
         ))}
       </ul>
+      <Link
+        to={href}
+        className="mt-6 inline-flex items-center gap-1.5 self-start rounded-full bg-[#635bff] px-4 py-2 text-[13.5px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all hover:bg-[#5048d6]"
+      >
+        {ctaLabel} <span aria-hidden>›</span>
+      </Link>
     </div>
   );
 }
