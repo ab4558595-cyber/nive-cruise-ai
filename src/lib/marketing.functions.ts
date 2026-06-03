@@ -112,6 +112,25 @@ Return only the JSON object.`;
       parsed = m ? JSON.parse(m[0]) : {};
     }
 
+    // Increment usage after a successful generation.
+    const nextCount = used + 1;
+    const { error: upErr } = await supabase
+      .from("business_tool_usage")
+      .upsert(
+        {
+          user_id: userId,
+          tool: "marketing",
+          day,
+          count: nextCount,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,tool,day" },
+      );
+    if (upErr) console.error("marketing usage upsert failed", upErr);
+
+    const tomorrow = new Date();
+    tomorrow.setUTCHours(24, 0, 0, 0);
+
     return {
       headline: (parsed.headline ?? "").toString().slice(0, 120),
       variants: Array.isArray(parsed.variants)
@@ -121,5 +140,12 @@ Return only the JSON object.`;
       cta: (parsed.cta ?? "Get started").toString().slice(0, 40),
       channel: data.channel,
       tone: data.tone,
+      usage: {
+        tool: "marketing",
+        limit,
+        used: nextCount,
+        remaining: Math.max(0, limit - nextCount),
+        resetsAtUtc: tomorrow.toISOString(),
+      },
     };
   });
