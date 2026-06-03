@@ -421,9 +421,9 @@ function Index() {
               )}
             </div>
 
-            <div className="border-t border-border/60 bg-background/80 px-3 py-3 backdrop-blur-md sm:px-4">
+            <div className="bg-transparent px-3 py-5 sm:px-4">
               <div className="mx-auto max-w-3xl">
-                <div className="relative flex items-end gap-2 rounded-2xl border border-border/70 bg-card/70 p-2 shadow-[var(--shadow-elegant)] transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow)]">
+                <div className="relative flex items-end gap-2 rounded-[28px] border border-[#e3e3e3] bg-white px-3 py-2.5 shadow-[0_2px_14px_rgba(13,42,148,0.08)] transition-all focus-within:border-[#bcd0ff] focus-within:shadow-[0_4px_24px_rgba(91,141,239,0.18)]">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground" title={`Style: ${presetMeta.label}`} aria-label="Style preset">
