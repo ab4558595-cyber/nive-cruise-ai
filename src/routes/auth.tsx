@@ -30,7 +30,10 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
-  const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
+  const safeRedirect =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : "/";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
