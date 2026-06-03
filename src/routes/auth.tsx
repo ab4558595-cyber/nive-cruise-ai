@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — Nive AI" },
