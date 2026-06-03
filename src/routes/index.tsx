@@ -288,14 +288,14 @@ function Index() {
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
         {/* Gemini-style soft blue radial glow */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
           <div className="absolute inset-0 bg-white" />
           <div
-            className="absolute left-1/2 top-1/2 h-[120vmin] w-[120vmin] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute left-1/2 top-[48%] h-[140vmin] w-[140vmin] -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               background:
-                "radial-gradient(closest-side, rgba(186,217,255,0.85) 0%, rgba(207,228,255,0.55) 35%, rgba(232,242,255,0.25) 65%, rgba(255,255,255,0) 100%)",
-              filter: "blur(20px)",
+                "radial-gradient(closest-side, rgba(138,180,248,0.55) 0%, rgba(165,200,255,0.40) 30%, rgba(207,225,255,0.22) 55%, rgba(232,242,255,0.10) 78%, rgba(255,255,255,0) 100%)",
+              filter: "blur(8px)",
             }}
           />
         </div>
