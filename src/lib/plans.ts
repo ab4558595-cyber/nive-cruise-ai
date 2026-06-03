@@ -3,8 +3,11 @@ export const UPI_ID = "8766208760@yapl";
 export const UPI_PAYEE_NAME = "Nive AI";
 export const OWNER_EMAIL = "bansal.monikaji1982@gmail.com";
 
+export type ProductKey = "code" | "business";
+
 export type Plan = {
   id: string;
+  product?: ProductKey;
   name: string;
   price: number; // INR
   period: string;
