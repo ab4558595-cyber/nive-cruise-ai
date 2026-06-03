@@ -40,6 +40,12 @@ export function Ribbon({
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`}
+      style={{
+        clipPath: "inset(0)",
+        WebkitClipPath: "inset(0)",
+        contain: "strict",
+        maxWidth: "100vw",
+      }}
     >
       <style>{`
         @keyframes srDriftA { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-8px, -10px, 0); } }
