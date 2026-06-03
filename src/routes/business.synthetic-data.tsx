@@ -3,6 +3,9 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Database, Download, Sparkles, Loader2 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
+import { useUsage, UsageBadge } from "@/components/UsageBadge";
+import { useServerFn } from "@tanstack/react-start";
+import { consumeBusinessUsage } from "@/lib/businessUsage.functions";
 
 export const Route = createFileRoute("/business/synthetic-data")({
   head: () => ({
