@@ -360,6 +360,7 @@ function Index() {
         <div className="flex min-h-0 flex-1">
           <div className="flex min-w-0 flex-1 flex-col">
             <div ref={scrollRef} className="flex-1 overflow-y-auto">
+              <h1 className="sr-only">Nive AI — Elite AI coding copilot for any platform</h1>
               {messages.length === 0 ? (
                 <div className="mx-auto flex max-w-2xl flex-col items-center justify-center px-4 py-12 text-center sm:py-20">
                   <div className="mb-8 h-20 w-20 rounded-2xl p-[1px]" style={{ background: "var(--gradient-brand)" }}>
