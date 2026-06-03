@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_credit_topups: {
+        Row: {
+          amount_inr: number
+          created_at: string
+          credits: number
+          day: string
+          id: string
+          pack: string
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          amount_inr: number
+          created_at?: string
+          credits: number
+          day?: string
+          id?: string
+          pack: string
+          tool: string
+          user_id: string
+        }
+        Update: {
+          amount_inr?: number
+          created_at?: string
+          credits?: number
+          day?: string
+          id?: string
+          pack?: string
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      business_tool_events: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          metadata: Json
+          tool: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          metadata?: Json
+          tool: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          metadata?: Json
+          tool?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_tool_usage: {
         Row: {
           count: number

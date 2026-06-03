@@ -170,7 +170,7 @@ function SyntheticDataPage() {
   const handleGenerate = async () => {
     setError(null);
     if (usage && usage.remaining <= 0) {
-      setError(`Daily limit reached (${usage.limit}/day). Resets at midnight UTC.`);
+      setError(`Daily limit reached (${usage.limit}/day). Top up to keep generating.`);
       return;
     }
     setGenerating(true);
@@ -214,7 +214,14 @@ function SyntheticDataPage() {
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
         <div className="flex items-center gap-3">
-          <UsageBadge usage={usage} />
+          <UsageBadge
+            usage={usage}
+            onTopupSuccess={(u) => {
+              setUsage(u);
+              setError(null);
+              void handleGenerate();
+            }}
+          />
           <Link
             to="/business"
             className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
