@@ -20,6 +20,7 @@ export type Plan = {
 export const PLANS: Plan[] = [
   {
     id: "trial",
+    product: "code",
     name: "Free Trial",
     price: 0,
     period: "1 day",
@@ -35,6 +36,7 @@ export const PLANS: Plan[] = [
   },
   {
     id: "starter",
+    product: "code",
     name: "Starter",
     price: 149,
     period: "30 days",
@@ -51,6 +53,7 @@ export const PLANS: Plan[] = [
   },
   {
     id: "pro",
+    product: "code",
     name: "Pro",
     price: 299,
     period: "30 days",
@@ -64,7 +67,62 @@ export const PLANS: Plan[] = [
       "Highest-quality production-grade code",
     ],
   },
+  // ===== Nive AI for Business =====
+  {
+    id: "biz-trial",
+    product: "business",
+    name: "Pilot",
+    price: 0,
+    period: "7 days",
+    tagline: "Try the business suite free",
+    badge: "Free pilot",
+    features: [
+      "100 synthetic rows / day",
+      "5 marketing generations / day",
+      "1 brand profile",
+      "CSV export",
+      "Email support",
+    ],
+  },
+  {
+    id: "biz-growth",
+    product: "business",
+    name: "Growth",
+    price: 499,
+    period: "30 days",
+    tagline: "For small teams and marketers",
+    features: [
+      "50,000 synthetic rows / month",
+      "Unlimited marketing copy generation",
+      "5 brand voices + tone presets",
+      "Ad, email & social variants",
+      "CSV / JSON / Parquet export",
+      "Priority email support",
+    ],
+    highlight: true,
+  },
+  {
+    id: "biz-scale",
+    product: "business",
+    name: "Scale",
+    price: 1499,
+    period: "30 days",
+    tagline: "For data teams and agencies",
+    features: [
+      "Unlimited synthetic data generation",
+      "Schema-aware structured datasets",
+      "Bias & privacy guardrails (PII scrubbing)",
+      "Full marketing campaign generator",
+      "Multi-brand workspaces",
+      "API access + webhook integrations",
+      "Dedicated onboarding",
+    ],
+  },
 ];
+
+export function plansForProduct(product: ProductKey): Plan[] {
+  return PLANS.filter((p) => (p.product ?? "code") === product);
+}
 
 export function getPlan(id: string): Plan | undefined {
   return PLANS.find((p) => p.id === id);
