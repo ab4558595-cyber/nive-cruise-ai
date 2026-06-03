@@ -1,6 +1,6 @@
 // UPI ID for receiving payments
 export const UPI_ID = "8766208760@yapl";
-export const UPI_PAYEE_NAME = "Cruise AI";
+export const UPI_PAYEE_NAME = "Nive AI";
 export const OWNER_EMAIL = "bansal.monikaji1982@gmail.com";
 
 export type Plan = {

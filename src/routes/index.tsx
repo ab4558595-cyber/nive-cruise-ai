@@ -28,10 +28,10 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cruise AI — Elite coding copilot for any platform" },
-      { name: "description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
-      { property: "og:title", content: "Cruise AI — Elite coding copilot for any platform" },
-      { property: "og:description", content: "Chat with Cruise AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { title: "Nive AI — Elite coding copilot for any platform" },
+      { name: "description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:title", content: "Nive AI — Elite coding copilot for any platform" },
+      { property: "og:description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -236,7 +236,7 @@ function Index() {
   const stopVoice = () => { voiceRef.current?.stop(); setVoiceOn(false); };
 
   const exportMarkdown = () => {
-    const md = messages.map((m) => `### ${m.role === "user" ? "You" : "Cruise AI"}\n\n${m.content}`).join("\n\n---\n\n");
+    const md = messages.map((m) => `### ${m.role === "user" ? "You" : "Nive AI"}\n\n${m.content}`).join("\n\n---\n\n");
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -307,9 +307,9 @@ function Index() {
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold leading-tight tracking-tight">
-                {store.active.title || "Cruise AI — Elite coding copilot"}
+                {store.active.title || "Nive AI — Elite coding copilot"}
               </h1>
-              <p className="text-[11px] text-muted-foreground">Cruise AI · ⌘K for commands</p>
+              <p className="text-[11px] text-muted-foreground">Nive AI · ⌘K for commands</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -425,7 +425,7 @@ function Index() {
                         <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
                         <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
                       </span>
-                      Cruise AI is thinking…
+                      Nive AI is thinking…
                     </div>
                   )}
                 </div>

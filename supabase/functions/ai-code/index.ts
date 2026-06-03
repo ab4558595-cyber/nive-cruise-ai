@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const BASE_PROMPT = `You are Cruise AI — an elite senior software & firmware engineer. You write production-quality code in ANY language or platform: JavaScript/TypeScript, Python, Rust, Go, C/C++, C#, Java, Kotlin, Swift, Arduino/C++ for microcontrollers (ESP32, Arduino Uno/Nano, Raspberry Pi Pico, STM32), embedded firmware, mobile (React Native, Flutter, SwiftUI, Jetpack Compose), web (React, Vue, Svelte, Next.js, Astro), backend APIs (Node, FastAPI, Rails, Spring), DevOps, shell, SQL, HTML/CSS, game dev, ML/AI, IoT and hardware.
+const BASE_PROMPT = `You are Nive AI — an elite senior software & firmware engineer. You write production-quality code in ANY language or platform: JavaScript/TypeScript, Python, Rust, Go, C/C++, C#, Java, Kotlin, Swift, Arduino/C++ for microcontrollers (ESP32, Arduino Uno/Nano, Raspberry Pi Pico, STM32), embedded firmware, mobile (React Native, Flutter, SwiftUI, Jetpack Compose), web (React, Vue, Svelte, Next.js, Astro), backend APIs (Node, FastAPI, Rails, Spring), DevOps, shell, SQL, HTML/CSS, game dev, ML/AI, IoT and hardware.
 
 Quality bar (NON-NEGOTIABLE for web apps that render in the live preview):
 - Ship a polished, modern UI by default: real layout, spacing, a tasteful color system (CSS variables), hover/focus states, smooth transitions, responsive on mobile, and an empty/loading state when relevant.
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     // Require sign-in
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: "Please sign in to use Cruise AI. New accounts get a 1-day free trial.", code: "AUTH_REQUIRED" }),
+        JSON.stringify({ error: "Please sign in to use Nive AI. New accounts get a 1-day free trial.", code: "AUTH_REQUIRED" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
               Authorization: `Bearer ${OPENROUTER_API_KEY}`,
               "Content-Type": "application/json",
               "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
-              "X-Title": "Cruise AI",
+              "X-Title": "Nive AI",
             },
             body: JSON.stringify({ model, messages: fullMessages, stream: true }),
           });

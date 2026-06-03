@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "Welcome to Cruise AI — Production code for any platform" },
-      { name: "description", content: "Cruise AI writes production-quality code for web, mobile, embedded, and ML. Start with a 1-day free trial." },
-      { property: "og:title", content: "Welcome to Cruise AI" },
+      { title: "Welcome to Nive AI — Production code for any platform" },
+      { name: "description", content: "Nive AI writes production-quality code for web, mobile, embedded, and ML. Start with a 1-day free trial." },
+      { property: "og:title", content: "Welcome to Nive AI" },
       { property: "og:description", content: "Production code for any platform. 1-day free trial for new accounts." },
       { property: "og:url", content: "/welcome" },
     ],
@@ -42,7 +42,7 @@ function Welcome() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}>
             <Sparkles className="h-4 w-4" />
           </div>
-          <span className="text-base font-semibold tracking-tight">Cruise AI</span>
+          <span className="text-base font-semibold tracking-tight">Nive AI</span>
         </Link>
         <nav className="flex items-center gap-1.5 text-sm">
           <Button asChild variant="ghost" size="sm"><Link to="/pricing">Pricing</Link></Button>
@@ -64,7 +64,7 @@ function Welcome() {
           , in any language.
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-          Cruise AI is a senior-engineer coding partner. Describe what you want — firmware, a SwiftUI screen, a Python scraper, a full React app — and get working, multi-file code with a live preview.
+          Nive AI is a senior-engineer coding partner. Describe what you want — firmware, a SwiftUI screen, a Python scraper, a full React app — and get working, multi-file code with a live preview.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild size="lg" className="h-12 px-6 text-primary-foreground" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}>
@@ -132,7 +132,7 @@ function Welcome() {
       </section>
 
       <footer className="border-t border-border/40 py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Cruise AI — Crafted for engineers who ship.
+        © {new Date().getFullYear()} Nive AI — Crafted for engineers who ship.
       </footer>
     </div>
   );
