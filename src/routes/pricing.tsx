@@ -15,7 +15,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:url", content: "/pricing" },
     ],
     links: [{ rel: "canonical", href: "/pricing" }],
-    scripts: PLANS.filter((p) => p.price > 0).map((p) => ({
+    scripts: PLANS.filter((p) => p.price > 0 && (p.product ?? "code") === "code").map((p) => ({
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
