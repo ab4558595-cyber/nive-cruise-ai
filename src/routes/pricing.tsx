@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { PLANS } from "@/lib/plans";
-import { Button } from "@/components/ui/button";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -35,71 +35,93 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   return (
-    <div className="relative min-h-screen px-4 py-10 sm:py-16">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: "var(--gradient-surface)" }} />
-      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-brand)" }} />
+    <div
+      className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
+      style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
+    >
+      <Ribbon />
 
-      <div className="mx-auto max-w-5xl">
-        <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
+        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+          nive
+        </Link>
+        <Link to="/" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
           <ArrowLeft className="h-4 w-4" /> Back to chat
         </Link>
+      </header>
 
-        <div className="mb-12 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
-            Choose your <span className="bg-gradient-to-r from-primary to-[oklch(0.78_0.2_320)] bg-clip-text text-transparent">plan</span>
+      <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
+        <div className="mb-14 max-w-2xl">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Pricing</p>
+          <h1 className="text-[40px] font-bold leading-[1.05] tracking-tight text-[#0a2540] sm:text-[56px]">
+            Choose your{" "}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #ec4899 60%, #fb7185 100%)" }}
+            >
+              plan
+            </span>
           </h1>
-          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            Pay securely with UPI. Access unlocks after the owner verifies your payment.
+          <p className="mt-4 text-[16px] text-[#425466]">
+            Simple, transparent pricing. Pay securely with UPI — access unlocks once your payment is approved.
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`relative flex flex-col rounded-2xl border bg-card/60 p-6 backdrop-blur-md transition-all hover:-translate-y-1 ${
-                plan.highlight ? "border-primary/60 shadow-[var(--shadow-glow)]" : "border-border/60"
+              className={`relative flex flex-col rounded-2xl bg-white p-7 transition-all hover:-translate-y-1 ${
+                plan.highlight
+                  ? "shadow-[0_20px_60px_rgba(99,91,255,0.25),0_8px_24px_rgba(50,50,93,0.1)] ring-2 ring-[#635bff]"
+                  : "shadow-[0_15px_50px_rgba(50,50,93,0.1),0_5px_15px_rgba(0,0,0,0.05)] ring-1 ring-[#e3e8ee]"
               }`}
             >
               {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-semibold text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#635bff] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-md">
                   Most popular
                 </span>
               )}
-              <h2 className="text-lg font-semibold">{plan.name}</h2>
-              <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">₹{plan.price}</span>
-                <span className="text-sm text-muted-foreground">/ {plan.period}</span>
+              <h2 className="text-[18px] font-semibold text-[#0a2540]">{plan.name}</h2>
+              <p className="mt-1 text-[13px] text-[#697386]">{plan.tagline}</p>
+              <div className="mt-5 flex items-baseline gap-1">
+                <span className="text-[42px] font-bold tracking-tight text-[#0a2540]">₹{plan.price}</span>
+                <span className="text-[14px] text-[#697386]">/ {plan.period}</span>
               </div>
-              <ul className="mt-5 flex-1 space-y-2 text-sm">
+              <ul className="mt-6 flex-1 space-y-2.5 text-[14px]">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span className="text-foreground/90">{f}</span>
+                  <li key={f} className="flex items-start gap-2.5">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#635bff]" />
+                    <span className="text-[#3c4257]">{f}</span>
                   </li>
                 ))}
               </ul>
               {plan.price === 0 ? (
-                <Button asChild variant="outline" className="mt-6">
-                  <Link to="/">Use free</Link>
-                </Button>
+                <Link
+                  to="/"
+                  className="mt-7 inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-semibold text-[#0a2540] shadow-sm transition-all hover:border-[#cfd7df] hover:shadow"
+                >
+                  Use free
+                </Link>
               ) : (
-                <Button asChild className="mt-6 text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
-                  <Link to="/checkout/$planId" params={{ planId: plan.id }}>Choose {plan.name}</Link>
-                </Button>
+                <Link
+                  to="/checkout/$planId"
+                  params={{ planId: plan.id }}
+                  className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
+                    plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
+                  }`}
+                >
+                  Choose {plan.name}
+                </Link>
               )}
             </div>
           ))}
         </div>
 
-        <p className="mt-10 text-center text-xs text-muted-foreground">
+        <p className="mt-12 text-center text-[13px] text-[#697386]">
           After payment, your access is activated once the owner approves your request.
         </p>
-      </div>
+      </main>
     </div>
   );
 }
