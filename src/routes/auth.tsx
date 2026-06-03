@@ -1,12 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -26,6 +23,7 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -54,47 +52,145 @@ function AuthPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/` },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast.error(err.message || "Google sign-in failed");
+    }
+  };
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
-      <Toaster richColors position="top-center" theme="dark" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: "var(--gradient-surface)" }} />
-      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-brand)" }} />
+    <div
+      className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
+      style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
+    >
+      <Toaster richColors position="top-center" />
+      <Ribbon />
 
-      <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-card/70 p-6 shadow-[var(--shadow-elegant)] backdrop-blur-md">
-        <Link to="/" className="mb-6 flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <span className="font-semibold">Nive AI</span>
+      {/* Top brand */}
+      <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
+        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+          nive
         </Link>
-
-        <h1 className="mb-1 text-2xl font-semibold">{mode === "signin" ? "Welcome back" : "Create your account"}</h1>
-        <p className="mb-5 text-sm text-muted-foreground">
-          {mode === "signin" ? "Sign in to continue building." : "Start writing code for any platform."}
-        </p>
-
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-          </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete={mode === "signin" ? "current-password" : "new-password"} />
-          </div>
-          <Button type="submit" disabled={loading} className="w-full text-primary-foreground" style={{ background: "var(--gradient-brand)" }}>
-            {loading ? "…" : mode === "signin" ? "Sign in" : "Create account"}
-          </Button>
-        </form>
-
-        <button
-          type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
+        <Link
+          to="/welcome"
+          className="text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
         >
-          {mode === "signin" ? "No account? Create one" : "Already have an account? Sign in"}
-        </button>
-      </div>
+          ← Back
+        </Link>
+      </header>
+
+      {/* Card */}
+      <main className="relative z-10 flex min-h-[calc(100vh-80px)] items-start justify-center px-4 pb-16 pt-6 sm:items-center sm:pt-0">
+        <div className="w-full max-w-[440px] rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.12),0_5px_15px_rgba(0,0,0,0.07)] sm:p-10">
+          <h1 className="mb-7 text-[22px] font-semibold tracking-tight text-[#0a2540]">
+            {mode === "signin" ? "Sign in to your account" : "Create your account"}
+          </h1>
+
+          <form onSubmit={submit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-[14px] font-medium text-[#3c4257]">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full rounded-md border border-[#e0e6eb] bg-white px-3 py-2.5 text-[15px] text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] outline-none transition-all focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
+              />
+            </div>
+
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="password" className="text-[14px] font-medium text-[#3c4257]">
+                  Password
+                </label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    className="text-[13px] font-medium text-[#635bff] hover:underline"
+                    onClick={() => toast.info("Use the magic-link reset coming soon, or contact support.")}
+                  >
+                    Forgot your password?
+                  </button>
+                )}
+              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                className="w-full rounded-md border border-[#e0e6eb] bg-white px-3 py-2.5 text-[15px] text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] outline-none transition-all focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
+              />
+            </div>
+
+            {mode === "signin" && (
+              <label className="flex cursor-pointer items-center gap-2 text-[14px] text-[#3c4257]">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="h-4 w-4 cursor-pointer accent-[#635bff]"
+                />
+                Remember me on this device
+              </label>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-md bg-[#a5a3ff] py-3 text-[15px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all hover:bg-[#635bff] disabled:opacity-60"
+            >
+              {loading ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+            </button>
+          </form>
+
+          <div className="my-6 flex items-center gap-3 text-[12px] text-[#697386]">
+            <span className="h-px flex-1 bg-[#e0e6eb]" />
+            <span>Or {mode === "signin" ? "sign in" : "sign up"} with</span>
+            <span className="h-px flex-1 bg-[#e0e6eb]" />
+          </div>
+
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            className="flex w-full items-center justify-center gap-2.5 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[15px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:border-[#cfd7df] hover:shadow-md"
+          >
+            <GoogleG />
+            Google
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            className="mt-6 w-full text-center text-[14px] text-[#697386] transition-colors hover:text-[#635bff]"
+          >
+            {mode === "signin" ? "No account? Create one" : "Already have an account? Sign in"}
+          </button>
+        </div>
+      </main>
     </div>
+  );
+}
+
+function GoogleG() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853" />
+      <path d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z" fill="#FBBC05" />
+      <path d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" fill="#EA4335" />
+    </svg>
   );
 }
