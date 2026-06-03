@@ -57,6 +57,7 @@ const EXAMPLES = [
 
 function MarketingPage() {
   const generate = useServerFn(generateMarketing);
+  const { usage, setUsage } = useUsage("marketing");
   const [product, setProduct] = useState("");
   const [audience, setAudience] = useState("");
   const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("professional");
