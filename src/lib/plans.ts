@@ -33,7 +33,7 @@ export const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Starter",
-    price: 49,
+    price: 149,
     period: "30 days",
     tagline: "For hobbyists and tinkerers",
     features: [
@@ -49,7 +49,7 @@ export const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    price: 149,
+    price: 299,
     period: "30 days",
     tagline: "For serious builders",
     features: [
