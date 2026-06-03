@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Database, Download, Sparkles, Loader2 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 
 export const Route = createFileRoute("/business/synthetic-data")({
   head: () => ({
@@ -20,7 +21,11 @@ export const Route = createFileRoute("/business/synthetic-data")({
     ],
     links: [{ rel: "canonical", href: "/business/synthetic-data" }],
   }),
-  component: SyntheticDataPage,
+  component: () => (
+    <BusinessAuthGate>
+      <SyntheticDataPage />
+    </BusinessAuthGate>
+  ),
 });
 
 // --- Deterministic fake-data helpers (no external deps) -----------------

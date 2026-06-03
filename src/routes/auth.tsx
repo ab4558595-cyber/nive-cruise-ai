@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — Nive AI" },
@@ -26,6 +29,8 @@ function AuthPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { redirect: redirectTo } = Route.useSearch();
+  const safeRedirect = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +49,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back");
       }
-      navigate({ to: "/" });
+      navigate({ to: safeRedirect });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -56,7 +61,7 @@ function AuthPage() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/` },
+        options: { redirectTo: `${window.location.origin}${safeRedirect}` },
       });
       if (error) throw error;
     } catch (err: any) {

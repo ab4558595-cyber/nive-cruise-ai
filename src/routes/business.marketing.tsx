@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { generateMarketing, type MarketingResult } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/business/marketing")({
@@ -22,7 +23,11 @@ export const Route = createFileRoute("/business/marketing")({
     ],
     links: [{ rel: "canonical", href: "/business/marketing" }],
   }),
-  component: MarketingPage,
+  component: () => (
+    <BusinessAuthGate>
+      <MarketingPage />
+    </BusinessAuthGate>
+  ),
 });
 
 const TONES = [
