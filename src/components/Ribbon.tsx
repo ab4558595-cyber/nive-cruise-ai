@@ -55,7 +55,7 @@ export function Ribbon({
       `}</style>
 
       <div
-        className="sr-shell absolute right-[-38%] top-[-18%] w-[96%] max-w-[920px] aspect-[960/820] opacity-[0.82] sm:right-[-20%] sm:top-[-12%] sm:w-[82%] sm:opacity-[0.9] md:right-[-12%] md:top-[-10%] md:w-[68%] md:opacity-100 lg:right-[-6%] lg:top-[-14%] lg:w-[58%]"
+        className="sr-shell absolute right-[-38%] top-[-18%] w-[96%] max-w-[980px] aspect-[960/820] opacity-[0.82] sm:right-[-20%] sm:top-[-12%] sm:w-[82%] sm:opacity-[0.9] md:right-[-12%] md:top-[-10%] md:w-[68%] md:opacity-100 lg:right-[-1%] lg:top-[-18%] lg:w-[64%] xl:right-[1%] xl:top-[-20%] xl:w-[60%]"
         style={flipStyle}
       >
         <svg
@@ -119,10 +119,10 @@ export function Ribbon({
 
           <ellipse
             className="sr-c"
-            cx="720"
-            cy="400"
-            rx="320"
-            ry="330"
+            cx="742"
+            cy="396"
+            rx="344"
+            ry="346"
             fill={`url(#${ids.halo})`}
             filter={`url(#${ids.blurXl})`}
           />
@@ -130,7 +130,7 @@ export function Ribbon({
           <g mask={`url(#${ids.mask})`}>
             <path
               className="sr-b"
-              d="M 1020 58 C 842 98, 652 178, 540 284 C 418 402, 382 566, 238 802"
+              d="M 1046 36 C 850 84, 652 176, 532 294 C 412 416, 374 584, 212 836"
               stroke={`url(#${ids.cool})`}
               strokeWidth="214"
               strokeLinecap="round"
@@ -140,7 +140,7 @@ export function Ribbon({
             />
             <path
               className="sr-a"
-              d="M 1018 96 C 834 136, 650 222, 552 324 C 448 434, 418 584, 290 804"
+              d="M 1042 74 C 850 122, 656 218, 554 338 C 454 448, 420 604, 264 834"
               stroke={`url(#${ids.warm})`}
               strokeWidth="162"
               strokeLinecap="round"
@@ -150,7 +150,7 @@ export function Ribbon({
             />
             <path
               className="sr-a"
-              d="M 990 142 C 826 184, 680 262, 596 352 C 512 452, 492 588, 378 784"
+              d="M 1018 124 C 844 168, 694 252, 612 356 C 532 456, 504 596, 354 802"
               stroke={`url(#${ids.hot})`}
               strokeWidth="118"
               strokeLinecap="round"
@@ -160,7 +160,7 @@ export function Ribbon({
             />
             <path
               className="sr-c"
-              d="M 968 196 C 824 234, 708 300, 640 378 C 566 462, 544 578, 452 740"
+              d="M 994 178 C 842 218, 718 286, 648 372 C 576 462, 552 574, 430 756"
               stroke={`url(#${ids.deep})`}
               strokeWidth="86"
               strokeLinecap="round"
@@ -170,7 +170,7 @@ export function Ribbon({
             />
             <path
               className="sr-b"
-              d="M 982 114 C 810 154, 646 236, 564 332 C 478 430, 448 566, 322 790"
+              d="M 1002 98 C 834 140, 672 226, 586 326 C 500 430, 466 568, 336 802"
               stroke={`url(#${ids.sheen})`}
               strokeWidth="10"
               strokeLinecap="round"
@@ -178,7 +178,7 @@ export function Ribbon({
               opacity="0.9"
             />
             <path
-              d="M 978 130 C 826 170, 674 248, 596 344 C 512 446, 484 574, 360 778"
+              d="M 996 114 C 844 154, 690 234, 608 336 C 522 442, 490 572, 368 792"
               stroke="#ffffff"
               strokeWidth="1.8"
               strokeLinecap="round"
