@@ -49,7 +49,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back");
       }
-      navigate({ to: "/" });
+      navigate({ to: safeRedirect });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
@@ -61,7 +61,7 @@ function AuthPage() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/` },
+        options: { redirectTo: `${window.location.origin}${safeRedirect}` },
       });
       if (error) throw error;
     } catch (err: any) {
