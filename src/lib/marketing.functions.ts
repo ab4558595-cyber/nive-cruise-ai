@@ -36,8 +36,8 @@ Match the requested tone and channel. No markdown, no commentary — JSON only.`
 export const generateMarketing = createServerFn({ method: "POST" })
   .inputValidator((input) => MarketingInput.parse(input))
   .handler(async ({ data }): Promise<MarketingResult> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Lovable AI not configured");
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("OpenRouter API key not configured");
 
     const userPrompt = `Product / service: ${data.product}
 Target audience: ${data.audience || "broad consumer audience"}
@@ -54,11 +54,13 @@ Channel: ${data.channel} (${
 
 Return only the JSON object.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://nive-ai.co.in",
+        "X-Title": "Nive AI for Business",
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
@@ -72,7 +74,7 @@ Return only the JSON object.`;
 
     if (!res.ok) {
       const txt = await res.text().catch(() => "");
-      throw new Error(`AI gateway error ${res.status}: ${txt.slice(0, 200)}`);
+      throw new Error(`OpenRouter error ${res.status}: ${txt.slice(0, 200)}`);
     }
 
     const json = (await res.json()) as {
