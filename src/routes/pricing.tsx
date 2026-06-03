@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ArrowLeft } from "lucide-react";
-import { PLANS } from "@/lib/plans";
+import { PLANS, plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
+
+const CODE_PLANS = plansForProduct("code");
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
