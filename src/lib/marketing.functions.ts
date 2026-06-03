@@ -25,6 +25,7 @@ export type MarketingResult = {
   cta: string;
   channel: string;
   tone: string;
+  usage: UsageSnapshot;
 };
 
 const SYSTEM = `You are a senior brand copywriter. Output strictly valid JSON matching:
