@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
+import { useUsage, UsageBadge } from "@/components/UsageBadge";
 import { generateMarketing, type MarketingResult } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/business/marketing")({
