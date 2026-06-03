@@ -14,7 +14,11 @@ export const Route = createFileRoute("/business/")({
     ],
     links: [{ rel: "canonical", href: "/business" }],
   }),
-  component: Business,
+  component: () => (
+    <BusinessAuthGate>
+      <Business />
+    </BusinessAuthGate>
+  ),
 });
 
 function Business() {
