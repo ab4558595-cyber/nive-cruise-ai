@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { DAILY_LIMITS, type UsageSnapshot } from "./businessUsage.functions";
+import { loadUsage, todayUtc, type UsageSnapshot } from "./businessUsage.functions";
 
 const MarketingInput = z.object({
   product: z.string().trim().min(2).max(200),
@@ -44,20 +44,10 @@ export const generateMarketing = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("OpenRouter API key not configured");
 
     const { supabase, userId } = context as any;
-    const day = new Date().toISOString().slice(0, 10);
-    const limit = DAILY_LIMITS.marketing;
-    const { data: row, error: readErr } = await supabase
-      .from("business_tool_usage")
-      .select("count")
-      .eq("user_id", userId)
-      .eq("tool", "marketing")
-      .eq("day", day)
-      .maybeSingle();
-    if (readErr) throw new Error(readErr.message);
-    const used = row?.count ?? 0;
-    if (used >= limit) {
+    const current = await loadUsage(supabase, userId, "marketing");
+    if (current.remaining <= 0) {
       throw new Error(
-        `Daily limit reached for marketing (${limit}/day). Resets at midnight UTC.`,
+        `Daily limit reached for marketing (${current.limit}/day). Top up or wait until midnight UTC.`,
       );
     }
 
@@ -107,13 +97,12 @@ Return only the JSON object.`;
     try {
       parsed = JSON.parse(content);
     } catch {
-      // fallback: try to extract JSON block
       const m = content.match(/\{[\s\S]*\}/);
       parsed = m ? JSON.parse(m[0]) : {};
     }
 
-    // Increment usage after a successful generation.
-    const nextCount = used + 1;
+    const day = todayUtc();
+    const nextCount = current.used + 1;
     const { error: upErr } = await supabase
       .from("business_tool_usage")
       .upsert(
@@ -128,8 +117,13 @@ Return only the JSON object.`;
       );
     if (upErr) console.error("marketing usage upsert failed", upErr);
 
-    const tomorrow = new Date();
-    tomorrow.setUTCHours(24, 0, 0, 0);
+    const { error: evErr } = await supabase.from("business_tool_events").insert({
+      user_id: userId,
+      tool: "marketing",
+      credits: 1,
+      metadata: { channel: data.channel, tone: data.tone },
+    });
+    if (evErr) console.error("marketing event log failed", evErr);
 
     return {
       headline: (parsed.headline ?? "").toString().slice(0, 120),
@@ -141,11 +135,9 @@ Return only the JSON object.`;
       channel: data.channel,
       tone: data.tone,
       usage: {
-        tool: "marketing",
-        limit,
+        ...current,
         used: nextCount,
-        remaining: Math.max(0, limit - nextCount),
-        resetsAtUtc: tomorrow.toISOString(),
+        remaining: Math.max(0, current.limit - nextCount),
       },
     };
   });
