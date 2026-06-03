@@ -158,16 +158,25 @@ const PRESETS: { name: string; fields: Field[] }[] = [
 ];
 
 function SyntheticDataPage() {
+  const consume = useServerFn(consumeBusinessUsage);
+  const { usage, setUsage } = useUsage("synthetic");
   const [fields, setFields] = useState<Field[]>(PRESETS[0].fields);
   const [count, setCount] = useState(50);
   const [seed, setSeed] = useState(42);
   const [rows, setRows] = useState<Record<string, string | number | boolean>[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    setError(null);
+    if (usage && usage.remaining <= 0) {
+      setError(`Daily limit reached (${usage.limit}/day). Resets at midnight UTC.`);
+      return;
+    }
     setGenerating(true);
-    // tiny delay so the spinner is visible for very small counts
-    setTimeout(() => {
+    try {
+      const next = await consume({ data: { tool: "synthetic" } });
+      setUsage(next);
       const safeCount = Math.max(1, Math.min(5000, Math.floor(count) || 1));
       const data = generateRows(
         fields.filter((f) => f.name.trim().length > 0),
@@ -175,11 +184,15 @@ function SyntheticDataPage() {
         seed,
       );
       setRows(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Generation failed.");
+    } finally {
       setGenerating(false);
-    }, 120);
+    }
   };
 
   const previewRows = useMemo(() => rows.slice(0, 25), [rows]);
+
 
   const updateField = (idx: number, patch: Partial<Field>) => {
     setFields((prev) => prev.map((f, i) => (i === idx ? { ...f, ...patch } : f)));
