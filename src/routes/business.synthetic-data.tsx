@@ -334,6 +334,9 @@ function SyntheticDataPage() {
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               Generate dataset
             </button>
+            {error && (
+              <p className="mt-3 text-[13px] font-medium text-[#c8341c]">{error}</p>
+            )}
           </div>
 
           {/* Results */}
