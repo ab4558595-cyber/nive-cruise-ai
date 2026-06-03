@@ -21,7 +21,11 @@ export const Route = createFileRoute("/business/synthetic-data")({
     ],
     links: [{ rel: "canonical", href: "/business/synthetic-data" }],
   }),
-  component: SyntheticDataPage,
+  component: () => (
+    <BusinessAuthGate>
+      <SyntheticDataPage />
+    </BusinessAuthGate>
+  ),
 });
 
 // --- Deterministic fake-data helpers (no external deps) -----------------
