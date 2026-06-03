@@ -290,7 +290,7 @@ function Index() {
         {/* Stripe-style vibrant ribbon */}
         <Ribbon side="right" />
 
-        <header className="flex items-center justify-between border-b border-border/60 px-3 py-2.5 backdrop-blur-md sm:px-5">
+        <header className="relative z-20 flex items-center justify-between border-b border-border/60 bg-white/95 px-3 py-2.5 backdrop-blur-md sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
             {sidebarCollapsed && (
               <Button variant="ghost" size="sm" onClick={() => setSidebarCollapsed(false)} className="hidden md:inline-flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground" aria-label="Show sidebar">
