@@ -125,7 +125,3 @@ function Pricing() {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
