@@ -42,6 +42,7 @@ function Business() {
             <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
               <Link to="/business/synthetic-data" className="transition-colors hover:text-[#635bff]">Synthetic Data</Link>
               <Link to="/business/marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</Link>
+              <Link to="/business/usage" className="transition-colors hover:text-[#635bff]">Usage</Link>
               <Link to="/business/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
               <Link to="/welcome" className="text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
                 ← Nive for Builders
