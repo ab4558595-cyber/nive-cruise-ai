@@ -23,6 +23,7 @@ import { createVoiceInput, isVoiceSupported } from "@/lib/voiceInput";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
+import { Ribbon } from "@/components/Ribbon";
 
 
 export const Route = createFileRoute("/")({
