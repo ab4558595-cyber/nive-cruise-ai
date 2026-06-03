@@ -44,6 +44,12 @@ function Welcome() {
               <NavItem label="Developers" />
               <NavItem label="Resources" />
               <Link to="/pricing" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Pricing</Link>
+              <Link
+                to="/business"
+                className="whitespace-nowrap rounded-full bg-[#0a2540]/5 px-3 py-1 text-[#635bff] transition-colors hover:bg-[#635bff]/10"
+              >
+                For Business →
+              </Link>
             </nav>
           </div>
 
