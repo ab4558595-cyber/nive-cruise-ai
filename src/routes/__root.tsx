@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 function NotFoundComponent() {
   return (
@@ -93,6 +94,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        async: true,
+        src: "https://www.googletagmanager.com/gtag/js?id=G-3PCB797DC4",
+      },
+      {
+        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-3PCB797DC4');`,
+      },
+      {
         children: `try{var t=localStorage.getItem('cruise-ai-theme')||'dark';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}`,
       },
       {
@@ -138,6 +146,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useAnalytics();
 
   return (
     <QueryClientProvider client={queryClient}>
