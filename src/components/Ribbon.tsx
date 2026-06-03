@@ -55,7 +55,7 @@ export function Ribbon({
       `}</style>
 
       <div
-        className="sr-shell absolute right-[-22%] top-[-4%] w-[112%] max-w-[920px] aspect-[960/820] sm:right-[-14%] sm:top-[-8%] sm:w-[84%] md:right-[-10%] md:top-[-10%] md:w-[68%] lg:right-[-6%] lg:top-[-14%] lg:w-[58%]"
+        className="sr-shell absolute right-[-38%] top-[-18%] w-[96%] max-w-[920px] aspect-[960/820] opacity-[0.82] sm:right-[-20%] sm:top-[-12%] sm:w-[82%] sm:opacity-[0.9] md:right-[-12%] md:top-[-10%] md:w-[68%] md:opacity-100 lg:right-[-6%] lg:top-[-14%] lg:w-[58%]"
         style={flipStyle}
       >
         <svg
@@ -189,7 +189,7 @@ export function Ribbon({
         </svg>
       </div>
 
-      <div className="absolute inset-y-0 left-0 w-2/3 sm:w-[58%] md:w-1/2" style={fadeStyle} />
+      <div className="absolute inset-y-0 left-0 w-[76%] sm:w-[62%] md:w-1/2" style={fadeStyle} />
     </div>
   );
 }
