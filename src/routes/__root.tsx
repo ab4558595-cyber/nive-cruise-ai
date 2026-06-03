@@ -146,6 +146,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useAnalytics();
 
   return (
     <QueryClientProvider client={queryClient}>
