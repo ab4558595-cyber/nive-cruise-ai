@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { PLANS } from "@/lib/plans";
-import { Button } from "@/components/ui/button";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
