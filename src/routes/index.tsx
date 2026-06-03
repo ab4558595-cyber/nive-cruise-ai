@@ -457,6 +457,11 @@ function Index() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
+                    placeholder={voiceOn ? "Listening…" : "Ask Nive"}
+                    className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-base text-[#1f1f1f] shadow-none placeholder:text-[#9aa0a6] focus-visible:ring-0"
+                    disabled={isLoading}
+                  />
+                    onKeyDown={onKeyDown}
                     placeholder={voiceOn ? "Listening…" : "Describe what you want to code… (⌘/ to focus)"}
                     className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
                     disabled={isLoading}
