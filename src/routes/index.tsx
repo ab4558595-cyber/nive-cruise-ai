@@ -287,7 +287,18 @@ function Index() {
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
-        <Ribbon />
+        {/* Gemini-style soft blue radial glow */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-0 bg-white" />
+          <div
+            className="absolute left-1/2 top-1/2 h-[120vmin] w-[120vmin] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(closest-side, rgba(186,217,255,0.85) 0%, rgba(207,228,255,0.55) 35%, rgba(232,242,255,0.25) 65%, rgba(255,255,255,0) 100%)",
+              filter: "blur(20px)",
+            }}
+          />
+        </div>
 
         <header className="flex items-center justify-between border-b border-border/60 px-3 py-2.5 backdrop-blur-md sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
@@ -356,41 +367,24 @@ function Index() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto">
               <h1 className="sr-only">Nive AI — Elite AI coding copilot for any platform</h1>
               {messages.length === 0 ? (
-                <div className="mx-auto flex max-w-2xl flex-col items-center justify-center px-4 py-12 text-center sm:py-20">
-                  <div className="mb-8 h-20 w-20 rounded-2xl p-[1px]" style={{ background: "var(--gradient-brand)" }}>
-                    <div className="flex h-full w-full items-center justify-center rounded-2xl bg-background/80 backdrop-blur-md">
-                      <Sparkles className="h-9 w-9 text-foreground" strokeWidth={1.5} />
-                    </div>
-                  </div>
-                  <h2 className="mb-5 text-5xl font-normal leading-[1.05] tracking-tight sm:text-6xl" style={{ fontFamily: "var(--font-serif)" }}>
-                    What are we{" "}
-                    <span className="italic bg-clip-text text-transparent" style={{ backgroundImage: "var(--gradient-brand)" }}>
-                      building
-                    </span>{" "}
-                    today?
+                <div className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center px-4 py-12 text-center">
+                  <h2
+                    className="mb-10 text-4xl font-normal leading-[1.1] tracking-tight text-[#1f1f1f] sm:text-5xl md:text-6xl"
+                    style={{ fontFamily: "'Google Sans', 'Product Sans', Inter, system-ui, sans-serif" }}
+                  >
+                    Any new ideas to explore?
                   </h2>
-                  <p className="mb-12 max-w-md text-base font-light leading-relaxed text-muted-foreground sm:text-lg">
-                    Tell me what you need — a firmware sketch, a web app, a Python script. I'll write it, organise the files, and run the web ones live on the right.
-                  </p>
-                  <div className="grid w-full gap-4 text-left sm:grid-cols-2">
-                    {SUGGESTIONS.map((s, idx) => {
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                    {SUGGESTIONS.map((s) => {
                       const Icon = s.icon;
-                      const accents = ["#6c5ce7", "#e84393", "#f7931e", "#ff6b35"];
-                      const accent = accents[idx % accents.length];
                       return (
                         <button
                           key={s.label}
                           onClick={() => send(s.prompt)}
-                          className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] p-6 text-left backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-white/10 hover:bg-white/[0.06]"
+                          className="group inline-flex items-center gap-2 rounded-full border border-[#e3e3e3] bg-white/80 px-4 py-2 text-sm text-[#444] backdrop-blur-sm transition-all hover:border-[#c8d8ff] hover:bg-white hover:text-[#1a1a1a] hover:shadow-sm"
                         >
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                          <div className="relative flex flex-col gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `color-mix(in oklab, ${accent} 14%, transparent)`, color: accent }}>
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <div className="text-sm font-medium text-foreground/90">{s.label}</div>
-                            <div className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{s.prompt}</div>
-                          </div>
+                          <Icon className="h-3.5 w-3.5 text-[#5b8def]" />
+                          <span>{s.label}</span>
                         </button>
                       );
                     })}
@@ -427,9 +421,9 @@ function Index() {
               )}
             </div>
 
-            <div className="border-t border-border/60 bg-background/80 px-3 py-3 backdrop-blur-md sm:px-4">
+            <div className="bg-transparent px-3 py-5 sm:px-4">
               <div className="mx-auto max-w-3xl">
-                <div className="relative flex items-end gap-2 rounded-2xl border border-border/70 bg-card/70 p-2 shadow-[var(--shadow-elegant)] transition-all focus-within:border-primary/50 focus-within:shadow-[var(--shadow-glow)]">
+                <div className="relative flex items-end gap-2 rounded-[28px] border border-[#e3e3e3] bg-white px-3 py-2.5 shadow-[0_2px_14px_rgba(13,42,148,0.08)] transition-all focus-within:border-[#bcd0ff] focus-within:shadow-[0_4px_24px_rgba(91,141,239,0.18)]">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground" title={`Style: ${presetMeta.label}`} aria-label="Style preset">
@@ -463,8 +457,8 @@ function Index() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
-                    placeholder={voiceOn ? "Listening…" : "Describe what you want to code… (⌘/ to focus)"}
-                    className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-sm shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+                    placeholder={voiceOn ? "Listening…" : "Ask Nive"}
+                    className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-base text-[#1f1f1f] shadow-none placeholder:text-[#9aa0a6] focus-visible:ring-0"
                     disabled={isLoading}
                   />
 
