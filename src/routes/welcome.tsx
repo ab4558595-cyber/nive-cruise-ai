@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
