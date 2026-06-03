@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { submitPayment } from "@/lib/payments.functions";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/checkout/$planId")({
   head: ({ params }) => ({
