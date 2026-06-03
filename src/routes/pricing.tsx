@@ -70,7 +70,7 @@ function Pricing() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {PLANS.map((plan) => (
+          {CODE_PLANS.map((plan) => (
             <div
               key={plan.id}
               className={`relative flex flex-col rounded-2xl bg-white p-7 transition-all hover:-translate-y-1 ${
