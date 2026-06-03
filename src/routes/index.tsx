@@ -357,7 +357,7 @@ function Index() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto">
               <h1 className="sr-only">Nive AI — Elite AI coding copilot for any platform</h1>
               {messages.length === 0 ? (
-                <div className="mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center px-4 py-12 text-center">
+                <div className="relative z-10 mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center px-4 py-12 text-center">
                   <h2
                     className="mb-10 text-4xl font-normal leading-[1.1] tracking-tight text-[#1f1f1f] sm:text-5xl md:text-6xl"
                     style={{ fontFamily: "'Google Sans', 'Product Sans', Inter, system-ui, sans-serif" }}
