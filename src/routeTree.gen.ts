@@ -17,6 +17,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
+import { Route as BusinessUsageRouteImport } from './routes/business.usage'
 import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
 import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
 import { Route as BusinessMarketingRouteImport } from './routes/business.marketing'
@@ -62,6 +63,11 @@ const CheckoutPlanIdRoute = CheckoutPlanIdRouteImport.update({
   path: '/checkout/$planId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessUsageRoute = BusinessUsageRouteImport.update({
+  id: '/business/usage',
+  path: '/business/usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessSyntheticDataRoute = BusinessSyntheticDataRouteImport.update({
   id: '/business/synthetic-data',
   path: '/business/synthetic-data',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
+  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
+  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
+  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/business/marketing'
     | '/business/pricing'
     | '/business/synthetic-data'
+    | '/business/usage'
     | '/checkout/$planId'
     | '/business/'
     | '/api/public/approve-payment'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/business/marketing'
     | '/business/pricing'
     | '/business/synthetic-data'
+    | '/business/usage'
     | '/checkout/$planId'
     | '/business'
     | '/api/public/approve-payment'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/business/marketing'
     | '/business/pricing'
     | '/business/synthetic-data'
+    | '/business/usage'
     | '/checkout/$planId'
     | '/business/'
     | '/api/public/approve-payment'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   BusinessMarketingRoute: typeof BusinessMarketingRoute
   BusinessPricingRoute: typeof BusinessPricingRoute
   BusinessSyntheticDataRoute: typeof BusinessSyntheticDataRoute
+  BusinessUsageRoute: typeof BusinessUsageRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutPlanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/usage': {
+      id: '/business/usage'
+      path: '/business/usage'
+      fullPath: '/business/usage'
+      preLoaderRoute: typeof BusinessUsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/synthetic-data': {
       id: '/business/synthetic-data'
       path: '/business/synthetic-data'
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessMarketingRoute: BusinessMarketingRoute,
   BusinessPricingRoute: BusinessPricingRoute,
   BusinessSyntheticDataRoute: BusinessSyntheticDataRoute,
+  BusinessUsageRoute: BusinessUsageRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
@@ -292,3 +313,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
