@@ -104,6 +104,8 @@ function Business() {
         <div className="mx-auto grid max-w-[1280px] gap-6 px-6 py-20 sm:px-10 md:grid-cols-2 lg:py-28">
           <FeatureCard
             id="synthetic"
+            href="/business/synthetic-data"
+            ctaLabel="Open Synthetic Data generator"
             icon={<Database className="h-5 w-5" />}
             eyebrow="AI Synthetic Data Generation"
             title="Realistic data, zero privacy risk."
@@ -117,6 +119,8 @@ function Business() {
           />
           <FeatureCard
             id="marketing"
+            href="/business/marketing"
+            ctaLabel="Open Marketing generator"
             icon={<Megaphone className="h-5 w-5" />}
             eyebrow="AI Marketing Generation"
             title="Campaigns that sound like your brand."
