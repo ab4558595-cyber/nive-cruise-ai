@@ -74,12 +74,17 @@ function MarketingPage() {
       setError("Tell us what you're selling first.");
       return;
     }
+    if (usage && usage.remaining <= 0) {
+      setError(`Daily limit reached (${usage.limit}/day). Resets at midnight UTC.`);
+      return;
+    }
     setLoading(true);
     try {
       const data = await generate({
         data: { product: trimmed, audience: audience.trim(), tone, channel },
       });
       setResult(data);
+      setUsage(data.usage);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed. Try again.");
     } finally {
