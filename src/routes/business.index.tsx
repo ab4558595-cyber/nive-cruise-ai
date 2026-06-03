@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 
-export const Route = createFileRoute("/business")({
+export const Route = createFileRoute("/business/")({
   head: () => ({
     meta: [
       { title: "Nive AI for Business — Synthetic data & AI marketing" },
@@ -35,8 +35,8 @@ function Business() {
             </Link>
 
             <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
-              <a href="#synthetic" className="transition-colors hover:text-[#635bff]">Synthetic Data</a>
-              <a href="#marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</a>
+              <Link to="/business/synthetic-data" className="transition-colors hover:text-[#635bff]">Synthetic Data</Link>
+              <Link to="/business/marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</Link>
               <Link to="/business/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
               <Link to="/welcome" className="text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
                 ← Nive for Builders
@@ -104,6 +104,8 @@ function Business() {
         <div className="mx-auto grid max-w-[1280px] gap-6 px-6 py-20 sm:px-10 md:grid-cols-2 lg:py-28">
           <FeatureCard
             id="synthetic"
+            href="/business/synthetic-data"
+            ctaLabel="Open Synthetic Data generator"
             icon={<Database className="h-5 w-5" />}
             eyebrow="AI Synthetic Data Generation"
             title="Realistic data, zero privacy risk."
@@ -117,6 +119,8 @@ function Business() {
           />
           <FeatureCard
             id="marketing"
+            href="/business/marketing"
+            ctaLabel="Open Marketing generator"
             icon={<Megaphone className="h-5 w-5" />}
             eyebrow="AI Marketing Generation"
             title="Campaigns that sound like your brand."
@@ -145,6 +149,8 @@ function Business() {
 
 function FeatureCard({
   id,
+  href,
+  ctaLabel,
   icon,
   eyebrow,
   title,
@@ -152,6 +158,8 @@ function FeatureCard({
   bullets,
 }: {
   id: string;
+  href: "/business/synthetic-data" | "/business/marketing";
+  ctaLabel: string;
   icon: React.ReactNode;
   eyebrow: string;
   title: string;
@@ -161,7 +169,7 @@ function FeatureCard({
   return (
     <div
       id={id}
-      className="rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.08),0_5px_15px_rgba(0,0,0,0.04)] ring-1 ring-[#e3e8ee] transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,91,255,0.15)]"
+      className="flex flex-col rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.08),0_5px_15px_rgba(0,0,0,0.04)] ring-1 ring-[#e3e8ee] transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,91,255,0.15)]"
     >
       <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#635bff]/10 text-[#635bff]">
         {icon}
@@ -169,7 +177,7 @@ function FeatureCard({
       <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">{eyebrow}</p>
       <h3 className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-[#0a2540]">{title}</h3>
       <p className="mt-3 text-[15px] leading-relaxed text-[#425466]">{body}</p>
-      <ul className="mt-5 space-y-2 text-[14px] text-[#3c4257]">
+      <ul className="mt-5 flex-1 space-y-2 text-[14px] text-[#3c4257]">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-2">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#635bff]" />
@@ -177,6 +185,12 @@ function FeatureCard({
           </li>
         ))}
       </ul>
+      <Link
+        to={href}
+        className="mt-6 inline-flex items-center gap-1.5 self-start rounded-full bg-[#635bff] px-4 py-2 text-[13.5px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all hover:bg-[#5048d6]"
+      >
+        {ctaLabel} <span aria-hidden>›</span>
+      </Link>
     </div>
   );
 }
