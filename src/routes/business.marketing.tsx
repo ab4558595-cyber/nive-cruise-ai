@@ -23,7 +23,11 @@ export const Route = createFileRoute("/business/marketing")({
     ],
     links: [{ rel: "canonical", href: "/business/marketing" }],
   }),
-  component: MarketingPage,
+  component: () => (
+    <BusinessAuthGate>
+      <MarketingPage />
+    </BusinessAuthGate>
+  ),
 });
 
 const TONES = [
