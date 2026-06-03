@@ -37,10 +37,29 @@ const SYSTEM = `You are a senior brand copywriter. Output strictly valid JSON ma
 Match the requested tone and channel. No markdown, no commentary — JSON only.`;
 
 export const generateMarketing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => MarketingInput.parse(input))
-  .handler(async ({ data }): Promise<MarketingResult> => {
+  .handler(async ({ data, context }): Promise<MarketingResult> => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("OpenRouter API key not configured");
+
+    const { supabase, userId } = context as any;
+    const day = new Date().toISOString().slice(0, 10);
+    const limit = DAILY_LIMITS.marketing;
+    const { data: row, error: readErr } = await supabase
+      .from("business_tool_usage")
+      .select("count")
+      .eq("user_id", userId)
+      .eq("tool", "marketing")
+      .eq("day", day)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    const used = row?.count ?? 0;
+    if (used >= limit) {
+      throw new Error(
+        `Daily limit reached for marketing (${limit}/day). Resets at midnight UTC.`,
+      );
+    }
 
     const userPrompt = `Product / service: ${data.product}
 Target audience: ${data.audience || "broad consumer audience"}
