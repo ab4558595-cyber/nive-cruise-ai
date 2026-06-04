@@ -47,7 +47,8 @@ function AuthPage() {
           options: { emailRedirectTo: `${window.location.origin}${safeRedirect}` },
         });
         if (error) throw error;
-        toast.success("Account created!");
+        markTourPending();
+        toast.success("Account created! Enjoy your 14-day free trial 🎉");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
