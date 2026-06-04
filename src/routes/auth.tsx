@@ -68,6 +68,27 @@ function AuthPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/auth",
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      if (mode === "signup") markTourPending();
+      toast.success(mode === "signup" ? "Account created! Enjoy your 14-day free trial 🎉" : "Welcome back");
+      if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
+        window.location.assign(safeRedirect);
+      } else {
+        navigate({ to: safeRedirect });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
