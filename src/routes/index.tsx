@@ -75,21 +75,34 @@ function Index() {
   const [voiceOn, setVoiceOn] = useState(false);
   const voiceRef = useRef<ReturnType<typeof createVoiceInput>>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number; text?: string }[]>([]);
+  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number; text?: string; dataUrl?: string }[]>([]);
 
   const onPickFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const next: typeof attachments = [];
     for (const f of Array.from(files).slice(0, 5)) {
-      if (f.size > 5 * 1024 * 1024) {
-        toast.error(`${f.name} is over 5MB — skipped.`);
+      if (f.size > 8 * 1024 * 1024) {
+        toast.error(`${f.name} is over 8MB — skipped.`);
         continue;
       }
       let text: string | undefined;
-      if (f.type.startsWith("text/") || /\.(md|json|csv|ya?ml|tsx?|jsx?|py|go|rs|java|c|cpp|h|css|html?|sh|env|toml|ini|sql)$/i.test(f.name)) {
+      let dataUrl: string | undefined;
+      const isImage = f.type.startsWith("image/");
+      if (isImage) {
+        try {
+          dataUrl = await new Promise<string>((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(String(r.result));
+            r.onerror = () => reject(r.error);
+            r.readAsDataURL(f);
+          });
+        } catch {
+          toast.error(`Could not read ${f.name}`);
+        }
+      } else if (f.type.startsWith("text/") || /\.(md|json|csv|ya?ml|tsx?|jsx?|py|go|rs|java|c|cpp|h|css|html?|sh|env|toml|ini|sql)$/i.test(f.name)) {
         try { text = await f.text(); } catch {}
       }
-      next.push({ name: f.name, type: f.type || "file", size: f.size, text });
+      next.push({ name: f.name, type: f.type || "file", size: f.size, text, dataUrl });
     }
     if (next.length) {
       setAttachments((a) => [...a, ...next].slice(0, 5));
@@ -97,6 +110,7 @@ function Index() {
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
   const removeAttachment = (i: number) => setAttachments((a) => a.filter((_, idx) => idx !== i));
 
   useEffect(() => { try { localStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
@@ -157,15 +171,26 @@ function Index() {
     const trimmed = text.trim();
     if ((!trimmed && attachments.length === 0) || isLoading) return;
 
+    const imageAtts = attachments.filter((a) => a.dataUrl);
+    const nonImageAtts = attachments.filter((a) => !a.dataUrl);
+
     let composed = trimmed;
-    if (attachments.length) {
-      const summary = attachments
-        .map((a) => {
-          const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
-          return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
-        })
-        .join("\n");
-      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${summary}`;
+    if (nonImageAtts.length || imageAtts.length) {
+      const parts: string[] = [];
+      if (nonImageAtts.length) {
+        parts.push(
+          nonImageAtts
+            .map((a) => {
+              const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
+              return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
+            })
+            .join("\n"),
+        );
+      }
+      if (imageAtts.length) {
+        parts.push(imageAtts.map((a) => `- 🖼️ ${a.name} (image attached below)`).join("\n"));
+      }
+      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${parts.join("\n")}`;
     }
 
     const userMsg: Msg = { role: "user", content: composed };
@@ -174,6 +199,25 @@ function Index() {
     setInput("");
     setAttachments([]);
     setIsLoading(true);
+
+    // Build outbound messages: if images were attached, send the LAST user
+    // message as a multimodal content array so vision-capable models can see
+    // them. Stored UI messages remain plain strings.
+    const outbound: any[] = next.map((m, i) => {
+      if (i === next.length - 1 && imageAtts.length) {
+        return {
+          role: m.role,
+          content: [
+            { type: "text", text: composed },
+            ...imageAtts.map((a) => ({
+              type: "image_url",
+              image_url: { url: a.dataUrl! },
+            })),
+          ],
+        };
+      }
+      return m;
+    });
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -188,9 +232,10 @@ function Index() {
           Authorization: `Bearer ${token}`,
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
-        body: JSON.stringify({ messages: next, preset }),
+        body: JSON.stringify({ messages: outbound, preset }),
         signal: controller.signal,
       });
+
 
       if (!resp.ok || !resp.body) {
         let msg = "Failed to get response";

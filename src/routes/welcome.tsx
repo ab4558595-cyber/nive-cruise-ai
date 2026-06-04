@@ -16,17 +16,8 @@ export const Route = createFileRoute("/welcome")({
   component: Welcome,
 });
 
-const LOGOS = [
-  { name: "amazon", text: "amazon" },
-  { name: "nvidia", text: "NVIDIA" },
-  { name: "ford", text: "Ford" },
-  { name: "coinbase", text: "coinbase" },
-  { name: "google", text: "Google" },
-  { name: "shopify", text: "shopify" },
-  { name: "mindbody", text: "mindbody" },
-];
-
 function Welcome() {
+
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
       <div className="relative overflow-hidden bg-white">
@@ -80,7 +71,7 @@ function Welcome() {
             </p>
 
             <h1
-              className="text-[44px] font-bold leading-[1.05] tracking-[-0.02em] text-[#0a2540] sm:text-[64px] lg:text-[76px]"
+              className="text-[48px] font-bold leading-[1.02] tracking-[-0.025em] text-[#0a2540] sm:text-[72px] lg:text-[88px]"
               style={{ fontFamily: "'Inter', 'Sohne', system-ui, sans-serif" }}
             >
               Code infrastructure to{" "}
@@ -89,9 +80,13 @@ function Welcome() {
                 style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #00d4ff 40%, #ff4d8d 100%)" }}
               >
                 grow your product.
-              </span>{" "}
-              Ship apps, firmware, and AI systems — from your first prototype to your billionth deployment.
+              </span>
             </h1>
+
+            <p className="mt-6 max-w-[620px] text-[17px] leading-relaxed text-[#425466] sm:text-[19px]">
+              Ship apps, firmware, and AI systems — from your first prototype to your billionth deployment.
+            </p>
+
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
@@ -110,20 +105,8 @@ function Welcome() {
           </div>
         </section>
 
-        {/* Logo strip */}
-        <div className="relative z-20 border-t border-[#0a2540]/8 bg-white">
-          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-10 gap-y-6 px-6 py-8 sm:px-10">
-            {LOGOS.map((logo) => (
-              <span
-                key={logo.name}
-                className="text-[18px] font-semibold tracking-tight text-[#425466] opacity-80"
-              >
-                {logo.text}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
+
 
       {/* Working features */}
       <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
