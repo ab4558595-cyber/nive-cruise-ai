@@ -101,20 +101,8 @@ function Welcome() {
           </div>
         </section>
 
-        {/* Logo strip */}
-        <div className="relative z-20 border-t border-[#0a2540]/8 bg-white">
-          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-10 gap-y-6 px-6 py-8 sm:px-10">
-            {LOGOS.map((logo) => (
-              <span
-                key={logo.name}
-                className="text-[18px] font-semibold tracking-tight text-[#425466] opacity-80"
-              >
-                {logo.text}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
+
 
       {/* Working features */}
       <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
