@@ -111,7 +111,7 @@ function Welcome() {
         </section>
 
         {/* Logo strip */}
-        <div className="relative z-10 border-t border-[#0a2540]/8 bg-white/60 backdrop-blur-sm">
+        <div className="relative z-20 border-t border-[#0a2540]/8 bg-white">
           <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-10 gap-y-6 px-6 py-8 sm:px-10">
             {LOGOS.map((logo) => (
               <span
