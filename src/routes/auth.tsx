@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Ribbon } from "@/components/Ribbon";
@@ -67,6 +68,27 @@ function AuthPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/auth",
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      if (mode === "signup") markTourPending();
+      toast.success(mode === "signup" ? "Account created! Enjoy your 14-day free trial 🎉" : "Welcome back");
+      if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
+        window.location.assign(safeRedirect);
+      } else {
+        navigate({ to: safeRedirect });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -100,6 +122,22 @@ function AuthPage() {
               ✨ Get a <strong>14-day free trial</strong> — no card required.
             </p>
           )}
+
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
+          >
+            <GoogleG />
+            {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
+          </button>
+
+          <div className="flex items-center gap-3 py-1">
+            <div className="h-px flex-1 bg-[#e0e6eb]" />
+            <span className="text-[12px] font-medium text-[#a3acb9]">or use email</span>
+            <div className="h-px flex-1 bg-[#e0e6eb]" />
+          </div>
 
           <form onSubmit={submit} className="space-y-5">
             <div>
@@ -175,6 +213,17 @@ function AuthPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function GoogleG() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.2c0-.63-.06-1.25-.18-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z" fill="#4285F4" />
+      <path d="M9 18a8.62 8.62 0 0 0 5.96-2.18l-2.92-2.26a5.43 5.43 0 0 1-8.08-2.85H.91v2.33A9 9 0 0 0 9 18z" fill="#34A853" />
+      <path d="M3.95 10.71a5.4 5.4 0 0 1 0-3.42V4.96H.91a9 9 0 0 0 0 8.08l3.04-2.33z" fill="#FBBC05" />
+      <path d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.91 8.91 0 0 0 9 0a9 9 0 0 0-8.09 4.96l3.04 2.33A5.43 5.43 0 0 1 9 3.58z" fill="#EA4335" />
+    </svg>
   );
 }
 
