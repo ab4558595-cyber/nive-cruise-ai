@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     // Require sign-in
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: "Please sign in to use Nive AI. New accounts get a 1-day free trial.", code: "AUTH_REQUIRED" }),
+        JSON.stringify({ error: "Please sign in to use Nive AI. New accounts get a 14-day free trial.", code: "AUTH_REQUIRED" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
