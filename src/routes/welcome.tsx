@@ -124,6 +124,69 @@ function Welcome() {
           </div>
         </div>
       </div>
+
+      {/* Working features */}
+      <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
+        <div className="mb-14 max-w-[760px]">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">What Nive actually does today</p>
+          <h2 className="text-[34px] font-bold leading-tight tracking-[-0.02em] text-[#0a2540] sm:text-[44px]">
+            Working features. Live. Right now.
+          </h2>
+          <p className="mt-4 text-[17px] leading-relaxed text-[#425466]">
+            Nive generates production-grade code — not full deployed webapps — on any stack you use.
+            Point it at your bugs, your legacy systems, or your own media, and it works alongside your team.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          <FeatureCard
+            icon={Bug}
+            title="The Autonomous Bug-Squasher"
+            body="Point Nive at your error tracking log (like Sentry). It autonomously locates the bug, writes the fix, runs the regression tests, and opens a Pull Request — while your team sleeps."
+          />
+          <FeatureCard
+            icon={Recycle}
+            title="The Legacy Modernizer"
+            body="Upload an ancient COBOL or Java codebase. Nive automatically refactors it into a modern, containerized TypeScript microservice architecture with 90%+ test coverage."
+          />
+          <FeatureCard
+            icon={Layers}
+            title="Any Code Stack"
+            body="Nive generates code — not full webapps — across every stack: Arduino firmware, SwiftUI, React, Rust, Python ML, Go services. You stay in control of where it ships."
+          />
+        </div>
+
+        <div className="mt-12 flex flex-wrap items-center gap-3 rounded-2xl border border-[#0a2540]/8 bg-[#f6f9fc] px-5 py-4 text-[14px] text-[#425466]">
+          <Paperclip className="h-4 w-4 text-[#635bff]" />
+          <span>
+            New: attach your own <span className="font-semibold text-[#0a2540]">images, audio, video or files</span> in the
+            composer and tell Nive what to do with them.
+          </span>
+          <Link to="/" className="ml-auto whitespace-nowrap font-medium text-[#635bff] hover:text-[#0a2540]">
+            Try it now ›
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function FeatureCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="group relative rounded-2xl border border-[#0a2540]/8 bg-white p-7 shadow-[0_2px_14px_rgba(13,42,148,0.04)] transition-all hover:-translate-y-1 hover:border-[#635bff]/30 hover:shadow-[0_12px_36px_rgba(99,91,255,0.14)]">
+      <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#635bff] to-[#00d4ff] text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)]">
+        <Icon className="h-5 w-5" />
+      </div>
+      <h3 className="mb-2 text-[19px] font-semibold tracking-tight text-[#0a2540]">{title}</h3>
+      <p className="text-[15px] leading-relaxed text-[#425466]">{body}</p>
     </div>
   );
 }
