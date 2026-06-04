@@ -16,17 +16,8 @@ export const Route = createFileRoute("/welcome")({
   component: Welcome,
 });
 
-const LOGOS = [
-  { name: "amazon", text: "amazon" },
-  { name: "nvidia", text: "NVIDIA" },
-  { name: "ford", text: "Ford" },
-  { name: "coinbase", text: "coinbase" },
-  { name: "google", text: "Google" },
-  { name: "shopify", text: "shopify" },
-  { name: "mindbody", text: "mindbody" },
-];
-
 function Welcome() {
+
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
       <div className="relative overflow-hidden bg-white">
