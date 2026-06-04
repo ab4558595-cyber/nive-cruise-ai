@@ -195,21 +195,6 @@ function AuthPage() {
             </button>
           </form>
 
-          <div className="my-6 flex items-center gap-3 text-[12px] text-[#697386]">
-            <span className="h-px flex-1 bg-[#e0e6eb]" />
-            <span>Or {mode === "signin" ? "sign in" : "sign up"} with</span>
-            <span className="h-px flex-1 bg-[#e0e6eb]" />
-          </div>
-
-          <button
-            type="button"
-            onClick={signInWithGoogle}
-            className="flex w-full items-center justify-center gap-2.5 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[15px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:border-[#cfd7df] hover:shadow-md"
-          >
-            <GoogleG />
-            Google
-          </button>
-
           <button
             type="button"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
