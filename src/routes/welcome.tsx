@@ -71,7 +71,7 @@ function Welcome() {
             </p>
 
             <h1
-              className="text-[44px] font-bold leading-[1.05] tracking-[-0.02em] text-[#0a2540] sm:text-[64px] lg:text-[76px]"
+              className="text-[48px] font-bold leading-[1.02] tracking-[-0.025em] text-[#0a2540] sm:text-[72px] lg:text-[88px]"
               style={{ fontFamily: "'Inter', 'Sohne', system-ui, sans-serif" }}
             >
               Code infrastructure to{" "}
@@ -80,9 +80,13 @@ function Welcome() {
                 style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #00d4ff 40%, #ff4d8d 100%)" }}
               >
                 grow your product.
-              </span>{" "}
-              Ship apps, firmware, and AI systems — from your first prototype to your billionth deployment.
+              </span>
             </h1>
+
+            <p className="mt-6 max-w-[620px] text-[17px] leading-relaxed text-[#425466] sm:text-[19px]">
+              Ship apps, firmware, and AI systems — from your first prototype to your billionth deployment.
+            </p>
+
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
