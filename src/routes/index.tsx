@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag,
   LogIn, LogOut, Shield, PlayCircle, Download, Mic, MicOff, SlidersHorizontal,
-  PanelLeftOpen, Plus, MessageSquare, Sun,
+  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -74,6 +74,30 @@ function Index() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
   const voiceRef = useRef<ReturnType<typeof createVoiceInput>>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number; text?: string }[]>([]);
+
+  const onPickFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const next: typeof attachments = [];
+    for (const f of Array.from(files).slice(0, 5)) {
+      if (f.size > 5 * 1024 * 1024) {
+        toast.error(`${f.name} is over 5MB — skipped.`);
+        continue;
+      }
+      let text: string | undefined;
+      if (f.type.startsWith("text/") || /\.(md|json|csv|ya?ml|tsx?|jsx?|py|go|rs|java|c|cpp|h|css|html?|sh|env|toml|ini|sql)$/i.test(f.name)) {
+        try { text = await f.text(); } catch {}
+      }
+      next.push({ name: f.name, type: f.type || "file", size: f.size, text });
+    }
+    if (next.length) {
+      setAttachments((a) => [...a, ...next].slice(0, 5));
+      toast.success(`Attached ${next.length} file${next.length > 1 ? "s" : ""}`);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+  const removeAttachment = (i: number) => setAttachments((a) => a.filter((_, idx) => idx !== i));
 
   useEffect(() => { try { localStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
 
@@ -131,12 +155,24 @@ function Index() {
 
   const send = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+    if ((!trimmed && attachments.length === 0) || isLoading) return;
 
-    const userMsg: Msg = { role: "user", content: trimmed };
+    let composed = trimmed;
+    if (attachments.length) {
+      const summary = attachments
+        .map((a) => {
+          const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
+          return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
+        })
+        .join("\n");
+      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${summary}`;
+    }
+
+    const userMsg: Msg = { role: "user", content: composed };
     const next = [...messages, userMsg];
     store.setActiveMessages(() => next);
     setInput("");
+    setAttachments([]);
     setIsLoading(true);
 
     const controller = new AbortController();
@@ -417,7 +453,42 @@ function Index() {
 
             <div className="bg-transparent px-3 py-5 sm:px-4">
               <div className="mx-auto max-w-3xl">
+                {attachments.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {attachments.map((a, i) => {
+                      const Icon = a.type.startsWith("image/") ? ImageIcon : FileText;
+                      return (
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#e3e3e3] bg-white px-2.5 py-1 text-xs text-[#1f1f1f] shadow-sm">
+                          <Icon className="h-3 w-3 text-[#635bff]" />
+                          <span className="max-w-[180px] truncate">{a.name}</span>
+                          <span className="text-muted-foreground">{Math.round(a.size / 1024)}KB</span>
+                          <button onClick={() => removeAttachment(i)} className="ml-0.5 text-muted-foreground hover:text-destructive" aria-label={`Remove ${a.name}`}>
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  hidden
+                  accept="image/*,audio/*,video/*,.pdf,.txt,.md,.json,.csv,.yaml,.yml,.ts,.tsx,.js,.jsx,.py,.go,.rs,.java,.c,.cpp,.h,.css,.html,.sh,.sql"
+                  onChange={(e) => onPickFiles(e.target.files)}
+                />
                 <div className="relative flex items-end gap-2 rounded-[28px] border border-[#e3e3e3] bg-white px-3 py-2.5 shadow-[0_2px_14px_rgba(13,42,148,0.08)] transition-all focus-within:border-[#bcd0ff] focus-within:shadow-[0_4px_24px_rgba(91,141,239,0.18)]">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
+                    aria-label="Attach media"
+                    title="Attach image, audio, video, or files"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground" title={`Style: ${presetMeta.label}`} aria-label="Style preset">
@@ -477,7 +548,7 @@ function Index() {
                     <Button
                       size="icon"
                       onClick={() => send(input)}
-                      disabled={!input.trim()}
+                      disabled={!input.trim() && attachments.length === 0}
                       className="h-9 w-9 shrink-0 rounded-xl text-primary-foreground transition-opacity hover:opacity-90"
                       style={{ background: "var(--gradient-brand)" }}
                       aria-label="Send"
