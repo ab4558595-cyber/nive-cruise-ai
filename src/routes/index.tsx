@@ -453,7 +453,42 @@ function Index() {
 
             <div className="bg-transparent px-3 py-5 sm:px-4">
               <div className="mx-auto max-w-3xl">
+                {attachments.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {attachments.map((a, i) => {
+                      const Icon = a.type.startsWith("image/") ? ImageIcon : FileText;
+                      return (
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#e3e3e3] bg-white px-2.5 py-1 text-xs text-[#1f1f1f] shadow-sm">
+                          <Icon className="h-3 w-3 text-[#635bff]" />
+                          <span className="max-w-[180px] truncate">{a.name}</span>
+                          <span className="text-muted-foreground">{Math.round(a.size / 1024)}KB</span>
+                          <button onClick={() => removeAttachment(i)} className="ml-0.5 text-muted-foreground hover:text-destructive" aria-label={`Remove ${a.name}`}>
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  hidden
+                  accept="image/*,audio/*,video/*,.pdf,.txt,.md,.json,.csv,.yaml,.yml,.ts,.tsx,.js,.jsx,.py,.go,.rs,.java,.c,.cpp,.h,.css,.html,.sh,.sql"
+                  onChange={(e) => onPickFiles(e.target.files)}
+                />
                 <div className="relative flex items-end gap-2 rounded-[28px] border border-[#e3e3e3] bg-white px-3 py-2.5 shadow-[0_2px_14px_rgba(13,42,148,0.08)] transition-all focus-within:border-[#bcd0ff] focus-within:shadow-[0_4px_24px_rgba(91,141,239,0.18)]">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
+                    aria-label="Attach media"
+                    title="Attach image, audio, video, or files"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground" title={`Style: ${presetMeta.label}`} aria-label="Style preset">
