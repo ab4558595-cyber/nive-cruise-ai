@@ -548,7 +548,7 @@ function Index() {
                     <Button
                       size="icon"
                       onClick={() => send(input)}
-                      disabled={!input.trim()}
+                      disabled={!input.trim() && attachments.length === 0}
                       className="h-9 w-9 shrink-0 rounded-xl text-primary-foreground transition-opacity hover:opacity-90"
                       style={{ background: "var(--gradient-brand)" }}
                       aria-label="Send"
