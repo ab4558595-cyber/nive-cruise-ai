@@ -1,8 +1,8 @@
 import ribbonAsset from "@/assets/ribbon.png.asset.json";
 
 /**
- * Flowing ribbon: PNG ribbon with a continuous shimmer sweep + gentle wave
- * skew that fakes a silk-like flow. No blank gaps — sized to overflow.
+ * Ribbon with stripes flowing continuously from bottom to top.
+ * Two stacked copies translate upward seamlessly for an infinite loop.
  */
 export function Ribbon({
   side = "right",
@@ -41,59 +41,53 @@ export function Ribbon({
       }}
     >
       <style>{`
-        @keyframes srFlow {
-          0%   { transform: translate3d(0, -2%, 0) rotate(0deg) scale(1.04); }
-          50%  { transform: translate3d(-1.5%, 1.5%, 0) rotate(-1.4deg) scale(1.08); }
-          100% { transform: translate3d(0, -2%, 0) rotate(0deg) scale(1.04); }
-        }
-        @keyframes srWave {
-          0%   { transform: skewY(0deg) skewX(0deg); }
-          25%  { transform: skewY(-0.6deg) skewX(0.4deg); }
-          50%  { transform: skewY(0.8deg) skewX(-0.5deg); }
-          75%  { transform: skewY(-0.4deg) skewX(0.3deg); }
-          100% { transform: skewY(0deg) skewX(0deg); }
+        @keyframes srFlowUp {
+          0%   { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
         }
         @keyframes srShimmer {
-          0%   { transform: translateX(-60%) skewX(-18deg); opacity: 0; }
-          15%  { opacity: 0.55; }
-          50%  { opacity: 0.55; }
-          85%  { opacity: 0; }
-          100% { transform: translateX(160%) skewX(-18deg); opacity: 0; }
+          0%   { transform: translateY(110%); opacity: 0; }
+          15%  { opacity: 0.5; }
+          85%  { opacity: 0.5; }
+          100% { transform: translateY(-110%); opacity: 0; }
         }
-        @keyframes srHueShift {
-          0%, 100% { filter: hue-rotate(0deg) saturate(1.02); }
-          50%      { filter: hue-rotate(14deg) saturate(1.12); }
+        .sr-track {
+          will-change: transform;
+          animation: srFlowUp 18s linear infinite;
         }
-        .sr-shell { will-change: transform; animation: srFlow 16s ease-in-out infinite; transform-origin: 60% 40%; }
-        .sr-wave  { will-change: transform; animation: srWave 11s ease-in-out infinite; transform-origin: 50% 0%; }
-        .sr-img   { will-change: filter; animation: srHueShift 14s ease-in-out infinite; display:block; }
         .sr-shimmer {
           position: absolute; inset: 0; pointer-events: none;
-          background: linear-gradient(110deg,
+          background: linear-gradient(0deg,
             transparent 35%,
             rgba(255,255,255,0.55) 50%,
             transparent 65%);
           mix-blend-mode: overlay;
-          animation: srShimmer 7s ease-in-out infinite;
+          animation: srShimmer 6s ease-in-out infinite;
         }
         @media (prefers-reduced-motion: reduce) {
-          .sr-shell, .sr-wave, .sr-img, .sr-shimmer { animation: none !important; }
+          .sr-track, .sr-shimmer { animation: none !important; }
         }
       `}</style>
 
       <div
-        className={`sr-shell absolute right-[-25%] top-[-20%] w-[140%] max-w-none opacity-95 sm:right-[-15%] sm:top-[-14%] sm:w-[115%] md:right-[-18%] md:top-[-10%] md:w-[105%] lg:right-[-20%] lg:top-[-8%] lg:w-[110%] xl:right-[-18%] xl:top-[-8%] xl:w-[100%] ${shellClassName}`}
+        className={`absolute right-[-25%] top-0 h-full w-[140%] max-w-none opacity-95 sm:right-[-15%] sm:w-[115%] md:right-[-18%] md:w-[105%] lg:right-[-20%] lg:w-[110%] xl:right-[-18%] xl:w-[100%] overflow-hidden ${shellClassName}`}
         style={flipStyle}
       >
-        <div className="sr-wave relative">
+        <div className="sr-track absolute inset-x-0 top-0 flex flex-col">
           <img
             src={ribbonAsset.url}
             alt=""
-            className="sr-img h-auto w-full select-none"
+            className="block h-auto w-full select-none"
             draggable={false}
           />
-          <div className="sr-shimmer" />
+          <img
+            src={ribbonAsset.url}
+            alt=""
+            className="block h-auto w-full select-none"
+            draggable={false}
+          />
         </div>
+        <div className="sr-shimmer" />
       </div>
 
       <div
