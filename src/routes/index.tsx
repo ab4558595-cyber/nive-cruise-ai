@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag,
   LogIn, LogOut, Shield, PlayCircle, Download, Mic, MicOff, SlidersHorizontal,
-  PanelLeftOpen, Plus, MessageSquare, Sun,
+  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
