@@ -171,15 +171,26 @@ function Index() {
     const trimmed = text.trim();
     if ((!trimmed && attachments.length === 0) || isLoading) return;
 
+    const imageAtts = attachments.filter((a) => a.dataUrl);
+    const nonImageAtts = attachments.filter((a) => !a.dataUrl);
+
     let composed = trimmed;
-    if (attachments.length) {
-      const summary = attachments
-        .map((a) => {
-          const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
-          return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
-        })
-        .join("\n");
-      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${summary}`;
+    if (nonImageAtts.length || imageAtts.length) {
+      const parts: string[] = [];
+      if (nonImageAtts.length) {
+        parts.push(
+          nonImageAtts
+            .map((a) => {
+              const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
+              return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
+            })
+            .join("\n"),
+        );
+      }
+      if (imageAtts.length) {
+        parts.push(imageAtts.map((a) => `- 🖼️ ${a.name} (image attached below)`).join("\n"));
+      }
+      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${parts.join("\n")}`;
     }
 
     const userMsg: Msg = { role: "user", content: composed };
@@ -188,6 +199,25 @@ function Index() {
     setInput("");
     setAttachments([]);
     setIsLoading(true);
+
+    // Build outbound messages: if images were attached, send the LAST user
+    // message as a multimodal content array so vision-capable models can see
+    // them. Stored UI messages remain plain strings.
+    const outbound: any[] = next.map((m, i) => {
+      if (i === next.length - 1 && imageAtts.length) {
+        return {
+          role: m.role,
+          content: [
+            { type: "text", text: composed },
+            ...imageAtts.map((a) => ({
+              type: "image_url",
+              image_url: { url: a.dataUrl! },
+            })),
+          ],
+        };
+      }
+      return m;
+    });
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -202,9 +232,10 @@ function Index() {
           Authorization: `Bearer ${token}`,
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
-        body: JSON.stringify({ messages: next, preset }),
+        body: JSON.stringify({ messages: outbound, preset }),
         signal: controller.signal,
       });
+
 
       if (!resp.ok || !resp.body) {
         let msg = "Failed to get response";
