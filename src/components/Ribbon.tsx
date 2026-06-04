@@ -3,9 +3,13 @@ import { useId } from "react";
 export function Ribbon({
   side = "right",
   className = "",
+  shellClassName = "",
+  fadeClassName = "",
 }: {
   side?: "right" | "left";
   className?: string;
+  shellClassName?: string;
+  fadeClassName?: string;
 }) {
   const uid = useId().replace(/:/g, "");
   const ids = {
@@ -61,7 +65,7 @@ export function Ribbon({
       `}</style>
 
       <div
-        className="sr-shell absolute right-[-38%] top-[-18%] w-[96%] max-w-[1040px] aspect-[960/820] opacity-[0.82] sm:right-[-20%] sm:top-[-12%] sm:w-[82%] sm:opacity-[0.9] md:right-[-12%] md:top-[-10%] md:w-[68%] md:opacity-100 lg:right-[-14%] lg:top-[-5%] lg:w-[78%] xl:right-[-12%] xl:top-[-7%] xl:w-[72%]"
+        className={`sr-shell absolute right-[-38%] top-[-18%] w-[96%] max-w-[1040px] aspect-[960/820] opacity-[0.82] sm:right-[-20%] sm:top-[-12%] sm:w-[82%] sm:opacity-[0.9] md:right-[-12%] md:top-[-10%] md:w-[68%] md:opacity-100 lg:right-[-14%] lg:top-[-5%] lg:w-[78%] xl:right-[-12%] xl:top-[-7%] xl:w-[72%] ${shellClassName}`}
         style={flipStyle}
       >
         <svg
@@ -195,7 +199,7 @@ export function Ribbon({
         </svg>
       </div>
 
-      <div className="absolute inset-y-0 left-0 w-[76%] sm:w-[62%] md:w-1/2 lg:w-[38%]" style={fadeStyle} />
+      <div className={`absolute inset-y-0 left-0 w-[76%] sm:w-[62%] md:w-1/2 lg:w-[38%] ${fadeClassName}`} style={fadeStyle} />
     </div>
   );
 }
