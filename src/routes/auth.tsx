@@ -123,6 +123,22 @@ function AuthPage() {
             </p>
           )}
 
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
+          >
+            <GoogleG />
+            {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
+          </button>
+
+          <div className="flex items-center gap-3 py-1">
+            <div className="h-px flex-1 bg-[#e0e6eb]" />
+            <span className="text-[12px] font-medium text-[#a3acb9]">or use email</span>
+            <div className="h-px flex-1 bg-[#e0e6eb]" />
+          </div>
+
           <form onSubmit={submit} className="space-y-5">
             <div>
               <label htmlFor="email" className="mb-1.5 block text-[14px] font-medium text-[#3c4257]">
