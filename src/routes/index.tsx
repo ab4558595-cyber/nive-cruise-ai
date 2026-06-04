@@ -75,21 +75,34 @@ function Index() {
   const [voiceOn, setVoiceOn] = useState(false);
   const voiceRef = useRef<ReturnType<typeof createVoiceInput>>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number; text?: string }[]>([]);
+  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number; text?: string; dataUrl?: string }[]>([]);
 
   const onPickFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const next: typeof attachments = [];
     for (const f of Array.from(files).slice(0, 5)) {
-      if (f.size > 5 * 1024 * 1024) {
-        toast.error(`${f.name} is over 5MB — skipped.`);
+      if (f.size > 8 * 1024 * 1024) {
+        toast.error(`${f.name} is over 8MB — skipped.`);
         continue;
       }
       let text: string | undefined;
-      if (f.type.startsWith("text/") || /\.(md|json|csv|ya?ml|tsx?|jsx?|py|go|rs|java|c|cpp|h|css|html?|sh|env|toml|ini|sql)$/i.test(f.name)) {
+      let dataUrl: string | undefined;
+      const isImage = f.type.startsWith("image/");
+      if (isImage) {
+        try {
+          dataUrl = await new Promise<string>((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(String(r.result));
+            r.onerror = () => reject(r.error);
+            r.readAsDataURL(f);
+          });
+        } catch {
+          toast.error(`Could not read ${f.name}`);
+        }
+      } else if (f.type.startsWith("text/") || /\.(md|json|csv|ya?ml|tsx?|jsx?|py|go|rs|java|c|cpp|h|css|html?|sh|env|toml|ini|sql)$/i.test(f.name)) {
         try { text = await f.text(); } catch {}
       }
-      next.push({ name: f.name, type: f.type || "file", size: f.size, text });
+      next.push({ name: f.name, type: f.type || "file", size: f.size, text, dataUrl });
     }
     if (next.length) {
       setAttachments((a) => [...a, ...next].slice(0, 5));
@@ -97,6 +110,7 @@ function Index() {
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
   const removeAttachment = (i: number) => setAttachments((a) => a.filter((_, idx) => idx !== i));
 
   useEffect(() => { try { localStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
