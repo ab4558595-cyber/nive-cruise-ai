@@ -146,46 +146,52 @@ export function Ribbon({
               className="sr-c"
               d="M 1052 42 C 856 92, 664 188, 544 308 C 426 426, 376 600, 224 836 L 394 836 C 524 644, 592 496, 690 398 C 790 300, 930 222, 1104 184 Z"
               fill={`url(#${ids.cool})`}
-              opacity="0.9"
+              opacity="0.34"
+              filter={`url(#${ids.blurXl})`}
+            />
+            <path
+              className="sr-a"
+              d="M 1046 62 C 852 112, 664 206, 548 322 C 432 438, 386 602, 250 836 L 408 836 C 522 660, 590 524, 684 426 C 784 322, 920 242, 1096 198 Z"
+              fill={`url(#${ids.warm})`}
+              opacity="0.98"
+            />
+            <path
+              className="sr-b"
+              d="M 1046 62 C 852 112, 664 206, 548 322 C 432 438, 386 602, 250 836"
+              stroke={`url(#${ids.deep})`}
+              strokeWidth="18"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.3"
+              filter={`url(#${ids.blurSm})`}
+            />
+            <path
+              className="sr-b"
+              d="M 1018 122 C 850 166, 702 246, 610 348 C 526 444, 478 562, 392 764"
+              stroke={`url(#${ids.hot})`}
+              strokeWidth="82"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.22"
               filter={`url(#${ids.blurMd})`}
             />
-            <g clipPath={`url(#${ids.ribbonClip})`}>
-              <path
-                className="sr-a"
-                d="M 1044 80 C 848 128, 666 220, 558 330 C 454 438, 408 588, 282 828 L 446 828 C 552 642, 612 518, 700 420 C 792 318, 926 240, 1088 204 Z"
-                fill={`url(#${ids.warm})`}
-                opacity="0.98"
-              />
-              <path
-                className="sr-b"
-                d="M 1030 126 C 844 170, 686 248, 592 346 C 500 442, 462 574, 366 790 L 514 790 C 594 632, 640 528, 718 444 C 800 356, 914 288, 1042 256 Z"
-                fill={`url(#${ids.hot})`}
-                opacity="0.93"
-              />
-              <path
-                className="sr-c"
-                d="M 1012 172 C 838 214, 702 278, 626 362 C 550 448, 520 554, 446 754 L 576 754 C 638 620, 676 534, 738 464 C 806 390, 900 334, 1004 306 Z"
-                fill={`url(#${ids.deep})`}
-                opacity="0.88"
-              />
-              <path
-                className="sr-b"
-                d="M 1018 110 C 856 150, 714 226, 622 326 C 530 424, 484 548, 382 770"
-                stroke={`url(#${ids.sheen})`}
-                strokeWidth="20"
-                strokeLinecap="round"
-                fill="none"
-                opacity="0.88"
-              />
-              <path
-                d="M 1002 138 C 850 174, 726 242, 648 330 C 568 418, 528 528, 436 734"
-                stroke="#ffffff"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                fill="none"
-                opacity="0.74"
-              />
-            </g>
+            <path
+              className="sr-b"
+              d="M 1018 112 C 856 154, 714 230, 624 330 C 536 428, 488 550, 390 770"
+              stroke={`url(#${ids.sheen})`}
+              strokeWidth="20"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.82"
+            />
+            <path
+              d="M 1002 144 C 856 180, 740 242, 660 330 C 582 416, 540 524, 454 716"
+              stroke="#ffffff"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.72"
+            />
           </g>
         </svg>
       </div>
