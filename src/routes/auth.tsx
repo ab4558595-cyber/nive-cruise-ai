@@ -67,20 +67,6 @@ function AuthPage() {
     }
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      // Mark tour pending — harmless for returning users, since the tour also
-      // only fires once per signup flow (cleared after first display).
-      if (mode === "signup") markTourPending();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}${safeRedirect}` },
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      toast.error(err.message || "Google sign-in failed");
-    }
-  };
 
   return (
     <div
