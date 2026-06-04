@@ -177,9 +177,10 @@
   }
 
   h1, h2, h3, h4, h5 {
-    letter-spacing: -0.025em;
-    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-weight: 300;
   }
+
 
   code, pre, kbd {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
