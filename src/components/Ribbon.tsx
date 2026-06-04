@@ -90,24 +90,28 @@ export function Ribbon({
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            {/* Color flow along the ribbon: blue → orange → pink → purple */}
-            <linearGradient id={ids.flow} x1="0.95" y1="0" x2="0.05" y2="1">
-              <stop offset="0%" stopColor="#b8c5ff" />
-              <stop offset="14%" stopColor="#a8b8ff" />
-              <stop offset="30%" stopColor="#ffb070" />
-              <stop offset="50%" stopColor="#ff7a3a" />
-              <stop offset="68%" stopColor="#ff4d8a" />
-              <stop offset="84%" stopColor="#e64bbf" />
-              <stop offset="100%" stopColor="#7a5cff" />
+            {/* Color flow along the ribbon (upper-left → lower-right):
+                light blue/lilac → orange → hot pink → magenta → deep purple */}
+            <linearGradient id={ids.flow} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#cdd5ff" />
+              <stop offset="10%" stopColor="#b9c2ff" />
+              <stop offset="22%" stopColor="#e0a7c8" />
+              <stop offset="34%" stopColor="#ffa86a" />
+              <stop offset="46%" stopColor="#ff8a3d" />
+              <stop offset="58%" stopColor="#ff5c6e" />
+              <stop offset="72%" stopColor="#ff3d8a" />
+              <stop offset="86%" stopColor="#d246c4" />
+              <stop offset="100%" stopColor="#6a4cff" />
             </linearGradient>
 
-            {/* Feather mask: fades ribbon out at both ends */}
-            <linearGradient id={ids.feather} x1="0.95" y1="0" x2="0.05" y2="1">
+            {/* Feather mask: fades ribbon out at both ends along the sweep */}
+            <linearGradient id={ids.feather} x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="white" stopOpacity="0" />
-              <stop offset="12%" stopColor="white" stopOpacity="1" />
-              <stop offset="88%" stopColor="white" stopOpacity="1" />
+              <stop offset="14%" stopColor="white" stopOpacity="1" />
+              <stop offset="86%" stopColor="white" stopOpacity="1" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </linearGradient>
+
             <mask id={`${uid}-mask`}>
               <rect width="1200" height="900" fill={`url(#${ids.feather})`} />
             </mask>
