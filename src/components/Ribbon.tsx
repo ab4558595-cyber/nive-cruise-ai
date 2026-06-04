@@ -24,37 +24,29 @@ export function Ribbon({
     blurHaze: `${uid}-blur-haze`,
   };
 
-  // Base centerline of the ribbon. A long diagonal sweep curving from
-  // upper-right down to lower-left.
-  // Filaments are drawn as parallel offset copies of this curve.
-  const baseCurve = "M 1180 -40 C 980 80, 720 220, 540 360 C 360 500, 240 660, 60 880";
+  // Base centerline: long diagonal sweep from upper-LEFT down to lower-RIGHT
+  // (matches the Stripe reference image).
+  const baseCurve = "M -60 -40 C 200 100, 460 260, 680 420 C 900 580, 1080 740, 1260 940";
 
-  // Generate many filaments offset perpendicular to the sweep direction.
-  // Offset is roughly along the normal (≈ (-0.7, 0.7) for a NE→SW diagonal),
-  // we cheat with a vertical+horizontal mix that visually matches.
+  // Parallel filaments offset perpendicular to the sweep.
   const filaments = useMemo(() => {
     const list: { dx: number; dy: number; opacity: number; width: number }[] = [];
-    const count = 90;
-    const spread = 380; // total band thickness in SVG units
+    const count = 110;
+    const spread = 460; // total band thickness in SVG units
+    // Perpendicular to (1,1) sweep direction is (-1,1) normalized
+    const nx = -0.707;
+    const ny = 0.707;
     for (let i = 0; i < count; i++) {
-      const t = i / (count - 1); // 0..1
-      const off = (t - 0.5) * spread; // -spread/2 .. +spread/2
-      // Normal direction (perpendicular to sweep): roughly (1, 1) normalized
-      const nx = 0.78;
-      const ny = 0.78;
-      // Density falls off toward the edges (gaussian-ish)
-      const edge = Math.abs(t - 0.5) * 2; // 0 center .. 1 edge
-      const opacity = 0.55 * Math.exp(-edge * edge * 2.2) + 0.05;
-      const width = 1.1 + (1 - edge) * 1.4;
-      list.push({
-        dx: off * nx,
-        dy: off * ny,
-        opacity,
-        width,
-      });
+      const t = i / (count - 1);
+      const off = (t - 0.5) * spread;
+      const edge = Math.abs(t - 0.5) * 2;
+      const opacity = 0.6 * Math.exp(-edge * edge * 2.0) + 0.04;
+      const width = 1.0 + (1 - edge) * 1.6;
+      list.push({ dx: off * nx, dy: off * ny, opacity, width });
     }
     return list;
   }, []);
+
 
   const flipStyle = side === "left" ? { transform: "scaleX(-1)" } : undefined;
   const fadeStyle =
