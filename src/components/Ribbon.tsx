@@ -21,6 +21,7 @@ export function Ribbon({
     halo: `${uid}-halo`,
     mask: `${uid}-mask`,
     maskGradient: `${uid}-mask-gradient`,
+    ribbonClip: `${uid}-ribbon-clip`,
     blurXl: `${uid}-blur-xl`,
     blurMd: `${uid}-blur-md`,
     blurSm: `${uid}-blur-sm`,
@@ -52,9 +53,9 @@ export function Ribbon({
       }}
     >
       <style>{`
-        @keyframes srDriftA { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-8px, -10px, 0); } }
-        @keyframes srDriftB { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(10px, 10px, 0); } }
-        @keyframes srDriftC { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-4px, 14px, 0); } }
+        @keyframes srDriftA { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-5px, -7px, 0); } }
+        @keyframes srDriftB { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(6px, 6px, 0); } }
+        @keyframes srDriftC { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-2px, 8px, 0); } }
         .sr-shell { will-change: transform; }
         .sr-a { animation: srDriftA 18s ease-in-out infinite; transform-origin: 72% 40%; }
         .sr-b { animation: srDriftB 22s ease-in-out infinite; transform-origin: 72% 40%; }
@@ -116,6 +117,9 @@ export function Ribbon({
             <mask id={ids.mask}>
               <rect width="960" height="820" fill={`url(#${ids.maskGradient})`} />
             </mask>
+            <clipPath id={ids.ribbonClip}>
+              <path d="M 1052 42 C 856 92, 664 188, 544 308 C 426 426, 376 600, 224 836 L 394 836 C 524 644, 592 496, 690 398 C 790 300, 930 222, 1104 184 Z" />
+            </clipPath>
             <filter id={ids.blurXl} x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="44" />
             </filter>
@@ -139,61 +143,54 @@ export function Ribbon({
 
           <g mask={`url(#${ids.mask})`}>
             <path
+              className="sr-c"
+              d="M 1052 42 C 856 92, 664 188, 544 308 C 426 426, 376 600, 224 836 L 394 836 C 524 644, 592 496, 690 398 C 790 300, 930 222, 1104 184 Z"
+              fill={`url(#${ids.cool})`}
+              opacity="0.34"
+              filter={`url(#${ids.blurXl})`}
+            />
+            <path
+              className="sr-a"
+              d="M 1046 62 C 852 112, 664 206, 548 322 C 432 438, 386 602, 250 836 L 408 836 C 522 660, 590 524, 684 426 C 784 322, 920 242, 1096 198 Z"
+              fill={`url(#${ids.warm})`}
+              opacity="0.98"
+            />
+            <path
               className="sr-b"
-              d="M 1046 36 C 850 84, 652 176, 532 294 C 412 416, 374 584, 212 836"
-              stroke={`url(#${ids.cool})`}
-              strokeWidth="214"
+              d="M 1046 62 C 852 112, 664 206, 548 322 C 432 438, 386 602, 250 836"
+              stroke={`url(#${ids.deep})`}
+              strokeWidth="18"
               strokeLinecap="round"
               fill="none"
-              opacity="0.92"
+              opacity="0.3"
+              filter={`url(#${ids.blurSm})`}
+            />
+            <path
+              className="sr-b"
+              d="M 1018 122 C 850 166, 702 246, 610 348 C 526 444, 478 562, 392 764"
+              stroke={`url(#${ids.hot})`}
+              strokeWidth="82"
+              strokeLinecap="round"
+              fill="none"
+              opacity="0.22"
               filter={`url(#${ids.blurMd})`}
             />
             <path
-              className="sr-a"
-              d="M 1042 74 C 850 122, 656 218, 554 338 C 454 448, 420 604, 264 834"
-              stroke={`url(#${ids.warm})`}
-              strokeWidth="162"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.98"
-              filter={`url(#${ids.blurSm})`}
-            />
-            <path
-              className="sr-a"
-              d="M 1018 124 C 844 168, 694 252, 612 356 C 532 456, 504 596, 354 802"
-              stroke={`url(#${ids.hot})`}
-              strokeWidth="118"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.94"
-              filter={`url(#${ids.blurSm})`}
-            />
-            <path
-              className="sr-c"
-              d="M 994 178 C 842 218, 718 286, 648 372 C 576 462, 552 574, 430 756"
-              stroke={`url(#${ids.deep})`}
-              strokeWidth="86"
-              strokeLinecap="round"
-              fill="none"
-              opacity="0.9"
-              filter={`url(#${ids.blurSm})`}
-            />
-            <path
               className="sr-b"
-              d="M 1002 98 C 834 140, 672 226, 586 326 C 500 430, 466 568, 336 802"
+              d="M 1018 112 C 856 154, 714 230, 624 330 C 536 428, 488 550, 390 770"
               stroke={`url(#${ids.sheen})`}
-              strokeWidth="10"
+              strokeWidth="20"
               strokeLinecap="round"
               fill="none"
-              opacity="0.9"
+              opacity="0.82"
             />
             <path
-              d="M 996 114 C 844 154, 690 234, 608 336 C 522 442, 490 572, 368 792"
+              d="M 1002 144 C 856 180, 740 242, 660 330 C 582 416, 540 524, 454 716"
               stroke="#ffffff"
-              strokeWidth="1.8"
+              strokeWidth="2.5"
               strokeLinecap="round"
               fill="none"
-              opacity="0.8"
+              opacity="0.72"
             />
           </g>
         </svg>
