@@ -37,6 +37,30 @@ function AuthPage() {
       ? redirectTo
       : "/";
 
+  // If user is already signed in (e.g. returning from Google OAuth redirect), navigate away.
+  useEffect(() => {
+    let cancelled = false;
+    const go = () => {
+      if (cancelled) return;
+      if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
+        window.location.assign(safeRedirect);
+      } else {
+        navigate({ to: safeRedirect, replace: true });
+      }
+    };
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!error && data.user) go();
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) go();
+    });
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
