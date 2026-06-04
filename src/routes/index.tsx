@@ -155,12 +155,24 @@ function Index() {
 
   const send = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+    if ((!trimmed && attachments.length === 0) || isLoading) return;
 
-    const userMsg: Msg = { role: "user", content: trimmed };
+    let composed = trimmed;
+    if (attachments.length) {
+      const summary = attachments
+        .map((a) => {
+          const head = `- ${a.name} (${a.type}, ${Math.round(a.size / 1024)} KB)`;
+          return a.text ? `${head}\n\`\`\`\n${a.text.slice(0, 8000)}\n\`\`\`` : head;
+        })
+        .join("\n");
+      composed = `${trimmed || "(see attached media)"}\n\n[Attached media for Nive]\n${summary}`;
+    }
+
+    const userMsg: Msg = { role: "user", content: composed };
     const next = [...messages, userMsg];
     store.setActiveMessages(() => next);
     setInput("");
+    setAttachments([]);
     setIsLoading(true);
 
     const controller = new AbortController();
