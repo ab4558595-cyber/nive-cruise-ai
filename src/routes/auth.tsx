@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Ribbon } from "@/components/Ribbon";
+import { markTourPending } from "@/components/GuidedTour";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
