@@ -368,6 +368,7 @@ function Index() {
         onCollapse={() => setSidebarCollapsed((v) => !v)}
       />
 
+      <GuidedTour />
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
         {/* Stripe-style vibrant ribbon */}
         <Ribbon
