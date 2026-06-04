@@ -106,9 +106,30 @@ function AuthPage() {
       {/* Card */}
       <main className="relative z-10 flex min-h-[calc(100vh-80px)] items-start justify-center px-4 pb-16 pt-6 sm:items-center sm:pt-0">
         <div className="w-full max-w-[440px] rounded-2xl bg-white p-8 shadow-[0_15px_50px_rgba(50,50,93,0.12),0_5px_15px_rgba(0,0,0,0.07)] sm:p-10">
-          <h1 className="mb-7 text-[22px] font-semibold tracking-tight text-[#0a2540]">
+          <h1 className="mb-2 text-[22px] font-semibold tracking-tight text-[#0a2540]">
             {mode === "signin" ? "Sign in to your account" : "Create your account"}
           </h1>
+          {mode === "signup" && (
+            <p className="mb-6 text-[14px] text-[#635bff]">
+              ✨ Get a <strong>14-day free trial</strong> — no card required.
+            </p>
+          )}
+
+          {/* Google first, since it's the easiest path */}
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            className="mb-5 flex w-full items-center justify-center gap-2.5 rounded-md border border-[#e0e6eb] bg-white py-3 text-[15px] font-semibold text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:border-[#635bff] hover:shadow-md"
+          >
+            <GoogleG />
+            {mode === "signup" ? "Sign up easily with Google" : "Continue with Google"}
+          </button>
+
+          <div className="mb-5 flex items-center gap-3 text-[12px] text-[#697386]">
+            <span className="h-px flex-1 bg-[#e0e6eb]" />
+            <span>or use email</span>
+            <span className="h-px flex-1 bg-[#e0e6eb]" />
+          </div>
 
           <form onSubmit={submit} className="space-y-5">
             <div>
