@@ -40,9 +40,22 @@ export function Ribbon({
       }}
     >
       <style>{`
-        @keyframes srDrift { 0%, 100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(-6px, -4px, 0); } }
-        .sr-shell { will-change: transform; animation: srDrift 22s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .sr-shell { animation: none !important; } }
+        @keyframes srFloat {
+          0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+          25%  { transform: translate3d(-10px, 8px, 0) rotate(-1.2deg) scale(1.015); }
+          50%  { transform: translate3d(6px, -10px, 0) rotate(0.8deg) scale(1.03); }
+          75%  { transform: translate3d(-4px, 4px, 0) rotate(-0.4deg) scale(1.01); }
+          100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        }
+        @keyframes srHueShift {
+          0%, 100% { filter: hue-rotate(0deg) saturate(1); }
+          50%      { filter: hue-rotate(12deg) saturate(1.08); }
+        }
+        .sr-shell { will-change: transform; animation: srFloat 18s ease-in-out infinite; transform-origin: 60% 40%; }
+        .sr-img   { will-change: filter; animation: srHueShift 14s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .sr-shell, .sr-img { animation: none !important; }
+        }
       `}</style>
 
       <div
@@ -52,9 +65,10 @@ export function Ribbon({
         <img
           src={ribbonAsset.url}
           alt=""
-          className="h-auto w-full select-none"
+          className="sr-img h-auto w-full select-none"
           draggable={false}
         />
+
       </div>
 
       <div
