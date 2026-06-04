@@ -288,7 +288,11 @@ function Index() {
 
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
         {/* Stripe-style vibrant ribbon */}
-        <Ribbon side="right" />
+        <Ribbon
+          side="right"
+          shellClassName="top-[12%] right-[-20%] w-[72%] opacity-[0.72] sm:right-[-18%] sm:w-[68%] md:right-[-16%] md:top-[10%] md:w-[60%] lg:right-[-12%] lg:top-[8%] lg:w-[54%] xl:right-[-10%] xl:top-[7%] xl:w-[48%]"
+          fadeClassName="w-[66%] sm:w-[58%] md:w-[52%] lg:w-[46%]"
+        />
 
         <header className="relative z-20 flex items-center justify-between border-b border-border/60 bg-white/95 px-3 py-2.5 backdrop-blur-md sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
