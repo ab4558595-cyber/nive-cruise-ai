@@ -13,7 +13,7 @@ import {
   Download,
   Share2,
 } from "lucide-react";
-import { Ribbon } from "@/components/Ribbon";
+
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import {
   generateSocialPost,
@@ -76,8 +76,7 @@ function SocialPage() {
   const [tab, setTab] = useState<Tab>("post");
 
   return (
-    <div className="min-h-screen bg-white text-[#0a2540]">
-      <Ribbon />
+    <div className="min-h-screen bg-gradient-to-b from-[#f6f9fc] to-white text-[#0a2540]">
       <header className="border-b border-[#e5e7eb] bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link to="/" className="flex items-center gap-2 text-sm text-[#425466] hover:text-[#0a2540]">
