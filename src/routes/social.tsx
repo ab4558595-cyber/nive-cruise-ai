@@ -273,6 +273,8 @@ function CopyBtn({ text }: { text: string }) {
 /* ----- Tab: generate post ----- */
 function PostTab() {
   const run = useServerFn(generateSocialPost);
+  const mode = useMode();
+
   const [topic, setTopic] = useState("");
   const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
   const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("friendly");
