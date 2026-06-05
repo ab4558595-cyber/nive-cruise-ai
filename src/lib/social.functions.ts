@@ -85,23 +85,25 @@ export const generateSocialPost = createServerFn({ method: "POST" })
         platform: z.enum(PLATFORMS),
         tone: z.enum(TONES),
         audience: z.string().trim().max(200).optional().default(""),
+        mode: z.enum(["business", "creator"]).default("business"),
       })
       .parse(input),
   )
   .handler(async ({ data }): Promise<SocialPost> => {
-    const sys = `You are a senior social media manager. Output strictly valid JSON:
+    const sys = `You are a senior social media manager for ${data.mode === "creator" ? "a personal blogger / creator" : "a brand / business"}. Output strictly valid JSON:
 { "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string, "imagePrompt": string, "cta": string }
-- caption: tuned to ${data.platform} length and style
+- caption: tuned to ${data.platform} length and style, ${data.mode === "creator" ? "personal voice, storytelling, first-person" : "brand voice, value-led"}
 - hashtags: 8 relevant hashtags WITHOUT the leading #
 - variants: 3 alt captions
 - bestTime: a short suggested posting time (e.g. "Tue 7pm IST")
 - imagePrompt: a vivid 1-sentence prompt for an AI image to pair with the post
-- cta: one strong call-to-action line
+- cta: ${data.mode === "creator" ? "an engaging CTA (comment, save, share, follow)" : "a strong business CTA (signup, demo, buy)"}
 No markdown, JSON only.`;
     const usr = `Topic: ${data.topic}
 Platform: ${data.platform}
 Tone: ${data.tone}
-Audience: ${data.audience || "general"}`;
+Audience: ${data.audience || (data.mode === "creator" ? "my followers" : "ideal customers")}`;
+
     const parsed = (await callLLM(sys, usr)) as any;
     return {
       platform: data.platform,
