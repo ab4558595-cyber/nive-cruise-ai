@@ -286,7 +286,7 @@ function PostTab() {
     setLoading(true);
     setErr(null);
     try {
-      const r = await run({ data: { topic, platform, tone, audience } });
+      const r = await run({ data: { topic, platform, tone, audience, mode } });
       setResult(r);
     } catch (e: any) {
       setErr(e?.message ?? "Failed to generate");
