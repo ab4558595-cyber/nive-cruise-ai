@@ -93,56 +93,95 @@ const TONES = [
   { id: "minimal", label: "Minimal" },
 ] as const;
 
-type Tab = "post" | "reply" | "analytics" | "calendar" | "hashtags" | "bio" | "ideas" | "repurpose";
+type Tab = "post" | "reply" | "analytics" | "calendar" | "hashtags" | "bio" | "ideas" | "repurpose" | "longform" | "growth";
+export type Mode = "business" | "creator";
+
+const ModeCtx = React.createContext<Mode>("business");
+const useMode = () => React.useContext(ModeCtx);
 
 function SocialPage() {
   const [tab, setTab] = useState<Tab>("post");
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window === "undefined") return "business";
+    return (localStorage.getItem("nive_social_mode") as Mode) || "business";
+  });
+  function changeMode(m: Mode) {
+    setMode(m);
+    if (typeof window !== "undefined") localStorage.setItem("nive_social_mode", m);
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f6f9fc] to-white text-[#0a2540]">
-      <header className="border-b border-[#e5e7eb] bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <Link to="/" className="flex items-center gap-2 text-sm text-[#425466] hover:text-[#0a2540]">
-            <ArrowLeft className="h-4 w-4" /> Home
-          </Link>
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <Share2 className="h-4 w-4 text-[#635bff]" /> AI Social Media Manager
+    <ModeCtx.Provider value={mode}>
+      <div className="min-h-screen bg-gradient-to-b from-[#f6f9fc] to-white text-[#0a2540]">
+        <header className="border-b border-[#e5e7eb] bg-white/80 backdrop-blur">
+          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+            <Link to="/" className="flex items-center gap-2 text-sm text-[#425466] hover:text-[#0a2540]">
+              <ArrowLeft className="h-4 w-4" /> Home
+            </Link>
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Share2 className="h-4 w-4 text-[#635bff]" /> AI Social Media Manager
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          Nive, your AI social media manager
-        </h1>
-        <p className="mt-2 max-w-2xl text-[#425466]">
-          Plan content, write captions, reply in your voice, research hashtags, brainstorm ideas, repurpose
-          across platforms, and turn raw metrics into a plan — Instagram, X, LinkedIn, Facebook, TikTok and YouTube.
-        </p>
+        <main className="mx-auto max-w-5xl px-4 py-8">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Nive, your AI social media manager
+          </h1>
+          <p className="mt-2 max-w-2xl text-[#425466]">
+            For businesses and personal bloggers. Plan content, write captions, draft threads & blog posts,
+            reply in your voice, research hashtags, repurpose across platforms, and follow a 4-week growth playbook.
+          </p>
 
-        <nav className="mt-6 flex flex-wrap gap-2">
-          <TabButton active={tab === "post"} onClick={() => setTab("post")} icon={<Sparkles className="h-4 w-4" />}>Generate post</TabButton>
-          <TabButton active={tab === "reply"} onClick={() => setTab("reply")} icon={<MessageSquare className="h-4 w-4" />}>Reply / DM</TabButton>
-          <TabButton active={tab === "hashtags"} onClick={() => setTab("hashtags")} icon={<Hash className="h-4 w-4" />}>Hashtags</TabButton>
-          <TabButton active={tab === "ideas"} onClick={() => setTab("ideas")} icon={<Lightbulb className="h-4 w-4" />}>Ideas</TabButton>
-          <TabButton active={tab === "repurpose"} onClick={() => setTab("repurpose")} icon={<Repeat className="h-4 w-4" />}>Repurpose</TabButton>
-          <TabButton active={tab === "bio"} onClick={() => setTab("bio")} icon={<User className="h-4 w-4" />}>Bio</TabButton>
-          <TabButton active={tab === "analytics"} onClick={() => setTab("analytics")} icon={<BarChart3 className="h-4 w-4" />}>Analytics</TabButton>
-          <TabButton active={tab === "calendar"} onClick={() => setTab("calendar")} icon={<Calendar className="h-4 w-4" />}>Calendar</TabButton>
-        </nav>
+          {/* Mode switch */}
+          <div className="mt-5 inline-flex rounded-full border border-[#e5e7eb] bg-white p-1 text-sm shadow-sm">
+            <button
+              onClick={() => changeMode("business")}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition ${
+                mode === "business" ? "bg-[#0a2540] text-white" : "text-[#425466] hover:text-[#0a2540]"
+              }`}
+            >
+              <Briefcase className="h-4 w-4" /> Business
+            </button>
+            <button
+              onClick={() => changeMode("creator")}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition ${
+                mode === "creator" ? "bg-[#ff4d8d] text-white" : "text-[#425466] hover:text-[#0a2540]"
+              }`}
+            >
+              <Heart className="h-4 w-4" /> Creator / Blogger
+            </button>
+          </div>
 
-        <section className="mt-6">
-          {tab === "post" && <PostTab />}
-          {tab === "reply" && <ReplyTab />}
-          {tab === "hashtags" && <HashtagsTab />}
-          {tab === "ideas" && <IdeasTab />}
-          {tab === "repurpose" && <RepurposeTab />}
-          {tab === "bio" && <BioTab />}
-          {tab === "analytics" && <AnalyticsTab />}
-          {tab === "calendar" && <CalendarTab />}
-        </section>
-      </main>
-    </div>
+          <nav className="mt-6 flex flex-wrap gap-2">
+            <TabButton active={tab === "post"} onClick={() => setTab("post")} icon={<Sparkles className="h-4 w-4" />}>Generate post</TabButton>
+            <TabButton active={tab === "longform"} onClick={() => setTab("longform")} icon={<FileText className="h-4 w-4" />}>Long-form</TabButton>
+            <TabButton active={tab === "reply"} onClick={() => setTab("reply")} icon={<MessageSquare className="h-4 w-4" />}>Reply / DM</TabButton>
+            <TabButton active={tab === "hashtags"} onClick={() => setTab("hashtags")} icon={<Hash className="h-4 w-4" />}>Hashtags</TabButton>
+            <TabButton active={tab === "ideas"} onClick={() => setTab("ideas")} icon={<Lightbulb className="h-4 w-4" />}>Ideas</TabButton>
+            <TabButton active={tab === "repurpose"} onClick={() => setTab("repurpose")} icon={<Repeat className="h-4 w-4" />}>Repurpose</TabButton>
+            <TabButton active={tab === "bio"} onClick={() => setTab("bio")} icon={<User className="h-4 w-4" />}>Bio</TabButton>
+            <TabButton active={tab === "growth"} onClick={() => setTab("growth")} icon={<TrendingUp className="h-4 w-4" />}>Growth</TabButton>
+            <TabButton active={tab === "analytics"} onClick={() => setTab("analytics")} icon={<BarChart3 className="h-4 w-4" />}>Analytics</TabButton>
+            <TabButton active={tab === "calendar"} onClick={() => setTab("calendar")} icon={<Calendar className="h-4 w-4" />}>Calendar</TabButton>
+          </nav>
+
+          <section className="mt-6">
+            {tab === "post" && <PostTab />}
+            {tab === "longform" && <LongformTab />}
+            {tab === "reply" && <ReplyTab />}
+            {tab === "hashtags" && <HashtagsTab />}
+            {tab === "ideas" && <IdeasTab />}
+            {tab === "repurpose" && <RepurposeTab />}
+            {tab === "bio" && <BioTab />}
+            {tab === "growth" && <GrowthTab />}
+            {tab === "analytics" && <AnalyticsTab />}
+            {tab === "calendar" && <CalendarTab />}
+          </section>
+        </main>
+      </div>
+    </ModeCtx.Provider>
+
   );
 }
 
