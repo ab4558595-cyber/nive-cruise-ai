@@ -987,3 +987,233 @@ function BioTab() {
     </div>
   );
 }
+
+/* ----- Tab: long-form writer ----- */
+const LONGFORM_OPTS: { id: LongformFormat; label: string }[] = [
+  { id: "twitter_thread", label: "X / Twitter thread" },
+  { id: "instagram_carousel", label: "Instagram carousel" },
+  { id: "linkedin_article", label: "LinkedIn article" },
+  { id: "blog_post", label: "Blog post" },
+  { id: "youtube_script", label: "YouTube script" },
+  { id: "newsletter", label: "Newsletter" },
+];
+
+function LongformTab() {
+  const run = useServerFn(writeLongform);
+  const mode = useMode();
+  const [topic, setTopic] = useState("");
+  const [format, setFormat] = useState<LongformFormat>("twitter_thread");
+  const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("friendly");
+  const [audience, setAudience] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<LongformResult | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { topic, format, tone, audience, mode } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  const fullText = result
+    ? `${result.hook}\n\n${result.sections.map((s) => `${s.heading}\n${s.body}`).join("\n\n")}\n\n${result.outro}\n\n${result.hashtags.map((h) => "#" + h).join(" ")}`
+    : "";
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <Field label="Topic / angle">
+              <textarea required className={inputCls + " min-h-[80px]"}
+                placeholder="e.g. 5 lessons from my first year freelancing"
+                value={topic} onChange={(e) => setTopic(e.target.value)} />
+            </Field>
+          </div>
+          <Field label="Format">
+            <select className={inputCls} value={format} onChange={(e) => setFormat(e.target.value as LongformFormat)}>
+              {LONGFORM_OPTS.map((o) => (<option key={o.id} value={o.id}>{o.label}</option>))}
+            </select>
+          </Field>
+          <Field label="Tone">
+            <select className={inputCls} value={tone} onChange={(e) => setTone(e.target.value as any)}>
+              {TONES.map((t) => (<option key={t.id} value={t.id}>{t.label}</option>))}
+            </select>
+          </Field>
+          <div className="md:col-span-2">
+            <Field label="Audience (optional)">
+              <input className={inputCls} value={audience} onChange={(e) => setAudience(e.target.value)}
+                placeholder={mode === "creator" ? "e.g. aspiring writers" : "e.g. small-business owners"} />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
+            <PrimaryBtn loading={loading}>Write {LONGFORM_OPTS.find((o) => o.id === format)?.label}</PrimaryBtn>
+            {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
+          </div>
+        </form>
+      </Card>
+
+      {result && (
+        <Card>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-bold">{result.title}</h3>
+              <p className="mt-1 text-sm italic text-[#425466]">{result.hook}</p>
+            </div>
+            <CopyBtn text={fullText} />
+          </div>
+          <ol className="space-y-3">
+            {result.sections.map((s, i) => (
+              <li key={i} className="rounded-lg bg-[#f6f9fc] p-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase text-[#635bff]">#{i + 1} · {s.heading}</span>
+                  <CopyBtn text={`${s.heading}\n${s.body}`} />
+                </div>
+                <p className="whitespace-pre-wrap text-sm">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          {result.outro && (
+            <div className="mt-3 rounded-lg border border-[#635bff]/20 bg-[#635bff]/5 p-3 text-sm">
+              <span className="mb-1 block text-xs font-semibold uppercase text-[#635bff]">Outro / CTA</span>
+              {result.outro}
+            </div>
+          )}
+          {result.hashtags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {result.hashtags.map((h) => (
+                <span key={h} className="rounded-full bg-[#635bff]/10 px-2 py-0.5 text-xs text-[#635bff]">#{h}</span>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+    </div>
+  );
+}
+
+/* ----- Tab: growth playbook ----- */
+function GrowthTab() {
+  const run = useServerFn(growthPlaybook);
+  const mode = useMode();
+  const [niche, setNiche] = useState("");
+  const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
+  const [followers, setFollowers] = useState(500);
+  const [goal, setGoal] = useState("grow audience");
+  const [hoursPerWeek, setHours] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<GrowthPlaybook | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { niche, platform, followers, goal, hoursPerWeek, mode } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <Field label="Niche / what you post about">
+              <input required className={inputCls} value={niche} onChange={(e) => setNiche(e.target.value)}
+                placeholder={mode === "creator" ? "e.g. solo travel in India" : "e.g. B2B SaaS for HR teams"} />
+            </Field>
+          </div>
+          <Field label="Platform">
+            <select className={inputCls} value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
+              {PLATFORMS.map((p) => (<option key={p.id} value={p.id}>{p.label}</option>))}
+            </select>
+          </Field>
+          <Field label="Current followers">
+            <input type="number" min={0} className={inputCls} value={followers}
+              onChange={(e) => setFollowers(Math.max(0, Number(e.target.value) || 0))} />
+          </Field>
+          <Field label="Primary goal">
+            <input className={inputCls} value={goal} onChange={(e) => setGoal(e.target.value)} />
+          </Field>
+          <Field label="Hours per week you can commit">
+            <input type="number" min={1} max={80} className={inputCls} value={hoursPerWeek}
+              onChange={(e) => setHours(Math.min(80, Math.max(1, Number(e.target.value) || 1)))} />
+          </Field>
+          <div className="md:col-span-2">
+            <PrimaryBtn loading={loading}>Build my 4-week playbook</PrimaryBtn>
+            {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
+          </div>
+        </form>
+      </Card>
+
+      {result && (
+        <div className="space-y-4">
+          <Card>
+            <span className="text-xs font-semibold uppercase text-[#635bff]">North star</span>
+            <p className="mt-1 text-base font-medium">{result.northStar}</p>
+            {result.pillars.length > 0 && (
+              <>
+                <span className="mt-4 block text-xs font-semibold uppercase text-[#635bff]">Content pillars</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {result.pillars.map((p) => (
+                    <span key={p} className="rounded-full bg-[#0a2540] px-3 py-1 text-xs text-white">{p}</span>
+                  ))}
+                </div>
+              </>
+            )}
+          </Card>
+
+          {result.weekly.length > 0 && (
+            <div className="grid gap-3 md:grid-cols-2">
+              {result.weekly.map((w) => (
+                <Card key={w.week}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="rounded-full bg-[#635bff] px-2.5 py-0.5 text-xs font-bold text-white">Week {w.week}</span>
+                    <span className="text-sm font-semibold">{w.focus}</span>
+                  </div>
+                  <ul className="space-y-1.5 text-sm">
+                    {w.actions.map((a, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#635bff]" />
+                        <span className="text-[#425466]">{a}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {result.collabs.length > 0 && (
+              <Card>
+                <h4 className="mb-2 text-sm font-semibold">Collab ideas</h4>
+                <ul className="space-y-1.5 text-sm text-[#425466]">
+                  {result.collabs.map((c, i) => (<li key={i}>• {c}</li>))}
+                </ul>
+              </Card>
+            )}
+            {result.monetization.length > 0 && (
+              <Card>
+                <h4 className="mb-2 text-sm font-semibold">Monetization</h4>
+                <ul className="space-y-1.5 text-sm text-[#425466]">
+                  {result.monetization.map((m, i) => (<li key={i}>• {m}</li>))}
+                </ul>
+              </Card>
+            )}
+            {result.kpis.length > 0 && (
+              <Card>
+                <h4 className="mb-2 text-sm font-semibold">KPIs to track</h4>
+                <ul className="space-y-1.5 text-sm text-[#425466]">
+                  {result.kpis.map((k, i) => (<li key={i}>• {k}</li>))}
+                </ul>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
