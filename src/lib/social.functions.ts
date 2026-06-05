@@ -23,18 +23,16 @@ const TONES = [
 ] as const;
 
 async function callLLM(system: string, user: string, json = true) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("OpenRouter API key not configured");
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://nive-ai.co.in",
-      "X-Title": "Nive AI Social Manager",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3-flash-preview",
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -44,6 +42,12 @@ async function callLLM(system: string, user: string, json = true) {
   });
   if (!res.ok) {
     const txt = await res.text().catch(() => "");
+    if (res.status === 402) {
+      throw new Error("AI credits exhausted. Please add funds to your Lovable AI workspace.");
+    }
+    if (res.status === 429) {
+      throw new Error("AI rate limit exceeded. Please try again in a moment.");
+    }
     throw new Error(`AI error ${res.status}: ${txt.slice(0, 200)}`);
   }
   const data = (await res.json()) as {
