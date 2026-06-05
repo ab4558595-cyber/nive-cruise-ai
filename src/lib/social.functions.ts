@@ -85,23 +85,25 @@ export const generateSocialPost = createServerFn({ method: "POST" })
         platform: z.enum(PLATFORMS),
         tone: z.enum(TONES),
         audience: z.string().trim().max(200).optional().default(""),
+        mode: z.enum(["business", "creator"]).default("business"),
       })
       .parse(input),
   )
   .handler(async ({ data }): Promise<SocialPost> => {
-    const sys = `You are a senior social media manager. Output strictly valid JSON:
+    const sys = `You are a senior social media manager for ${data.mode === "creator" ? "a personal blogger / creator" : "a brand / business"}. Output strictly valid JSON:
 { "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string, "imagePrompt": string, "cta": string }
-- caption: tuned to ${data.platform} length and style
+- caption: tuned to ${data.platform} length and style, ${data.mode === "creator" ? "personal voice, storytelling, first-person" : "brand voice, value-led"}
 - hashtags: 8 relevant hashtags WITHOUT the leading #
 - variants: 3 alt captions
 - bestTime: a short suggested posting time (e.g. "Tue 7pm IST")
 - imagePrompt: a vivid 1-sentence prompt for an AI image to pair with the post
-- cta: one strong call-to-action line
+- cta: ${data.mode === "creator" ? "an engaging CTA (comment, save, share, follow)" : "a strong business CTA (signup, demo, buy)"}
 No markdown, JSON only.`;
     const usr = `Topic: ${data.topic}
 Platform: ${data.platform}
 Tone: ${data.tone}
-Audience: ${data.audience || "general"}`;
+Audience: ${data.audience || (data.mode === "creator" ? "my followers" : "ideal customers")}`;
+
     const parsed = (await callLLM(sys, usr)) as any;
     return {
       platform: data.platform,
@@ -419,5 +421,132 @@ Original content:
             .filter(Boolean)
             .slice(0, 8)
         : [],
+    };
+  });
+
+/* ---------------- 9. Long-form writer (threads, carousels, articles, blog) ---------------- */
+
+const LONGFORM_FORMATS = ["twitter_thread", "instagram_carousel", "linkedin_article", "blog_post", "youtube_script", "newsletter"] as const;
+export type LongformFormat = (typeof LONGFORM_FORMATS)[number];
+export type LongformResult = {
+  title: string;
+  hook: string;
+  sections: Array<{ heading: string; body: string }>;
+  outro: string;
+  hashtags: string[];
+};
+
+export const writeLongform = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      topic: z.string().trim().min(2).max(600),
+      format: z.enum(LONGFORM_FORMATS),
+      tone: z.enum(TONES),
+      mode: z.enum(["business", "creator"]).default("business"),
+      audience: z.string().trim().max(200).optional().default(""),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<LongformResult> => {
+    const counts: Record<LongformFormat, string> = {
+      twitter_thread: "7-10 tweets, each <=270 chars",
+      instagram_carousel: "8 slides, each slide <=180 chars, slide 1 is the hook",
+      linkedin_article: "5-7 sections of 2-3 short paragraphs each, professional",
+      blog_post: "6 sections with H2 headings, conversational, 120-180 words per section",
+      youtube_script: "Intro hook + 5 talking-point sections + outro CTA, spoken-word style",
+      newsletter: "Opening, 4 short value sections, sign-off with CTA",
+    };
+    const sys = `You are a top-tier ${data.mode === "creator" ? "creator/blogger" : "brand"} writer.
+Produce ${data.format} content. Structure: ${counts[data.format]}.
+Output strictly valid JSON:
+{ "title": string, "hook": string, "sections": [ { "heading": string, "body": string } ], "outro": string, "hashtags": string[6] }
+- hook: scroll-stopping opener
+- sections: one per tweet/slide/section depending on format
+- outro: clear CTA matching ${data.mode === "creator" ? "audience growth, comments, follows, or newsletter signup" : "lead gen, signup, or purchase"}
+- hashtags WITHOUT leading #
+JSON only.`;
+    const usr = `Topic: ${data.topic}
+Tone: ${data.tone}
+Audience: ${data.audience || (data.mode === "creator" ? "my followers" : "ideal customers")}
+Mode: ${data.mode}`;
+    const p = (await callLLM(sys, usr)) as any;
+    return {
+      title: String(p.title ?? "").slice(0, 200),
+      hook: String(p.hook ?? "").slice(0, 400),
+      sections: Array.isArray(p.sections)
+        ? p.sections.slice(0, 20).map((s: any) => ({
+            heading: String(s.heading ?? "").slice(0, 200),
+            body: String(s.body ?? "").slice(0, 2000),
+          }))
+        : [],
+      outro: String(p.outro ?? "").slice(0, 600),
+      hashtags: Array.isArray(p.hashtags)
+        ? p.hashtags.slice(0, 10).map((h: any) => String(h).replace(/^#/, "").slice(0, 40))
+        : [],
+    };
+  });
+
+/* ---------------- 10. Growth playbook ---------------- */
+
+export type GrowthPlaybook = {
+  northStar: string;
+  pillars: string[];
+  weekly: Array<{ week: number; focus: string; actions: string[] }>;
+  collabs: string[];
+  monetization: string[];
+  kpis: string[];
+};
+
+export const growthPlaybook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      niche: z.string().trim().min(2).max(300),
+      platform: z.enum(PLATFORMS),
+      followers: z.number().int().min(0).max(100_000_000),
+      mode: z.enum(["business", "creator"]).default("creator"),
+      goal: z.string().trim().max(200).optional().default("grow audience"),
+      hoursPerWeek: z.number().int().min(1).max(80).default(5),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<GrowthPlaybook> => {
+    const sys = `You are a social-growth strategist for ${data.mode === "creator" ? "personal bloggers and creators" : "businesses and brands"}.
+Build a realistic 4-week growth playbook. Output strictly valid JSON:
+{
+  "northStar": string,
+  "pillars": string[4],
+  "weekly": [ { "week": number, "focus": string, "actions": string[5] } ],
+  "collabs": string[4],
+  "monetization": string[5],
+  "kpis": string[4]
+}
+- pillars: 4 recurring content pillars
+- weekly: exactly 4 weeks of focus + concrete actions, sized to ${data.hoursPerWeek}h/week
+- collabs: 4 collab/partnership ideas appropriate for ${data.followers} followers
+- monetization: 5 monetization paths fit for current size (${data.mode === "creator" ? "sponsorships, products, paid newsletter, affiliate, courses" : "lead gen, demos, content upgrades, partnerships"})
+- kpis: 4 metrics to track
+JSON only.`;
+    const usr = `Niche: ${data.niche}
+Platform: ${data.platform}
+Current followers: ${data.followers}
+Goal: ${data.goal}
+Mode: ${data.mode}
+Hours per week: ${data.hoursPerWeek}`;
+    const p = (await callLLM(sys, usr)) as any;
+    const arr = (v: any, n: number) =>
+      Array.isArray(v) ? v.slice(0, n).map((x: any) => String(x).slice(0, 400)) : [];
+    return {
+      northStar: String(p.northStar ?? "").slice(0, 400),
+      pillars: arr(p.pillars, 6),
+      weekly: Array.isArray(p.weekly)
+        ? p.weekly.slice(0, 6).map((w: any, i: number) => ({
+            week: Number(w.week) || i + 1,
+            focus: String(w.focus ?? "").slice(0, 300),
+            actions: arr(w.actions, 8),
+          }))
+        : [],
+      collabs: arr(p.collabs, 6),
+      monetization: arr(p.monetization, 8),
+      kpis: arr(p.kpis, 6),
     };
   });
