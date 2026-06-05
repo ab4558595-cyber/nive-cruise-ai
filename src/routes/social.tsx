@@ -320,6 +320,24 @@ function PostTab() {
                 </ul>
               </div>
             )}
+            {result.cta && (
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Call to action</h3>
+                  <CopyBtn text={result.cta} />
+                </div>
+                <p className="rounded-lg bg-[#f6f9fc] p-2 text-sm">{result.cta}</p>
+              </div>
+            )}
+            {result.imagePrompt && (
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Image prompt</h3>
+                  <CopyBtn text={result.imagePrompt} />
+                </div>
+                <p className="rounded-lg bg-[#f6f9fc] p-2 text-sm italic text-[#425466]">{result.imagePrompt}</p>
+              </div>
+            )}
             {result.bestTime && (
               <p className="text-xs text-[#425466]">Suggested time: <span className="font-medium text-[#0a2540]">{result.bestTime}</span></p>
             )}
