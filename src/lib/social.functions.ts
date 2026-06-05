@@ -71,7 +71,10 @@ export type SocialPost = {
   hashtags: string[];
   variants: string[];
   bestTime: string;
+  imagePrompt: string;
+  cta: string;
 };
+
 
 export const generateSocialPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
