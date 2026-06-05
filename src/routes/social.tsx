@@ -12,6 +12,10 @@ import {
   Check,
   Download,
   Share2,
+  Hash,
+  User,
+  Lightbulb,
+  Repeat,
 } from "lucide-react";
 
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -20,11 +24,20 @@ import {
   generateSocialReply,
   analyzeSocialMetrics,
   generateContentCalendar,
+  researchHashtags,
+  generateBio,
+  generateIdeas,
+  repurposePost,
   type SocialPost,
   type ReplyResult,
   type AnalyticsInsights,
   type CalendarItem,
+  type HashtagGroup,
+  type BioResult,
+  type IdeasResult,
+  type RepurposeResult,
 } from "@/lib/social.functions";
+
 
 export const Route = createFileRoute("/social")({
   head: () => ({
