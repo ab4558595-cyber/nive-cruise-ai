@@ -90,11 +90,13 @@ export const generateSocialPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<SocialPost> => {
     const sys = `You are a senior social media manager. Output strictly valid JSON:
-{ "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string }
+{ "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string, "imagePrompt": string, "cta": string }
 - caption: tuned to ${data.platform} length and style
 - hashtags: 8 relevant hashtags WITHOUT the leading #
 - variants: 3 alt captions
 - bestTime: a short suggested posting time (e.g. "Tue 7pm IST")
+- imagePrompt: a vivid 1-sentence prompt for an AI image to pair with the post
+- cta: one strong call-to-action line
 No markdown, JSON only.`;
     const usr = `Topic: ${data.topic}
 Platform: ${data.platform}
@@ -111,8 +113,11 @@ Audience: ${data.audience || "general"}`;
         ? parsed.variants.slice(0, 5).map((v: any) => String(v).slice(0, 800))
         : [],
       bestTime: String(parsed.bestTime ?? "").slice(0, 80),
+      imagePrompt: String(parsed.imagePrompt ?? "").slice(0, 400),
+      cta: String(parsed.cta ?? "").slice(0, 200),
     };
   });
+
 
 /* ---------------- 2. Reply / DM assistant ---------------- */
 
