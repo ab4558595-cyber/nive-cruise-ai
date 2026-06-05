@@ -83,7 +83,7 @@ const TONES = [
   { id: "minimal", label: "Minimal" },
 ] as const;
 
-type Tab = "post" | "reply" | "analytics" | "calendar";
+type Tab = "post" | "reply" | "analytics" | "calendar" | "hashtags" | "bio" | "ideas" | "repurpose";
 
 function SocialPage() {
   const [tab, setTab] = useState<Tab>("post");
@@ -106,28 +106,28 @@ function SocialPage() {
           Nive, your AI social media manager
         </h1>
         <p className="mt-2 max-w-2xl text-[#425466]">
-          Plan content, write captions, reply in your voice, and turn raw metrics into a plan —
-          across Instagram, X, LinkedIn, Facebook, TikTok and YouTube.
+          Plan content, write captions, reply in your voice, research hashtags, brainstorm ideas, repurpose
+          across platforms, and turn raw metrics into a plan — Instagram, X, LinkedIn, Facebook, TikTok and YouTube.
         </p>
 
         <nav className="mt-6 flex flex-wrap gap-2">
-          <TabButton active={tab === "post"} onClick={() => setTab("post")} icon={<Sparkles className="h-4 w-4" />}>
-            Generate post
-          </TabButton>
-          <TabButton active={tab === "reply"} onClick={() => setTab("reply")} icon={<MessageSquare className="h-4 w-4" />}>
-            Reply / DM
-          </TabButton>
-          <TabButton active={tab === "analytics"} onClick={() => setTab("analytics")} icon={<BarChart3 className="h-4 w-4" />}>
-            Analytics
-          </TabButton>
-          <TabButton active={tab === "calendar"} onClick={() => setTab("calendar")} icon={<Calendar className="h-4 w-4" />}>
-            Calendar
-          </TabButton>
+          <TabButton active={tab === "post"} onClick={() => setTab("post")} icon={<Sparkles className="h-4 w-4" />}>Generate post</TabButton>
+          <TabButton active={tab === "reply"} onClick={() => setTab("reply")} icon={<MessageSquare className="h-4 w-4" />}>Reply / DM</TabButton>
+          <TabButton active={tab === "hashtags"} onClick={() => setTab("hashtags")} icon={<Hash className="h-4 w-4" />}>Hashtags</TabButton>
+          <TabButton active={tab === "ideas"} onClick={() => setTab("ideas")} icon={<Lightbulb className="h-4 w-4" />}>Ideas</TabButton>
+          <TabButton active={tab === "repurpose"} onClick={() => setTab("repurpose")} icon={<Repeat className="h-4 w-4" />}>Repurpose</TabButton>
+          <TabButton active={tab === "bio"} onClick={() => setTab("bio")} icon={<User className="h-4 w-4" />}>Bio</TabButton>
+          <TabButton active={tab === "analytics"} onClick={() => setTab("analytics")} icon={<BarChart3 className="h-4 w-4" />}>Analytics</TabButton>
+          <TabButton active={tab === "calendar"} onClick={() => setTab("calendar")} icon={<Calendar className="h-4 w-4" />}>Calendar</TabButton>
         </nav>
 
         <section className="mt-6">
           {tab === "post" && <PostTab />}
           {tab === "reply" && <ReplyTab />}
+          {tab === "hashtags" && <HashtagsTab />}
+          {tab === "ideas" && <IdeasTab />}
+          {tab === "repurpose" && <RepurposeTab />}
+          {tab === "bio" && <BioTab />}
           {tab === "analytics" && <AnalyticsTab />}
           {tab === "calendar" && <CalendarTab />}
         </section>
@@ -135,6 +135,7 @@ function SocialPage() {
     </div>
   );
 }
+
 
 function TabButton({
   active,
