@@ -16,6 +16,10 @@ import {
   User,
   Lightbulb,
   Repeat,
+  Briefcase,
+  Heart,
+  FileText,
+  TrendingUp,
 } from "lucide-react";
 
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -28,6 +32,8 @@ import {
   generateBio,
   generateIdeas,
   repurposePost,
+  writeLongform,
+  growthPlaybook,
   type SocialPost,
   type ReplyResult,
   type AnalyticsInsights,
@@ -36,7 +42,11 @@ import {
   type BioResult,
   type IdeasResult,
   type RepurposeResult,
+  type LongformResult,
+  type LongformFormat,
+  type GrowthPlaybook,
 } from "@/lib/social.functions";
+
 
 
 export const Route = createFileRoute("/social")({
