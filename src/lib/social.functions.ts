@@ -71,7 +71,10 @@ export type SocialPost = {
   hashtags: string[];
   variants: string[];
   bestTime: string;
+  imagePrompt: string;
+  cta: string;
 };
+
 
 export const generateSocialPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -87,11 +90,13 @@ export const generateSocialPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<SocialPost> => {
     const sys = `You are a senior social media manager. Output strictly valid JSON:
-{ "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string }
+{ "caption": string, "hashtags": string[8], "variants": string[3], "bestTime": string, "imagePrompt": string, "cta": string }
 - caption: tuned to ${data.platform} length and style
 - hashtags: 8 relevant hashtags WITHOUT the leading #
 - variants: 3 alt captions
 - bestTime: a short suggested posting time (e.g. "Tue 7pm IST")
+- imagePrompt: a vivid 1-sentence prompt for an AI image to pair with the post
+- cta: one strong call-to-action line
 No markdown, JSON only.`;
     const usr = `Topic: ${data.topic}
 Platform: ${data.platform}
@@ -108,8 +113,11 @@ Audience: ${data.audience || "general"}`;
         ? parsed.variants.slice(0, 5).map((v: any) => String(v).slice(0, 800))
         : [],
       bestTime: String(parsed.bestTime ?? "").slice(0, 80),
+      imagePrompt: String(parsed.imagePrompt ?? "").slice(0, 400),
+      cta: String(parsed.cta ?? "").slice(0, 200),
     };
   });
+
 
 /* ---------------- 2. Reply / DM assistant ---------------- */
 
@@ -250,4 +258,166 @@ Days: ${data.days}`;
         })
       : [];
     return { items };
+  });
+
+/* ---------------- 5. Hashtag research ---------------- */
+
+export type HashtagGroup = {
+  niche: string[];
+  trending: string[];
+  broad: string[];
+  branded: string[];
+};
+
+export const researchHashtags = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      topic: z.string().trim().min(2).max(300),
+      platform: z.enum(PLATFORMS),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<HashtagGroup> => {
+    const sys = `You are a hashtag researcher. Output strictly valid JSON:
+{ "niche": string[10], "trending": string[8], "broad": string[6], "branded": string[4] }
+- All hashtags WITHOUT leading #
+- niche: very specific to the topic
+- trending: currently popular and relevant
+- broad: high-volume, wide reach
+- branded: suggested brandable tags
+JSON only.`;
+    const usr = `Topic: ${data.topic}\nPlatform: ${data.platform}`;
+    const p = (await callLLM(sys, usr)) as any;
+    const clean = (v: any, n: number) =>
+      Array.isArray(v) ? v.slice(0, n).map((h: any) => String(h).replace(/^#/, "").slice(0, 40)) : [];
+    return {
+      niche: clean(p.niche, 15),
+      trending: clean(p.trending, 12),
+      broad: clean(p.broad, 10),
+      branded: clean(p.branded, 8),
+    };
+  });
+
+/* ---------------- 6. Profile bio generator ---------------- */
+
+export type BioResult = { bios: string[] };
+
+export const generateBio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      name: z.string().trim().min(1).max(120),
+      platform: z.enum(PLATFORMS),
+      about: z.string().trim().min(2).max(600),
+      keywords: z.string().trim().max(300).optional().default(""),
+      tone: z.enum(TONES),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<BioResult> => {
+    const limit =
+      data.platform === "twitter" ? 160 :
+      data.platform === "instagram" ? 150 :
+      data.platform === "tiktok" ? 80 :
+      data.platform === "linkedin" ? 220 : 200;
+    const sys = `You write punchy social media profile bios. Output strictly valid JSON:
+{ "bios": string[5] }
+- Each bio <= ${limit} characters, tuned to ${data.platform}
+- Include emoji bullets if platform supports them (not for LinkedIn)
+- Include a clear value prop + call-to-action
+JSON only.`;
+    const usr = `Name/Brand: ${data.name}
+About: ${data.about}
+Keywords: ${data.keywords || "n/a"}
+Tone: ${data.tone}`;
+    const p = (await callLLM(sys, usr)) as any;
+    return {
+      bios: Array.isArray(p.bios) ? p.bios.slice(0, 8).map((b: any) => String(b).slice(0, 400)) : [],
+    };
+  });
+
+/* ---------------- 7. Content ideas / hooks ---------------- */
+
+export type IdeasResult = {
+  ideas: Array<{ format: string; hook: string; angle: string }>;
+};
+
+export const generateIdeas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      niche: z.string().trim().min(2).max(300),
+      platform: z.enum(PLATFORMS),
+      audience: z.string().trim().max(200).optional().default(""),
+      goal: z.string().trim().max(200).optional().default("grow reach"),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<IdeasResult> => {
+    const sys = `You are a viral content strategist. Output strictly valid JSON:
+{ "ideas": [ { "format": string, "hook": string, "angle": string } ] }
+- Return 10 distinct content ideas tuned for ${data.platform}
+- format: reel, carousel, thread, story, short, photo, livestream, etc.
+- hook: scroll-stopping first line <= 90 chars
+- angle: 1-sentence explanation of the angle/payoff
+JSON only.`;
+    const usr = `Niche: ${data.niche}\nAudience: ${data.audience || "general"}\nGoal: ${data.goal}`;
+    const p = (await callLLM(sys, usr)) as any;
+    return {
+      ideas: Array.isArray(p.ideas)
+        ? p.ideas.slice(0, 15).map((i: any) => ({
+            format: String(i.format ?? "post").slice(0, 40),
+            hook: String(i.hook ?? "").slice(0, 200),
+            angle: String(i.angle ?? "").slice(0, 400),
+          }))
+        : [],
+    };
+  });
+
+/* ---------------- 8. Cross-platform repurpose ---------------- */
+
+export type RepurposeResult = {
+  outputs: Array<{ platform: Platform; content: string; notes: string }>;
+};
+
+export const repurposePost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      source: z.string().trim().min(5).max(4000),
+      sourcePlatform: z.enum(PLATFORMS),
+      targets: z.array(z.enum(PLATFORMS)).min(1).max(6),
+      tone: z.enum(TONES),
+    }).parse(input),
+  )
+  .handler(async ({ data }): Promise<RepurposeResult> => {
+    const sys = `You repurpose social content across platforms while preserving the core message. Output strictly valid JSON:
+{ "outputs": [ { "platform": string, "content": string, "notes": string } ] }
+- One output per target platform
+- Adapt length, formatting, hashtags, emoji density and CTA to each platform's norms
+- notes: 1 short sentence on format/structure choice (e.g. "split into 4-tweet thread")
+JSON only.`;
+    const usr = `Source platform: ${data.sourcePlatform}
+Targets: ${data.targets.join(", ")}
+Tone: ${data.tone}
+Original content:
+"""${data.source}"""`;
+    const p = (await callLLM(sys, usr)) as any;
+    const valid = (s: any): Platform | null =>
+      (PLATFORMS as readonly string[]).includes(String(s)) ? (s as Platform) : null;
+    return {
+      outputs: Array.isArray(p.outputs)
+        ? p.outputs
+            .map((o: any) => {
+              const pl = valid(o.platform);
+              return pl
+                ? {
+                    platform: pl,
+                    content: String(o.content ?? "").slice(0, 4000),
+                    notes: String(o.notes ?? "").slice(0, 300),
+                  }
+                : null;
+            })
+            .filter(Boolean)
+            .slice(0, 8)
+        : [],
+    };
   });
