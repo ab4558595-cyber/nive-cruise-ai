@@ -645,3 +645,294 @@ function CalendarTab() {
     </div>
   );
 }
+
+/* ----- Tab: hashtags ----- */
+function HashtagsTab() {
+  const run = useServerFn(researchHashtags);
+  const [topic, setTopic] = useState("");
+  const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<HashtagGroup | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { topic, platform } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  const all = result ? [...result.niche, ...result.trending, ...result.broad, ...result.branded] : [];
+
+  return (
+    <div className="grid gap-6 md:grid-cols-[1fr_1.1fr]">
+      <Card>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <Field label="Topic / niche">
+            <input required className={inputCls} placeholder="e.g. vegan baking, indie SaaS"
+              value={topic} onChange={(e) => setTopic(e.target.value)} />
+          </Field>
+          <Field label="Platform">
+            <select className={inputCls} value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
+              {PLATFORMS.map((p) => (<option key={p.id} value={p.id}>{p.label}</option>))}
+            </select>
+          </Field>
+          <PrimaryBtn loading={loading}>Research hashtags</PrimaryBtn>
+          {err && <p className="text-sm text-red-600">{err}</p>}
+        </form>
+      </Card>
+
+      <Card>
+        {!result ? (
+          <p className="text-sm text-[#425466]">Niche, trending, broad and branded hashtag groups will appear here.</p>
+        ) : (
+          <div className="space-y-4">
+            {([
+              ["Niche", result.niche],
+              ["Trending", result.trending],
+              ["Broad reach", result.broad],
+              ["Branded", result.branded],
+            ] as const).map(([label, list]) => (
+              <div key={label}>
+                <div className="mb-1 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">{label}</h3>
+                  <CopyBtn text={list.map((h) => "#" + h).join(" ")} />
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {list.map((h) => (
+                    <span key={h} className="rounded-full bg-[#635bff]/10 px-2 py-0.5 text-xs text-[#635bff]">#{h}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="border-t border-[#e5e7eb] pt-3">
+              <CopyBtn text={all.map((h) => "#" + h).join(" ")} />
+              <span className="ml-2 text-xs text-[#425466]">Copy all {all.length} hashtags</span>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+/* ----- Tab: ideas ----- */
+function IdeasTab() {
+  const run = useServerFn(generateIdeas);
+  const [niche, setNiche] = useState("");
+  const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
+  const [audience, setAudience] = useState("");
+  const [goal, setGoal] = useState("grow reach");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<IdeasResult | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { niche, platform, audience, goal } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+          <Field label="Niche / topic">
+            <input required className={inputCls} value={niche} onChange={(e) => setNiche(e.target.value)} />
+          </Field>
+          <Field label="Platform">
+            <select className={inputCls} value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
+              {PLATFORMS.map((p) => (<option key={p.id} value={p.id}>{p.label}</option>))}
+            </select>
+          </Field>
+          <Field label="Audience (optional)">
+            <input className={inputCls} value={audience} onChange={(e) => setAudience(e.target.value)} />
+          </Field>
+          <Field label="Goal">
+            <input className={inputCls} value={goal} onChange={(e) => setGoal(e.target.value)} />
+          </Field>
+          <div className="md:col-span-2">
+            <PrimaryBtn loading={loading}>Brainstorm 10 ideas</PrimaryBtn>
+            {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
+          </div>
+        </form>
+      </Card>
+
+      {result && result.ideas.length > 0 && (
+        <div className="grid gap-3 md:grid-cols-2">
+          {result.ideas.map((it, i) => (
+            <Card key={i}>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="rounded-full bg-[#635bff]/10 px-2 py-0.5 text-xs font-medium uppercase text-[#635bff]">{it.format}</span>
+                <CopyBtn text={`${it.hook}\n\n${it.angle}`} />
+              </div>
+              <p className="font-semibold">{it.hook}</p>
+              <p className="mt-1 text-sm text-[#425466]">{it.angle}</p>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ----- Tab: repurpose ----- */
+function RepurposeTab() {
+  const run = useServerFn(repurposePost);
+  const [source, setSource] = useState("");
+  const [sourcePlatform, setSourcePlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
+  const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("friendly");
+  const [targets, setTargets] = useState<string[]>(["twitter", "linkedin"]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<RepurposeResult | null>(null);
+
+  function toggle(id: string) {
+    setTargets((cur) => (cur.includes(id) ? cur.filter((p) => p !== id) : [...cur, id]));
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (targets.length === 0) { setErr("Pick at least one target platform"); return; }
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { source, sourcePlatform, targets: targets as any, tone } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <Field label="Original post / content">
+            <textarea required className={inputCls + " min-h-[140px]"}
+              placeholder="Paste the original post, caption or thread to repurpose…"
+              value={source} onChange={(e) => setSource(e.target.value)} />
+          </Field>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="Source platform">
+              <select className={inputCls} value={sourcePlatform} onChange={(e) => setSourcePlatform(e.target.value as any)}>
+                {PLATFORMS.map((p) => (<option key={p.id} value={p.id}>{p.label}</option>))}
+              </select>
+            </Field>
+            <Field label="Tone">
+              <select className={inputCls} value={tone} onChange={(e) => setTone(e.target.value as any)}>
+                {TONES.map((t) => (<option key={t.id} value={t.id}>{t.label}</option>))}
+              </select>
+            </Field>
+          </div>
+          <div>
+            <span className="mb-2 block text-sm font-medium">Target platforms</span>
+            <div className="flex flex-wrap gap-2">
+              {PLATFORMS.filter((p) => p.id !== sourcePlatform).map((p) => {
+                const on = targets.includes(p.id);
+                return (
+                  <button key={p.id} type="button" onClick={() => toggle(p.id)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      on ? "border-[#635bff] bg-[#635bff] text-white"
+                         : "border-[#e5e7eb] bg-white text-[#0a2540] hover:border-[#635bff]/40"
+                    }`}>
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <PrimaryBtn loading={loading}>Repurpose</PrimaryBtn>
+          {err && <p className="text-sm text-red-600">{err}</p>}
+        </form>
+      </Card>
+
+      {result && result.outputs.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {result.outputs.map((o, i) => (
+            <Card key={i}>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="rounded-full bg-[#635bff]/10 px-2 py-0.5 text-xs font-semibold uppercase text-[#635bff]">{o.platform}</span>
+                <CopyBtn text={o.content} />
+              </div>
+              <p className="whitespace-pre-wrap text-sm">{o.content}</p>
+              {o.notes && <p className="mt-2 text-xs italic text-[#425466]">{o.notes}</p>}
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ----- Tab: bio ----- */
+function BioTab() {
+  const run = useServerFn(generateBio);
+  const [name, setName] = useState("");
+  const [about, setAbout] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("instagram");
+  const [tone, setTone] = useState<(typeof TONES)[number]["id"]>("friendly");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<BioResult | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setErr(null);
+    try { setResult(await run({ data: { name, platform, about, keywords, tone } })); }
+    catch (e: any) { setErr(e?.message ?? "Failed"); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="grid gap-6 md:grid-cols-[1fr_1.1fr]">
+      <Card>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <Field label="Name / brand">
+            <input required className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+          <Field label="About you / what you do">
+            <textarea required className={inputCls + " min-h-[100px]"}
+              value={about} onChange={(e) => setAbout(e.target.value)} />
+          </Field>
+          <Field label="Keywords (optional)">
+            <input className={inputCls} placeholder="e.g. coach, founder, fitness"
+              value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Platform">
+              <select className={inputCls} value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
+                {PLATFORMS.map((p) => (<option key={p.id} value={p.id}>{p.label}</option>))}
+              </select>
+            </Field>
+            <Field label="Tone">
+              <select className={inputCls} value={tone} onChange={(e) => setTone(e.target.value as any)}>
+                {TONES.map((t) => (<option key={t.id} value={t.id}>{t.label}</option>))}
+              </select>
+            </Field>
+          </div>
+          <PrimaryBtn loading={loading}>Generate bios</PrimaryBtn>
+          {err && <p className="text-sm text-red-600">{err}</p>}
+        </form>
+      </Card>
+
+      <Card>
+        {!result ? (
+          <p className="text-sm text-[#425466]">5 bio options optimized for your platform will appear here.</p>
+        ) : (
+          <ul className="space-y-3">
+            {result.bios.map((b, i) => (
+              <li key={i} className="rounded-lg bg-[#f6f9fc] p-3 text-sm">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-medium text-[#425466]">{b.length} chars</span>
+                  <CopyBtn text={b} />
+                </div>
+                <p className="whitespace-pre-wrap">{b}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
