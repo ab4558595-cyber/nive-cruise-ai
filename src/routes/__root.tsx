@@ -89,8 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@niveai" },
       { name: "twitter:title", content: "Nive AI" },
       { name: "twitter:description", content: "Nive AI is an AI-powered coding assistant that generates code and acts as a social media manager." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4f284cb5-d11a-48f6-adf6-1288c58dc6b7" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4f284cb5-d11a-48f6-adf6-1288c58dc6b7" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/9dcf517b-c808-4950-9504-36856169866d" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/9dcf517b-c808-4950-9504-36856169866d" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
