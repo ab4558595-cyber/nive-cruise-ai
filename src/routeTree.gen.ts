@@ -22,6 +22,7 @@ import { Route as BusinessUsageRouteImport } from './routes/business.usage'
 import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
 import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
 import { Route as BusinessMarketingRouteImport } from './routes/business.marketing'
+import { Route as ApiPublicTryAiRouteImport } from './routes/api/public/try-ai'
 import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public/approve-payment'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -92,6 +93,11 @@ const BusinessMarketingRoute = BusinessMarketingRouteImport.update({
   path: '/business/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTryAiRoute = ApiPublicTryAiRouteImport.update({
+  id: '/api/public/try-ai',
+  path: '/api/public/try-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicApprovePaymentRoute = ApiPublicApprovePaymentRouteImport.update({
   id: '/api/public/approve-payment',
   path: '/api/public/approve-payment',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
+  '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
+  '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
+  '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/checkout/$planId'
     | '/business/'
     | '/api/public/approve-payment'
+    | '/api/public/try-ai'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/checkout/$planId'
     | '/business'
     | '/api/public/approve-payment'
+    | '/api/public/try-ai'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/checkout/$planId'
     | '/business/'
     | '/api/public/approve-payment'
+    | '/api/public/try-ai'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
+  ApiPublicTryAiRoute: typeof ApiPublicTryAiRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/try-ai': {
+      id: '/api/public/try-ai'
+      path: '/api/public/try-ai'
+      fullPath: '/api/public/try-ai'
+      preLoaderRoute: typeof ApiPublicTryAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/approve-payment': {
       id: '/api/public/approve-payment'
       path: '/api/public/approve-payment'
@@ -391,6 +411,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
+  ApiPublicTryAiRoute: ApiPublicTryAiRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
