@@ -178,6 +178,32 @@ function Welcome() {
         </div>
       </section>
 
+      {/* Free try AI demo (no signup) */}
+      <TryAiDemo />
+
+      {/* Guarantees */}
+      <section className="mx-auto max-w-[1280px] px-6 pb-4 sm:px-10">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <GuaranteeCard
+            icon={BadgeCheck}
+            title="Free to start"
+            body="No credit card required. Build your first project on the house."
+          />
+          <GuaranteeCard
+            icon={RefreshCw}
+            title="Cancel anytime"
+            body="Month-to-month. Downgrade or cancel from your dashboard in one click."
+          />
+          <GuaranteeCard
+            icon={HeartHandshake}
+            title="Human support"
+            body="Real engineers reply within hours, not days. Email and live chat included."
+          />
+        </div>
+      </section>
+
+
+
 
       {/* Working features */}
       <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
