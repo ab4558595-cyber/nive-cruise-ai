@@ -258,3 +258,29 @@ function NavItem({ label }: { label: string }) {
   );
 }
 
+function TrustStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <div className="text-[26px] font-bold tracking-tight text-[#0a2540] sm:text-[32px]">{value}</div>
+      <div className="mt-1 text-[13px] text-[#425466]">{label}</div>
+    </div>
+  );
+}
+
+function Testimonial({ quote, name, role }: { quote: string; name: string; role: string }) {
+  return (
+    <figure className="rounded-2xl border border-[#0a2540]/8 bg-white p-6 shadow-[0_2px_14px_rgba(13,42,148,0.04)]">
+      <div className="mb-3 flex gap-0.5 text-[#f59e0b]">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} className="h-4 w-4 fill-current" />
+        ))}
+      </div>
+      <blockquote className="text-[15px] leading-relaxed text-[#0a2540]">"{quote}"</blockquote>
+      <figcaption className="mt-4 text-[13px] text-[#425466]">
+        <span className="font-semibold text-[#0a2540]">{name}</span> — {role}
+      </figcaption>
+    </figure>
+  );
+}
+
+
