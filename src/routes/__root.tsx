@@ -136,6 +136,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           },
         }),
       },
+      {
+        children: `atOptions = { 'key': '85abd4f81f92630462233b486857f08d', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} };`,
+      },
+      {
+        src: "https://www.highperformanceformat.com/85abd4f81f92630462233b486857f08d/invoke.js",
+      },
     ],
   }),
   shellComponent: RootShell,
