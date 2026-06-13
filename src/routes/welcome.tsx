@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ribbon } from "@/components/Ribbon";
+import { AdBanner } from "@/components/AdBanner";
 import { Bug, Recycle, Layers, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/welcome")({
