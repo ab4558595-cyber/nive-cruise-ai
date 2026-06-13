@@ -247,9 +247,74 @@ function Welcome() {
           </Link>
         </div>
       </section>
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-[960px] px-6 pb-24 sm:px-10">
+        <div className="mb-8 text-center">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Common questions</p>
+          <h2 className="text-[28px] font-bold tracking-[-0.02em] text-[#0a2540] sm:text-[36px]">Everything you want to know</h2>
+        </div>
+        <div className="divide-y divide-[#0a2540]/8 rounded-2xl border border-[#0a2540]/8 bg-white">
+          <FaqItem
+            q="Is my code and data private?"
+            a="Yes. Your code and prompts are encrypted in transit and at rest. We never train shared models on your data, and you can delete your workspace at any time."
+          />
+          <FaqItem
+            q="Do I need a credit card to start?"
+            a="No. The free plan lets you try real generations without payment details. You only add billing when you want to scale up."
+          />
+          <FaqItem
+            q="Can I use Nive AI for production work?"
+            a="Yes. Teams ship production code daily with Nive — including PR-ready fixes, full services, and firmware. Every output is yours to use commercially."
+          />
+          <FaqItem
+            q="What if it doesn't work for my stack?"
+            a="If Nive can't help with your stack within your first 14 days, email support and we'll refund any paid usage — no questions asked."
+          />
+          <FaqItem
+            q="How do I get help?"
+            a="Email and in-app chat support is included on every plan. Most replies come back within a few hours from a real engineer."
+          />
+        </div>
+      </section>
     </div>
   );
 }
+
+function GuaranteeCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex gap-4 rounded-2xl border border-[#0a2540]/8 bg-white p-5">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#635bff]/10 text-[#635bff]">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold text-[#0a2540]">{title}</h3>
+        <p className="mt-1 text-[14px] leading-relaxed text-[#425466]">{body}</p>
+      </div>
+    </div>
+  );
+}
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  return (
+    <details className="group p-5 sm:p-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-semibold text-[#0a2540] sm:text-[16px]">
+        {q}
+        <span className="ml-auto text-[#635bff] transition-transform group-open:rotate-45">+</span>
+      </summary>
+      <p className="mt-3 text-[14px] leading-relaxed text-[#425466] sm:text-[15px]">{a}</p>
+    </details>
+  );
+}
+
 
 function FeatureCard({
   icon: Icon,
