@@ -114,6 +114,7 @@ function Welcome() {
 
       </div>
 
+      <AdBanner />
 
       {/* Working features */}
       <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
