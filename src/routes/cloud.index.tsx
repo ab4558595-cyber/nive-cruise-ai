@@ -1,5 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Gamepad2, Zap, Monitor, Cpu, Wifi, ShieldCheck, Clock, IndianRupee } from "lucide-react";
+import bgmiImg from "@/assets/games/bgmi.jpg";
+import freeFireImg from "@/assets/games/free-fire.jpg";
+import gtaVImg from "@/assets/games/gta-v.jpg";
+import valorantImg from "@/assets/games/valorant.jpg";
+import fortniteImg from "@/assets/games/fortnite.jpg";
+import codImg from "@/assets/games/cod-warzone.jpg";
+import minecraftImg from "@/assets/games/minecraft.jpg";
+import fifaImg from "@/assets/games/fifa-24.jpg";
+import rdr2Img from "@/assets/games/rdr2.jpg";
 
 export const Route = createFileRoute("/cloud/")({
   head: () => ({
@@ -20,22 +29,23 @@ export type CloudGame = {
   genre: string;
   rigTier: "Standard" | "Performance" | "Ultra";
   pricePerHour: number; // INR
-  emoji: string;
+  image: string;
   accent: string;
   blurb: string;
 };
 
 export const GAMES: CloudGame[] = [
-  { id: "bgmi", title: "BGMI", genre: "Battle Royale", rigTier: "Performance", pricePerHour: 35, emoji: "🎯", accent: "#f59e0b", blurb: "Battlegrounds Mobile India on a 144Hz cloud rig — zero lag squads." },
-  { id: "free-fire", title: "Free Fire MAX", genre: "Battle Royale", rigTier: "Standard", pricePerHour: 20, emoji: "🔥", accent: "#ef4444", blurb: "Booyah-ready cloud instance with 60fps streaming." },
-  { id: "gta-v", title: "GTA V Online", genre: "Open World", rigTier: "Ultra", pricePerHour: 60, emoji: "🚗", accent: "#10b981", blurb: "Los Santos at Ultra settings on an RTX-class rig." },
-  { id: "valorant", title: "Valorant", genre: "Tactical Shooter", rigTier: "Performance", pricePerHour: 40, emoji: "🎯", accent: "#635bff", blurb: "Low-latency competitive ranked sessions." },
-  { id: "fortnite", title: "Fortnite", genre: "Battle Royale", rigTier: "Performance", pricePerHour: 35, emoji: "🛠️", accent: "#06b6d4", blurb: "Build, battle, dance — full graphics on a cloud rig." },
-  { id: "cod-warzone", title: "Call of Duty: Warzone", genre: "Shooter", rigTier: "Ultra", pricePerHour: 55, emoji: "🪖", accent: "#0a2540", blurb: "Verdansk drops with no install, no patches." },
-  { id: "minecraft", title: "Minecraft", genre: "Sandbox", rigTier: "Standard", pricePerHour: 18, emoji: "🧱", accent: "#22c55e", blurb: "Shaders + mods preloaded — just play." },
-  { id: "fifa-24", title: "EA FC 24", genre: "Sports", rigTier: "Performance", pricePerHour: 30, emoji: "⚽", accent: "#3b82f6", blurb: "Couch co-op + Ultimate Team from any device." },
-  { id: "rdr2", title: "Red Dead Redemption 2", genre: "Open World", rigTier: "Ultra", pricePerHour: 65, emoji: "🤠", accent: "#b45309", blurb: "Cinematic Wild West at Ultra, instant boot." },
+  { id: "bgmi", title: "BGMI", genre: "Battle Royale", rigTier: "Performance", pricePerHour: 35, image: bgmiImg, accent: "#f59e0b", blurb: "Battlegrounds Mobile India on a 144Hz cloud rig — zero lag squads." },
+  { id: "free-fire", title: "Free Fire MAX", genre: "Battle Royale", rigTier: "Standard", pricePerHour: 20, image: freeFireImg, accent: "#ef4444", blurb: "Booyah-ready cloud instance with 60fps streaming." },
+  { id: "gta-v", title: "GTA V Online", genre: "Open World", rigTier: "Ultra", pricePerHour: 60, image: gtaVImg, accent: "#10b981", blurb: "Los Santos at Ultra settings on an RTX-class rig." },
+  { id: "valorant", title: "Valorant", genre: "Tactical Shooter", rigTier: "Performance", pricePerHour: 40, image: valorantImg, accent: "#635bff", blurb: "Low-latency competitive ranked sessions." },
+  { id: "fortnite", title: "Fortnite", genre: "Battle Royale", rigTier: "Performance", pricePerHour: 35, image: fortniteImg, accent: "#06b6d4", blurb: "Build, battle, dance — full graphics on a cloud rig." },
+  { id: "cod-warzone", title: "Call of Duty: Warzone", genre: "Shooter", rigTier: "Ultra", pricePerHour: 55, image: codImg, accent: "#0a2540", blurb: "Verdansk drops with no install, no patches." },
+  { id: "minecraft", title: "Minecraft", genre: "Sandbox", rigTier: "Standard", pricePerHour: 18, image: minecraftImg, accent: "#22c55e", blurb: "Shaders + mods preloaded — just play." },
+  { id: "fifa-24", title: "EA FC 24", genre: "Sports", rigTier: "Performance", pricePerHour: 30, image: fifaImg, accent: "#3b82f6", blurb: "Couch co-op + Ultimate Team from any device." },
+  { id: "rdr2", title: "Red Dead Redemption 2", genre: "Open World", rigTier: "Ultra", pricePerHour: 65, image: rdr2Img, accent: "#b45309", blurb: "Cinematic Wild West at Ultra, instant boot." },
 ];
+
 
 function CloudIndex() {
   return (
