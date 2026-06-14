@@ -157,11 +157,19 @@ function GameCard({ game }: { game: CloudGame }) {
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-6 transition-all hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_20px_50px_rgba(99,91,255,0.25)]"
     >
       <div
-        className="mb-4 flex h-32 items-center justify-center rounded-xl text-[64px]"
+        className="mb-4 h-36 overflow-hidden rounded-xl"
         style={{ background: `linear-gradient(135deg, ${game.accent}33, ${game.accent}11)` }}
       >
-        {game.emoji}
+        <img
+          src={game.image}
+          alt={`${game.title} cover art`}
+          loading="lazy"
+          width={768}
+          height={512}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
       </div>
+
       <div className="flex items-center justify-between text-[12px] text-white/60">
         <span>{game.genre}</span>
         <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/80">{game.rigTier}</span>
