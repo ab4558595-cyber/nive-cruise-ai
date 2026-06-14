@@ -16,12 +16,14 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CloudIndexRouteImport } from './routes/cloud.index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
 import { Route as BusinessUsageRouteImport } from './routes/business.usage'
 import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
 import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
 import { Route as BusinessMarketingRouteImport } from './routes/business.marketing'
+import { Route as CloudRentGameIdRouteImport } from './routes/cloud.rent.$gameId'
 import { Route as ApiPublicTryAiRouteImport } from './routes/api/public/try-ai'
 import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public/approve-payment'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -63,6 +65,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CloudIndexRoute = CloudIndexRouteImport.update({
+  id: '/cloud/',
+  path: '/cloud/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/business/',
   path: '/business/',
@@ -91,6 +98,11 @@ const BusinessPricingRoute = BusinessPricingRouteImport.update({
 const BusinessMarketingRoute = BusinessMarketingRouteImport.update({
   id: '/business/marketing',
   path: '/business/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CloudRentGameIdRoute = CloudRentGameIdRouteImport.update({
+  id: '/cloud/rent/$gameId',
+  path: '/cloud/rent/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicTryAiRoute = ApiPublicTryAiRouteImport.update({
@@ -134,8 +146,10 @@ export interface FileRoutesByFullPath {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
+  '/cloud/': typeof CloudIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/cloud/rent/$gameId': typeof CloudRentGameIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -154,8 +168,10 @@ export interface FileRoutesByTo {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business': typeof BusinessIndexRoute
+  '/cloud': typeof CloudIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/cloud/rent/$gameId': typeof CloudRentGameIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -175,8 +191,10 @@ export interface FileRoutesById {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/business/': typeof BusinessIndexRoute
+  '/cloud/': typeof CloudIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/cloud/rent/$gameId': typeof CloudRentGameIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -197,8 +215,10 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/business/'
+    | '/cloud/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/cloud/rent/$gameId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -217,8 +237,10 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/business'
+    | '/cloud'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/cloud/rent/$gameId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -237,8 +259,10 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/business/'
+    | '/cloud/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/cloud/rent/$gameId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -258,8 +282,10 @@ export interface RootRouteChildren {
   BusinessUsageRoute: typeof BusinessUsageRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
+  CloudIndexRoute: typeof CloudIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
   ApiPublicTryAiRoute: typeof ApiPublicTryAiRoute
+  CloudRentGameIdRoute: typeof CloudRentGameIdRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -316,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cloud/': {
+      id: '/cloud/'
+      path: '/cloud'
+      fullPath: '/cloud/'
+      preLoaderRoute: typeof CloudIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/': {
       id: '/business/'
       path: '/business'
@@ -356,6 +389,13 @@ declare module '@tanstack/react-router' {
       path: '/business/marketing'
       fullPath: '/business/marketing'
       preLoaderRoute: typeof BusinessMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cloud/rent/$gameId': {
+      id: '/cloud/rent/$gameId'
+      path: '/cloud/rent/$gameId'
+      fullPath: '/cloud/rent/$gameId'
+      preLoaderRoute: typeof CloudRentGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/try-ai': {
@@ -410,8 +450,10 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessUsageRoute: BusinessUsageRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   BusinessIndexRoute: BusinessIndexRoute,
+  CloudIndexRoute: CloudIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
   ApiPublicTryAiRoute: ApiPublicTryAiRoute,
+  CloudRentGameIdRoute: CloudRentGameIdRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
