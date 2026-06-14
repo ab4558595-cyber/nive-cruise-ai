@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
-import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
+import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake, Gamepad2 } from "lucide-react";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -49,8 +49,15 @@ function Welcome() {
               >
                 For Business →
               </Link>
+              <Link
+                to="/cloud"
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#635bff]/10 to-[#00d4ff]/10 px-3 py-1 text-[#0a2540] transition-colors hover:from-[#635bff]/20 hover:to-[#00d4ff]/20"
+              >
+                🎮 Cloud Gaming
+              </Link>
             </nav>
           </div>
+
 
           <div className="flex items-center gap-2.5">
             <Link
@@ -124,7 +131,14 @@ function Welcome() {
               >
                 <Building2 className="h-4 w-4" /> For Business →
               </Link>
+              <Link
+                to="/cloud"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#635bff]/20 bg-white px-4 py-2 text-[14px] font-medium text-[#635bff] shadow-sm transition-colors hover:bg-[#635bff]/5"
+              >
+                <Gamepad2 className="h-4 w-4" /> Cloud Gaming
+              </Link>
             </div>
+
 
             {/* Trust strip */}
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px] text-[#425466]">
