@@ -84,11 +84,18 @@ function RentPage() {
         {/* Game panel */}
         <section>
           <div
-            className="flex h-56 items-center justify-center rounded-2xl text-[120px]"
+            className="overflow-hidden rounded-2xl"
             style={{ background: `linear-gradient(135deg, ${game.accent}55, ${game.accent}11)` }}
           >
-            {game.emoji}
+            <img
+              src={game.image}
+              alt={`${game.title} cover art`}
+              width={768}
+              height={512}
+              className="h-64 w-full object-cover sm:h-72"
+            />
           </div>
+
           <div className="mt-5 flex items-center gap-2 text-[12.5px] text-white/60">
             <span>{game.genre}</span>
             <span>·</span>
