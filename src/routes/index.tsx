@@ -60,6 +60,7 @@ function Index() {
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activePlan, setActivePlan] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -142,6 +143,7 @@ function Index() {
         .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
         .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
       setActivePlan(plan?.plan_id ?? null);
+      setAuthLoading(false);
     };
     init();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
