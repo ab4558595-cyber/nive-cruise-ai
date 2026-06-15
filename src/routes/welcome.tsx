@@ -283,7 +283,7 @@ function Welcome() {
           />
           <FaqItem
             q="What if it doesn't work for my stack?"
-            a="If Nive can't help with your stack within your first 14 days, email support and we'll refund any paid usage — no questions asked."
+            a="If Nive can't help with your stack, email support within 7 days of payment and we'll refund — no questions asked."
           />
           <FaqItem
             q="How do I get help?"
