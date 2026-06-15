@@ -5,6 +5,7 @@ import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const BUSINESS_PLANS = plansForProduct("business");
 

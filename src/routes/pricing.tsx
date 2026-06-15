@@ -4,6 +4,7 @@ import { PLANS, plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const CODE_PLANS = plansForProduct("code");
 
