@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
-import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake, Gamepad2 } from "lucide-react";
+import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -48,12 +48,6 @@ function Welcome() {
                 className="whitespace-nowrap rounded-full bg-[#0a2540]/5 px-3 py-1 text-[#635bff] transition-colors hover:bg-[#635bff]/10"
               >
                 For Business →
-              </Link>
-              <Link
-                to="/cloud"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#635bff]/10 to-[#00d4ff]/10 px-3 py-1 text-[#0a2540] transition-colors hover:from-[#635bff]/20 hover:to-[#00d4ff]/20"
-              >
-                🎮 Cloud Gaming
               </Link>
             </nav>
           </div>
@@ -130,12 +124,6 @@ function Welcome() {
                 className="inline-flex items-center gap-1.5 rounded-full border border-[#0a2540]/10 bg-white px-4 py-2 text-[14px] font-medium text-[#0a2540] shadow-sm transition-colors hover:border-[#635bff]/30 hover:text-[#635bff]"
               >
                 <Building2 className="h-4 w-4" /> For Business →
-              </Link>
-              <Link
-                to="/cloud"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#635bff]/20 bg-white px-4 py-2 text-[14px] font-medium text-[#635bff] shadow-sm transition-colors hover:bg-[#635bff]/5"
-              >
-                <Gamepad2 className="h-4 w-4" /> Cloud Gaming
               </Link>
             </div>
 
