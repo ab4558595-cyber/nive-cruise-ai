@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
 import { Route as BusinessUsageRouteImport } from './routes/business.usage'
 import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
@@ -27,6 +28,7 @@ import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -66,6 +68,11 @@ const IndexRoute = IndexRouteImport.update({
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/business/',
   path: '/business/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutPlanIdRoute = CheckoutPlanIdRouteImport.update({
@@ -119,6 +126,12 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,9 +146,11 @@ export interface FileRoutesByFullPath {
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -153,9 +168,11 @@ export interface FileRoutesByTo {
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/business': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -174,9 +191,11 @@ export interface FileRoutesById {
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -196,9 +215,11 @@ export interface FileRouteTypes {
     | '/business/synthetic-data'
     | '/business/usage'
     | '/checkout/$planId'
+    | '/checkout/success'
     | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -216,9 +237,11 @@ export interface FileRouteTypes {
     | '/business/synthetic-data'
     | '/business/usage'
     | '/checkout/$planId'
+    | '/checkout/success'
     | '/business'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -236,9 +259,11 @@ export interface FileRouteTypes {
     | '/business/synthetic-data'
     | '/business/usage'
     | '/checkout/$planId'
+    | '/checkout/success'
     | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
+    | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -257,9 +282,11 @@ export interface RootRouteChildren {
   BusinessSyntheticDataRoute: typeof BusinessSyntheticDataRoute
   BusinessUsageRoute: typeof BusinessUsageRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
   ApiPublicTryAiRoute: typeof ApiPublicTryAiRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -321,6 +348,13 @@ declare module '@tanstack/react-router' {
       path: '/business'
       fullPath: '/business/'
       preLoaderRoute: typeof BusinessIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/$planId': {
@@ -393,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -409,9 +450,11 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessSyntheticDataRoute: BusinessSyntheticDataRoute,
   BusinessUsageRoute: BusinessUsageRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
   ApiPublicTryAiRoute: ApiPublicTryAiRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
@@ -419,13 +462,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
