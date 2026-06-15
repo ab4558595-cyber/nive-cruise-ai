@@ -13,9 +13,9 @@ export const Route = createFileRoute("/business/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — Nive AI for Business" },
-      { name: "description", content: "Pricing for Nive AI for Business: synthetic data generation and AI marketing copy. Start free, scale with Growth and Scale plans." },
+      { name: "description", content: "Pricing for Nive AI for Business: synthetic data generation and AI marketing copy. Growth and Scale plans built for teams." },
       { property: "og:title", content: "Nive AI for Business — Pricing" },
-      { property: "og:description", content: "Free pilot, Growth at ₹499/mo, and Scale at ₹1499/mo. Synthetic data + AI marketing in one suite." },
+      { property: "og:description", content: "Growth at ₹499/mo and Scale at ₹1499/mo. Synthetic data + AI marketing in one suite." },
       { property: "og:url", content: "/business/pricing" },
     ],
     links: [{ rel: "canonical", href: "/business/pricing" }],
