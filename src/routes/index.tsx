@@ -60,6 +60,7 @@ function Index() {
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activePlan, setActivePlan] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -142,6 +143,7 @@ function Index() {
         .from("user_plans").select("plan_id, expires_at").eq("user_id", session.user.id).eq("active", true)
         .gte("expires_at", new Date().toISOString()).order("expires_at", { ascending: false }).limit(1).maybeSingle();
       setActivePlan(plan?.plan_id ?? null);
+      setAuthLoading(false);
     };
     init();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -349,6 +351,14 @@ function Index() {
 
   const presetMeta = PRESETS.find((p) => p.id === preset) ?? PRESETS[0];
   const PresetIcon = presetMeta.icon;
+
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#635bff]/20 border-t-[#635bff]" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-white text-[#0a2540]" style={{ fontFamily: "Inter, 'Sohne', system-ui, sans-serif" }}>
