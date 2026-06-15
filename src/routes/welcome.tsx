@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
 import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
+import { LegalFooter } from "@/components/LegalFooter";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
