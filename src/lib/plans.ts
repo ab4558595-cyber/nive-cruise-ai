@@ -53,22 +53,6 @@ export const PLANS: Plan[] = [
   },
   // ===== Nive AI for Business =====
   {
-    id: "biz-trial",
-    product: "business",
-    name: "Pilot",
-    price: 0,
-    period: "7 days",
-    tagline: "Try the business suite free",
-    badge: "Free pilot",
-    features: [
-      "100 synthetic rows / day",
-      "5 marketing generations / day",
-      "1 brand profile",
-      "CSV export",
-      "Email support",
-    ],
-  },
-  {
     id: "biz-growth",
     product: "business",
     name: "Growth",
