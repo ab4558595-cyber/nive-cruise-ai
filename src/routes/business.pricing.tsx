@@ -3,6 +3,8 @@ import { Check, ArrowLeft } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
+import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const BUSINESS_PLANS = plansForProduct("business");
 
@@ -117,15 +119,11 @@ function BusinessPricing() {
                   Start free pilot
                 </Link>
               ) : (
-                <Link
-                  to="/checkout/$planId"
-                  params={{ planId: plan.id }}
-                  className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
-                    plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
-                  }`}
-                >
-                  Choose {plan.name}
-                </Link>
+                <PaddleCheckoutButton
+                  planId={plan.id}
+                  planName={plan.name}
+                  highlight={plan.highlight}
+                />
               )}
             </div>
           ))}
