@@ -3,6 +3,7 @@ import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
 import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
+import complianceBadges from "@/assets/compliance-badges.png";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -135,6 +136,15 @@ function Welcome() {
               <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-[#635bff]" /> Encrypted in transit & at rest</span>
               <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-[#0a2540]" /> 12,000+ builders</span>
               <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-[#f59e0b] text-[#f59e0b]" /> 4.9/5 average rating</span>
+            </div>
+
+            {/* Compliance badges */}
+            <div className="mt-6">
+              <img
+                src={complianceBadges}
+                alt="SOC 2 Type II and GDPR compliance badges"
+                className="h-16 w-auto sm:h-20"
+              />
             </div>
           </div>
         </section>
