@@ -123,6 +123,7 @@ function Pricing() {
           After payment, your access is activated once the owner approves your request.
         </p>
       </main>
+      <LegalFooter />
     </div>
   );
 }
