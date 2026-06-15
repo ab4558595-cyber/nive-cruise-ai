@@ -12,9 +12,6 @@ export function LegalFooter() {
           <Link to="/privacy" className="transition-colors hover:text-[#635bff]">
             Privacy
           </Link>
-          <Link to="/refunds" className="transition-colors hover:text-[#635bff]">
-            Refund Policy
-          </Link>
           <a
             href="mailto:bansal.monikaji1982@gmail.com"
             className="transition-colors hover:text-[#635bff]"

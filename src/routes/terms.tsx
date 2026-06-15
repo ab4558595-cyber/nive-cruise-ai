@@ -94,8 +94,7 @@ function Terms() {
           <a className="text-[#635bff] underline" href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer">
             Paddle Checkout Buyer Terms
           </a>
-          . See our <Link to="/refunds" className="text-[#635bff] underline">Refund Policy</Link> for refund
-          windows and how to request a refund.
+          . For refund requests, contact us at bansal.monikaji1982@gmail.com.
         </Section>
 
         <Section title="8. Service availability">

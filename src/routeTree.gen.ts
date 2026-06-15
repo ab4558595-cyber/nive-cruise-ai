@@ -13,7 +13,6 @@ import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RefundsRouteImport } from './routes/refunds'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FounderRouteImport } from './routes/founder'
@@ -52,11 +51,6 @@ const SocialRoute = SocialRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RefundsRoute = RefundsRouteImport.update({
-  id: '/refunds',
-  path: '/refunds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -164,7 +158,6 @@ export interface FileRoutesByFullPath {
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/refunds': typeof RefundsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
@@ -190,7 +183,6 @@ export interface FileRoutesByTo {
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/refunds': typeof RefundsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
@@ -217,7 +209,6 @@ export interface FileRoutesById {
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
-  '/refunds': typeof RefundsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
@@ -245,7 +236,6 @@ export interface FileRouteTypes {
     | '/founder'
     | '/pricing'
     | '/privacy'
-    | '/refunds'
     | '/sitemap.xml'
     | '/social'
     | '/terms'
@@ -271,7 +261,6 @@ export interface FileRouteTypes {
     | '/founder'
     | '/pricing'
     | '/privacy'
-    | '/refunds'
     | '/sitemap.xml'
     | '/social'
     | '/terms'
@@ -297,7 +286,6 @@ export interface FileRouteTypes {
     | '/founder'
     | '/pricing'
     | '/privacy'
-    | '/refunds'
     | '/sitemap.xml'
     | '/social'
     | '/terms'
@@ -324,7 +312,6 @@ export interface RootRouteChildren {
   FounderRoute: typeof FounderRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
-  RefundsRoute: typeof RefundsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SocialRoute: typeof SocialRoute
   TermsRoute: typeof TermsRoute
@@ -372,13 +359,6 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/refunds': {
-      id: '/refunds'
-      path: '/refunds'
-      fullPath: '/refunds'
-      preLoaderRoute: typeof RefundsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -524,7 +504,6 @@ const rootRouteChildren: RootRouteChildren = {
   FounderRoute: FounderRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
-  RefundsRoute: RefundsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SocialRoute: SocialRoute,
   TermsRoute: TermsRoute,
