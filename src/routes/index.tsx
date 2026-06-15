@@ -352,6 +352,14 @@ function Index() {
   const presetMeta = PRESETS.find((p) => p.id === preset) ?? PRESETS[0];
   const PresetIcon = presetMeta.icon;
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#635bff]/20 border-t-[#635bff]" />
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex h-screen overflow-hidden bg-white text-[#0a2540]" style={{ fontFamily: "Inter, 'Sohne', system-ui, sans-serif" }}>
       <Toaster richColors position="top-center" />
