@@ -153,6 +153,13 @@ function Checkout() {
               </p>
             </form>
           </div>
+
+          <div className="mt-6 flex items-center justify-center gap-2 border-t border-[#e3e8ee] pt-5 text-[12px] text-[#697386]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L3 6v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V6l-9-4z" fill="#635bff"/>
+            </svg>
+            <span>Secured checkout — powered by <span className="font-semibold text-[#0a2540]">Paddle</span></span>
+          </div>
         </div>
       </main>
     </div>
