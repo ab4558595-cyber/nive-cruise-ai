@@ -96,10 +96,10 @@ function Business() {
                 See pricing <span aria-hidden>›</span>
               </Link>
               <Link
-                to="/auth"
+                to="/business/pricing"
                 className="inline-flex items-center gap-1.5 text-[15px] font-medium text-[#635bff] transition-colors hover:text-[#0a2540]"
               >
-                Start free pilot <span aria-hidden>›</span>
+                Compare plans <span aria-hidden>›</span>
               </Link>
             </div>
           </div>
