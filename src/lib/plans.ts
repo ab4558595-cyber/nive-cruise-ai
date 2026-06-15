@@ -19,22 +19,6 @@ export type Plan = {
 
 export const PLANS: Plan[] = [
   {
-    id: "trial",
-    product: "code",
-    name: "Free Trial",
-    price: 0,
-    period: "14 days",
-    tagline: "Auto-granted to new accounts",
-    badge: "New users only",
-    features: [
-      "Full access for 14 days",
-      "30 prompts per day during trial",
-      "Gemini 2.5 Flash model",
-      "Live web preview",
-      "Expires automatically — upgrade to keep building",
-    ],
-  },
-  {
     id: "starter",
     product: "code",
     name: "Starter",
