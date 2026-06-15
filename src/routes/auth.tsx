@@ -101,7 +101,7 @@ function AuthPage() {
       if (result.error) throw result.error;
       if (result.redirected) return;
       if (mode === "signup") markTourPending();
-      toast.success(mode === "signup" ? "Account created! Enjoy your 14-day free trial 🎉" : "Welcome back");
+      toast.success(mode === "signup" ? "Account created 🎉" : "Welcome back");
       if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
         window.location.assign(safeRedirect);
       } else {
