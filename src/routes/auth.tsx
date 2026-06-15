@@ -143,7 +143,7 @@ function AuthPage() {
           </h1>
           {mode === "signup" && (
             <p className="mb-6 text-[14px] text-[#635bff]">
-              ✨ Get a <strong>14-day free trial</strong> — no card required.
+              ✨ Pick a plan that fits — pay securely via UPI.
             </p>
           )}
 
