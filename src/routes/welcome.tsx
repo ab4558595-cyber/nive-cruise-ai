@@ -125,12 +125,6 @@ function Welcome() {
               >
                 <Building2 className="h-4 w-4" /> For Business →
               </Link>
-              <Link
-                to="/cloud"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#635bff]/20 bg-white px-4 py-2 text-[14px] font-medium text-[#635bff] shadow-sm transition-colors hover:bg-[#635bff]/5"
-              >
-                <Gamepad2 className="h-4 w-4" /> Cloud Gaming
-              </Link>
             </div>
 
 
