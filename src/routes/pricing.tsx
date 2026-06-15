@@ -12,9 +12,9 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — Nive AI" },
-      { name: "description", content: "Simple, affordable plans for Nive AI — pay with UPI. Free trial, Starter at ₹49/month, and Pro at ₹149/month for unlimited prompts." },
-      { property: "og:title", content: "Nive AI Pricing — Free, Starter & Pro plans" },
-      { property: "og:description", content: "Compare Nive AI plans. Start free, upgrade for higher limits, faster models, and unlimited prompts. UPI payments accepted." },
+      { name: "description", content: "Simple, affordable plans for Nive AI — pay with UPI. Starter at ₹149/month and Pro at ₹299/month for unlimited prompts." },
+      { property: "og:title", content: "Nive AI Pricing — Starter & Pro plans" },
+      { property: "og:description", content: "Compare Nive AI plans. Higher limits, faster models, and unlimited prompts. UPI payments accepted." },
       { property: "og:url", content: "/pricing" },
     ],
     links: [{ rel: "canonical", href: "/pricing" }],
