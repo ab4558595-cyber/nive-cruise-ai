@@ -200,8 +200,8 @@ function Welcome() {
         <div className="grid gap-4 sm:grid-cols-3">
           <GuaranteeCard
             icon={BadgeCheck}
-            title="Free to start"
-            body="No credit card required. Build your first project on the house."
+            title="Affordable plans"
+            body="Starter from ₹149/month. Pay securely via UPI — no card required."
           />
           <GuaranteeCard
             icon={RefreshCw}
