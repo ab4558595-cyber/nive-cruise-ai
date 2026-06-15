@@ -28,7 +28,7 @@ const STEPS = [
   {
     icon: Rocket,
     title: "You're all set",
-    body: "Your trial lasts 14 days with 30 prompts/day. Upgrade anytime from the Pricing page to keep building.",
+    body: "Pick a plan from the Pricing page whenever you're ready — pay securely via UPI and keep building.",
   },
 ];
 
