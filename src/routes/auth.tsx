@@ -73,7 +73,7 @@ function AuthPage() {
         });
         if (error) throw error;
         markTourPending();
-        toast.success("Account created! Enjoy your 14-day free trial 🎉");
+        toast.success("Account created 🎉");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
