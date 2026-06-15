@@ -13,7 +13,7 @@ const STEPS = [
   {
     icon: Sparkles,
     title: "Welcome to Nive AI 🎉",
-    body: "You've just unlocked a 14-day free trial — full access, no card required. Let's take a 30-second tour.",
+    body: "Glad you're here. Let's take a 30-second tour so you can start building right away.",
   },
   {
     icon: MessageSquare,
