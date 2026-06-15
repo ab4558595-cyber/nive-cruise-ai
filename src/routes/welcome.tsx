@@ -49,12 +49,6 @@ function Welcome() {
               >
                 For Business →
               </Link>
-              <Link
-                to="/cloud"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#635bff]/10 to-[#00d4ff]/10 px-3 py-1 text-[#0a2540] transition-colors hover:from-[#635bff]/20 hover:to-[#00d4ff]/20"
-              >
-                🎮 Cloud Gaming
-              </Link>
             </nav>
           </div>
 
