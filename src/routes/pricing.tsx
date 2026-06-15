@@ -43,6 +43,7 @@ function Pricing() {
       className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
       style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
     >
+      <PaymentTestModeBanner />
       <Ribbon />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
