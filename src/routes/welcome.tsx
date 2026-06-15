@@ -279,6 +279,7 @@ function Welcome() {
           />
         </div>
       </section>
+      <LegalFooter />
     </div>
   );
 }
