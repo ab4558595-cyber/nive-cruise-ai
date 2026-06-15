@@ -39,6 +39,7 @@ function Welcome() {
               <NavItem label="Developers" />
               <NavItem label="Resources" />
               <Link to="/pricing" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Pricing</Link>
+              <Link to="/founder" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Founder</Link>
               <Link
                 to="/social"
                 className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#635bff] to-[#ff4d8d] bg-clip-text text-transparent transition-opacity hover:opacity-80"
