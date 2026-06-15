@@ -73,7 +73,7 @@ function AuthPage() {
         });
         if (error) throw error;
         markTourPending();
-        toast.success("Account created! Enjoy your 14-day free trial 🎉");
+        toast.success("Account created 🎉");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -101,7 +101,7 @@ function AuthPage() {
       if (result.error) throw result.error;
       if (result.redirected) return;
       if (mode === "signup") markTourPending();
-      toast.success(mode === "signup" ? "Account created! Enjoy your 14-day free trial 🎉" : "Welcome back");
+      toast.success(mode === "signup" ? "Account created 🎉" : "Welcome back");
       if (safeRedirect.startsWith("/business") || safeRedirect.includes("?")) {
         window.location.assign(safeRedirect);
       } else {
@@ -143,7 +143,7 @@ function AuthPage() {
           </h1>
           {mode === "signup" && (
             <p className="mb-6 text-[14px] text-[#635bff]">
-              ✨ Get a <strong>14-day free trial</strong> — no card required.
+              ✨ Pick a plan that fits — pay securely via UPI.
             </p>
           )}
 

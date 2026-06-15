@@ -19,22 +19,6 @@ export type Plan = {
 
 export const PLANS: Plan[] = [
   {
-    id: "trial",
-    product: "code",
-    name: "Free Trial",
-    price: 0,
-    period: "14 days",
-    tagline: "Auto-granted to new accounts",
-    badge: "New users only",
-    features: [
-      "Full access for 14 days",
-      "30 prompts per day during trial",
-      "Gemini 2.5 Flash model",
-      "Live web preview",
-      "Expires automatically — upgrade to keep building",
-    ],
-  },
-  {
     id: "starter",
     product: "code",
     name: "Starter",
@@ -68,22 +52,6 @@ export const PLANS: Plan[] = [
     ],
   },
   // ===== Nive AI for Business =====
-  {
-    id: "biz-trial",
-    product: "business",
-    name: "Pilot",
-    price: 0,
-    period: "7 days",
-    tagline: "Try the business suite free",
-    badge: "Free pilot",
-    features: [
-      "100 synthetic rows / day",
-      "5 marketing generations / day",
-      "1 brand profile",
-      "CSV export",
-      "Email support",
-    ],
-  },
   {
     id: "biz-growth",
     product: "business",

@@ -200,8 +200,8 @@ function Welcome() {
         <div className="grid gap-4 sm:grid-cols-3">
           <GuaranteeCard
             icon={BadgeCheck}
-            title="Free to start"
-            body="No credit card required. Build your first project on the house."
+            title="Affordable plans"
+            body="Starter from ₹149/month. Pay securely via UPI — no card required."
           />
           <GuaranteeCard
             icon={RefreshCw}
@@ -283,7 +283,7 @@ function Welcome() {
           />
           <FaqItem
             q="What if it doesn't work for my stack?"
-            a="If Nive can't help with your stack within your first 14 days, email support and we'll refund any paid usage — no questions asked."
+            a="If Nive can't help with your stack, email support within 7 days of payment and we'll refund — no questions asked."
           />
           <FaqItem
             q="How do I get help?"
