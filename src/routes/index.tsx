@@ -44,10 +44,10 @@ export const Route = createFileRoute("/")({
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-code`;
 
 const SUGGESTIONS = [
-  { icon: Cpu,       label: "ESP32 Wi-Fi relay",     prompt: "Write Arduino code for ESP32 that hosts a tiny web server to toggle a relay on GPIO 26, with HTML controls." },
-  { icon: Smartphone,label: "SwiftUI login screen",  prompt: "Create a polished SwiftUI login screen with email/password validation and a sign-in button." },
-  { icon: Globe,     label: "React + TS todo app",   prompt: "Build a React + TypeScript todo app with add, complete, delete, filters, and localStorage persistence." },
-  { icon: Terminal,  label: "Python scraper",        prompt: "Write a Python script using requests + BeautifulSoup to scrape Hacker News front page into a CSV." },
+  { icon: Globe,      label: "SaaS landing page",     prompt: "Build a modern SaaS landing page with hero, features, pricing, testimonials and a contact form." },
+  { icon: Smartphone, label: "Recipe sharing app",    prompt: "Build a recipe sharing web app with user profiles, search, categories, and a 'save favorites' feature." },
+  { icon: Cpu,        label: "Analytics dashboard",   prompt: "Build a clean analytics dashboard with KPI cards, a line chart, a table of recent activity, and a sidebar nav." },
+  { icon: Terminal,   label: "Internal admin tool",   prompt: "Build an internal admin tool to manage users — list, search, edit, and invite — with role-based access." },
 ];
 
 function Index() {
