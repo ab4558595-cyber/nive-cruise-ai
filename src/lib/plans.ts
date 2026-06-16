@@ -51,41 +51,6 @@ export const PLANS: Plan[] = [
       "Highest-quality production-grade code",
     ],
   },
-  // ===== Nive AI for Business =====
-  {
-    id: "biz-growth",
-    product: "business",
-    name: "Growth",
-    price: 499,
-    period: "30 days",
-    tagline: "For small teams and marketers",
-    features: [
-      "50,000 synthetic rows / month",
-      "Unlimited marketing copy generation",
-      "5 brand voices + tone presets",
-      "Ad, email & social variants",
-      "CSV / JSON / Parquet export",
-      "Priority email support",
-    ],
-    highlight: true,
-  },
-  {
-    id: "biz-scale",
-    product: "business",
-    name: "Scale",
-    price: 1499,
-    period: "30 days",
-    tagline: "For data teams and agencies",
-    features: [
-      "Unlimited synthetic data generation",
-      "Schema-aware structured datasets",
-      "Bias & privacy guardrails (PII scrubbing)",
-      "Full marketing campaign generator",
-      "Multi-brand workspaces",
-      "API access + webhook integrations",
-      "Dedicated onboarding",
-    ],
-  },
 ];
 
 export function plansForProduct(product: ProductKey): Plan[] {
