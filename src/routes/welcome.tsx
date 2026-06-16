@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
 import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
+import { supabase } from "@/integrations/supabase/client";
 import complianceBadges from "@/assets/compliance-badges.png";
 
 export const Route = createFileRoute("/welcome")({
@@ -20,6 +22,17 @@ export const Route = createFileRoute("/welcome")({
 });
 
 function Welcome() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
@@ -101,7 +114,7 @@ function Welcome() {
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
-              to="/"
+              to={isLoggedIn ? "/" : "/auth"}
               className="inline-flex items-center gap-1.5 rounded-full bg-[#635bff] px-5 py-3 text-[15px] font-medium text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)] transition-all hover:translate-y-[-1px] hover:bg-[#5048d6] hover:shadow-[0_8px_24px_rgba(99,91,255,0.45)]"
             >
               Start building <span aria-hidden>›</span>
