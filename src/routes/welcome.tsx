@@ -103,21 +103,8 @@ function Welcome() {
               </Link>
             </div>
 
-            {/* Mobile-only quick access to key product surfaces */}
-            <div className="mt-6 flex flex-wrap gap-3 md:hidden">
-              <Link
-                to="/social"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#635bff]/20 bg-white px-4 py-2 text-[14px] font-medium text-[#635bff] shadow-sm transition-colors hover:bg-[#635bff]/5"
-              >
-                <Sparkles className="h-4 w-4" /> Social Manager
-              </Link>
-              <Link
-                to="/business"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#0a2540]/10 bg-white px-4 py-2 text-[14px] font-medium text-[#0a2540] shadow-sm transition-colors hover:border-[#635bff]/30 hover:text-[#635bff]"
-              >
-                <Building2 className="h-4 w-4" /> For Business →
-              </Link>
-            </div>
+
+
 
 
             {/* Trust strip */}
