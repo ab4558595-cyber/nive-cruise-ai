@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -19,13 +18,8 @@ import { Route as FounderRouteImport } from './routes/founder'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
-import { Route as BusinessUsageRouteImport } from './routes/business.usage'
-import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
-import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
-import { Route as BusinessMarketingRouteImport } from './routes/business.marketing'
 import { Route as ApiPublicTryAiRouteImport } from './routes/api/public/try-ai'
 import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public/approve-payment'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -41,11 +35,6 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SocialRoute = SocialRouteImport.update({
-  id: '/social',
-  path: '/social',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -83,11 +72,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BusinessIndexRoute = BusinessIndexRouteImport.update({
-  id: '/business/',
-  path: '/business/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
   path: '/checkout/success',
@@ -96,26 +80,6 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
 const CheckoutPlanIdRoute = CheckoutPlanIdRouteImport.update({
   id: '/checkout/$planId',
   path: '/checkout/$planId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessUsageRoute = BusinessUsageRouteImport.update({
-  id: '/business/usage',
-  path: '/business/usage',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessSyntheticDataRoute = BusinessSyntheticDataRouteImport.update({
-  id: '/business/synthetic-data',
-  path: '/business/synthetic-data',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessPricingRoute = BusinessPricingRouteImport.update({
-  id: '/business/pricing',
-  path: '/business/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessMarketingRoute = BusinessMarketingRouteImport.update({
-  id: '/business/marketing',
-  path: '/business/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicTryAiRoute = ApiPublicTryAiRouteImport.update({
@@ -159,16 +123,10 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
-  '/business/marketing': typeof BusinessMarketingRoute
-  '/business/pricing': typeof BusinessPricingRoute
-  '/business/synthetic-data': typeof BusinessSyntheticDataRoute
-  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
-  '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -184,16 +142,10 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
-  '/business/marketing': typeof BusinessMarketingRoute
-  '/business/pricing': typeof BusinessPricingRoute
-  '/business/synthetic-data': typeof BusinessSyntheticDataRoute
-  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
-  '/business': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -210,16 +162,10 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
-  '/business/marketing': typeof BusinessMarketingRoute
-  '/business/pricing': typeof BusinessPricingRoute
-  '/business/synthetic-data': typeof BusinessSyntheticDataRoute
-  '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
-  '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -237,16 +183,10 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
-    | '/social'
     | '/terms'
     | '/welcome'
-    | '/business/marketing'
-    | '/business/pricing'
-    | '/business/synthetic-data'
-    | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
-    | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/payments/webhook'
@@ -262,16 +202,10 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
-    | '/social'
     | '/terms'
     | '/welcome'
-    | '/business/marketing'
-    | '/business/pricing'
-    | '/business/synthetic-data'
-    | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
-    | '/business'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/payments/webhook'
@@ -287,16 +221,10 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
-    | '/social'
     | '/terms'
     | '/welcome'
-    | '/business/marketing'
-    | '/business/pricing'
-    | '/business/synthetic-data'
-    | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
-    | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/payments/webhook'
@@ -313,16 +241,10 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  SocialRoute: typeof SocialRoute
   TermsRoute: typeof TermsRoute
   WelcomeRoute: typeof WelcomeRoute
-  BusinessMarketingRoute: typeof BusinessMarketingRoute
-  BusinessPricingRoute: typeof BusinessPricingRoute
-  BusinessSyntheticDataRoute: typeof BusinessSyntheticDataRoute
-  BusinessUsageRoute: typeof BusinessUsageRoute
   CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
-  BusinessIndexRoute: typeof BusinessIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
   ApiPublicTryAiRoute: typeof ApiPublicTryAiRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -345,13 +267,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/social': {
-      id: '/social'
-      path: '/social'
-      fullPath: '/social'
-      preLoaderRoute: typeof SocialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -403,13 +318,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/business/': {
-      id: '/business/'
-      path: '/business'
-      fullPath: '/business/'
-      preLoaderRoute: typeof BusinessIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/checkout/success': {
       id: '/checkout/success'
       path: '/checkout/success'
@@ -422,34 +330,6 @@ declare module '@tanstack/react-router' {
       path: '/checkout/$planId'
       fullPath: '/checkout/$planId'
       preLoaderRoute: typeof CheckoutPlanIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/usage': {
-      id: '/business/usage'
-      path: '/business/usage'
-      fullPath: '/business/usage'
-      preLoaderRoute: typeof BusinessUsageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/synthetic-data': {
-      id: '/business/synthetic-data'
-      path: '/business/synthetic-data'
-      fullPath: '/business/synthetic-data'
-      preLoaderRoute: typeof BusinessSyntheticDataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/pricing': {
-      id: '/business/pricing'
-      path: '/business/pricing'
-      fullPath: '/business/pricing'
-      preLoaderRoute: typeof BusinessPricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/marketing': {
-      id: '/business/marketing'
-      path: '/business/marketing'
-      fullPath: '/business/marketing'
-      preLoaderRoute: typeof BusinessMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/try-ai': {
@@ -505,16 +385,10 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  SocialRoute: SocialRoute,
   TermsRoute: TermsRoute,
   WelcomeRoute: WelcomeRoute,
-  BusinessMarketingRoute: BusinessMarketingRoute,
-  BusinessPricingRoute: BusinessPricingRoute,
-  BusinessSyntheticDataRoute: BusinessSyntheticDataRoute,
-  BusinessUsageRoute: BusinessUsageRoute,
   CheckoutPlanIdRoute: CheckoutPlanIdRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
-  BusinessIndexRoute: BusinessIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
   ApiPublicTryAiRoute: ApiPublicTryAiRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -525,13 +399,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
