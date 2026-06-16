@@ -35,7 +35,7 @@ function AuthPage() {
   const safeRedirect =
     redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
       ? redirectTo
-      : "/welcome";
+      : "/";
 
   // If user is already signed in (e.g. returning from Google OAuth redirect), navigate away.
   useEffect(() => {
