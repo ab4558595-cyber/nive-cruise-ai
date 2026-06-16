@@ -3,7 +3,7 @@ export const UPI_ID = "8766208760@yapl";
 export const UPI_PAYEE_NAME = "Nive AI";
 export const OWNER_EMAIL = "bansal.monikaji1982@gmail.com";
 
-export type ProductKey = "code";
+export type ProductKey = "code" | "business";
 
 export type Plan = {
   id: string;
@@ -49,6 +49,41 @@ export const PLANS: Plan[] = [
       "Multi-file project outputs",
       "Multilingual + priority queue",
       "Highest-quality production-grade code",
+    ],
+  },
+  // ===== Nive AI for Business =====
+  {
+    id: "biz-growth",
+    product: "business",
+    name: "Growth",
+    price: 499,
+    period: "30 days",
+    tagline: "For small teams and marketers",
+    features: [
+      "50,000 synthetic rows / month",
+      "Unlimited marketing copy generation",
+      "5 brand voices + tone presets",
+      "Ad, email & social variants",
+      "CSV / JSON / Parquet export",
+      "Priority email support",
+    ],
+    highlight: true,
+  },
+  {
+    id: "biz-scale",
+    product: "business",
+    name: "Scale",
+    price: 1499,
+    period: "30 days",
+    tagline: "For data teams and agencies",
+    features: [
+      "Unlimited synthetic data generation",
+      "Schema-aware structured datasets",
+      "Bias & privacy guardrails (PII scrubbing)",
+      "Full marketing campaign generator",
+      "Multi-brand workspaces",
+      "API access + webhook integrations",
+      "Dedicated onboarding",
     ],
   },
 ];
