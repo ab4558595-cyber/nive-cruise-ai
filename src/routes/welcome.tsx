@@ -1,15 +1,17 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowUp, Sparkles, Layers, Globe, ShoppingBag, MessageSquare, BarChart3, Users } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Ribbon } from "@/components/Ribbon";
+import { TryAiDemo } from "@/components/TryAiDemo";
+import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
+import complianceBadges from "@/assets/compliance-badges.png";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "Nive AI — Build apps with a single prompt" },
-      { name: "description", content: "Nive AI turns your idea into a working web app. Describe what you want and watch it come to life — no code required." },
-      { property: "og:title", content: "Nive AI — Build apps with a single prompt" },
-      { property: "og:description", content: "Describe your app. Nive builds it. From landing pages to dashboards, full-stack apps shipped in minutes." },
+      { title: "Nive AI — Code infrastructure for the next billion builds" },
+      { name: "description", content: "Nive AI writes production-quality code for web, mobile, embedded, and ML — from your first prototype to your billionth deployment." },
+      { property: "og:title", content: "Nive AI — Code infrastructure for builders" },
+      { property: "og:description", content: "From your first prototype to your billionth deployment. Nive AI writes production code for any platform." },
       { property: "og:url", content: "/welcome" },
     ],
     links: [{ rel: "canonical", href: "/welcome" }],
@@ -17,142 +19,351 @@ export const Route = createFileRoute("/welcome")({
   component: Welcome,
 });
 
-const EXAMPLES = [
-  { icon: Globe,        label: "Landing page for my SaaS" },
-  { icon: ShoppingBag,  label: "Online store with checkout" },
-  { icon: BarChart3,    label: "Analytics dashboard" },
-  { icon: MessageSquare,label: "AI chat assistant" },
-  { icon: Users,        label: "Community / social app" },
-  { icon: Layers,       label: "Internal admin tool" },
-];
-
 function Welcome() {
-  const navigate = useNavigate();
-  const [prompt, setPrompt] = useState("");
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const text = prompt.trim();
-    if (text) {
-      try { sessionStorage.setItem("nive-pending-prompt", text); } catch {}
-    }
-    navigate({ to: "/" });
-  };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-white" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
-      {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[600px] overflow-hidden">
-        <div className="absolute left-1/2 top-[-200px] h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[#635bff]/25 blur-[140px]" />
-        <div className="absolute left-1/3 top-[-100px] h-[400px] w-[500px] -translate-x-1/2 rounded-full bg-[#00d4ff]/15 blur-[120px]" />
+    <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
+      <div className="relative overflow-hidden bg-white">
+        <Ribbon />
+
+        {/* Nav */}
+        <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
+          <div className="flex items-center gap-10">
+            <Link to="/welcome" className="flex items-center gap-2 whitespace-nowrap">
+              <span className="text-[22px] font-bold tracking-tight text-[#0a2540]">nive</span>
+            </Link>
+
+            <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
+              <NavItem label="Products" />
+              <NavItem label="Solutions" />
+              <NavItem label="Developers" />
+              <NavItem label="Resources" />
+              <Link to="/pricing" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Pricing</Link>
+              <Link to="/founder" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Founder</Link>
+            </nav>
+          </div>
+
+
+
+          <div className="flex items-center gap-2.5">
+            <Link
+              to="/auth"
+              className="hidden whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/auth"
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[#635bff] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#0a2540]"
+            >
+              Get started <span aria-hidden>›</span>
+            </Link>
+          </div>
+        </header>
+
+
+        {/* Hero content */}
+        <section className="relative z-10 mx-auto max-w-[1280px] px-6 pb-28 pt-16 sm:px-10 sm:pt-24 lg:pb-40 lg:pt-32">
+          <div className="max-w-[760px]">
+            <p className="mb-6 text-[14px] font-medium text-[#0a2540]/70">
+              Lines of code shipped with Nive AI:{" "}
+              <span className="text-[#635bff]">1,657,113</span>
+            </p>
+
+            <h1
+              className="text-[48px] font-bold leading-[1.02] tracking-[-0.025em] text-[#0a2540] sm:text-[72px] lg:text-[88px]"
+              style={{ fontFamily: "'Inter', 'Sohne', system-ui, sans-serif" }}
+            >
+              Code infrastructure to{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #00d4ff 40%, #ff4d8d 100%)" }}
+              >
+                grow your product.
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-[620px] text-[17px] leading-relaxed text-[#425466] sm:text-[19px]">
+              Ship apps, firmware, and AI systems — from your first prototype to your billionth deployment.
+            </p>
+
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link
+                to="/auth"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#635bff] px-5 py-3 text-[15px] font-medium text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)] transition-all hover:translate-y-[-1px] hover:bg-[#5048d6] hover:shadow-[0_8px_24px_rgba(99,91,255,0.45)]"
+              >
+                Start building <span aria-hidden>›</span>
+              </Link>
+              <Link
+                to="/pricing"
+                className="inline-flex items-center gap-1.5 text-[15px] font-medium text-[#635bff] transition-colors hover:text-[#0a2540]"
+              >
+                Contact sales <span aria-hidden>›</span>
+              </Link>
+            </div>
+
+
+
+
+
+            {/* Trust strip */}
+            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px] text-[#425466]">
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#22c55e]" /> SOC 2-ready infrastructure</span>
+              <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-[#635bff]" /> Encrypted in transit & at rest</span>
+              <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-[#0a2540]" /> 12,000+ builders</span>
+              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-[#f59e0b] text-[#f59e0b]" /> 4.9/5 average rating</span>
+            </div>
+
+            {/* Compliance badges */}
+            <div className="mt-6">
+              <img
+                src={complianceBadges}
+                alt="SOC 2 Type II and GDPR compliance badges"
+                className="h-16 w-auto sm:h-20"
+              />
+            </div>
+          </div>
+        </section>
+
       </div>
 
-      {/* Nav */}
-      <header className="relative z-10 mx-auto flex max-w-[1200px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[#635bff] to-[#ff4d8d]">
-            <Sparkles className="h-4 w-4 text-white" />
+      {/* Trust band */}
+      <section className="border-y border-[#0a2540]/8 bg-[#f6f9fc]">
+        <div className="mx-auto max-w-[1280px] px-6 py-10 sm:px-10">
+          <p className="mb-5 text-center text-[12px] font-semibold uppercase tracking-[0.18em] text-[#425466]">
+            Trusted by teams shipping production code
+          </p>
+          <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
+            <TrustStat value="1.6M+" label="Lines shipped" />
+            <TrustStat value="12k+" label="Active builders" />
+            <TrustStat value="99.95%" label="Uptime SLA" />
+            <TrustStat value="< 200ms" label="Median response" />
           </div>
-          <span className="text-[20px] font-semibold tracking-tight">nive</span>
-        </Link>
-        <nav className="hidden items-center gap-7 text-[14px] text-white/70 md:flex">
-          <Link to="/pricing" className="transition-colors hover:text-white">Pricing</Link>
-          <Link to="/founder" className="transition-colors hover:text-white">Founder</Link>
-          <Link to="/auth" className="transition-colors hover:text-white">Sign in</Link>
-        </nav>
-        <Link
-          to="/auth"
-          className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[13px] font-medium text-[#0a0a0b] transition-all hover:bg-white/90"
-        >
-          Get started
-        </Link>
-      </header>
-
-      {/* Hero */}
-      <section className="relative z-10 mx-auto max-w-[920px] px-6 pb-20 pt-16 text-center sm:px-10 sm:pt-24">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[12px] text-white/70 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
-          Build full apps from a single prompt
         </div>
+      </section>
 
-        <h1 className="text-[44px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[68px]">
-          What do you want to{" "}
-          <span
-            className="bg-clip-text text-transparent"
-            style={{ backgroundImage: "linear-gradient(95deg, #a78bfa 0%, #60a5fa 50%, #f472b6 100%)" }}
-          >
-            build today?
-          </span>
-        </h1>
-        <p className="mx-auto mt-5 max-w-[560px] text-[16px] leading-relaxed text-white/60 sm:text-[18px]">
-          Describe your idea. Nive ships a working app with a clean UI — landing pages, dashboards, stores, and more.
-        </p>
-
-        {/* Prompt composer */}
-        <form
-          onSubmit={handleSubmit}
-          className="relative mx-auto mt-10 max-w-[720px] rounded-2xl border border-white/10 bg-[#141416]/80 p-3 shadow-[0_30px_80px_-20px_rgba(99,91,255,0.45)] backdrop-blur"
-        >
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); }
-            }}
-            placeholder="Build me a recipe sharing app with user profiles and search…"
-            className="block w-full resize-none rounded-xl bg-transparent px-3 py-3 text-[15px] text-white placeholder:text-white/40 focus:outline-none"
-            rows={3}
+      {/* Testimonials */}
+      <section className="mx-auto max-w-[1280px] px-6 py-20 sm:px-10">
+        <div className="mb-10 max-w-[760px]">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">What builders say</p>
+          <h2 className="text-[30px] font-bold tracking-[-0.02em] text-[#0a2540] sm:text-[40px]">Loved by engineers and founders</h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <Testimonial
+            quote="Nive shipped a Sentry fix to production before our on-call engineer woke up. It just works."
+            name="Priya S."
+            role="CTO, Fintech startup"
           />
-          <div className="flex items-center justify-between px-2 pb-1">
-            <span className="text-[12px] text-white/40">⏎ to start · Shift+⏎ for new line</span>
-            <button
-              type="submit"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0a0a0b] transition-all hover:scale-105 active:scale-95"
-              aria-label="Build"
-            >
-              <ArrowUp className="h-4 w-4" />
-            </button>
-          </div>
-        </form>
-
-        {/* Example chips */}
-        <div className="mx-auto mt-8 flex max-w-[720px] flex-wrap justify-center gap-2">
-          {EXAMPLES.map(({ icon: Icon, label }) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setPrompt(label)}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[13px] text-white/75 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-            >
-              <Icon className="h-3.5 w-3.5 text-white/50" />
-              {label}
-            </button>
-          ))}
+          <Testimonial
+            quote="We modernized a 15-year-old Java service in a weekend. The test coverage report alone sold us."
+            name="Marcus L."
+            role="Staff Engineer, Logistics"
+          />
+          <Testimonial
+            quote="Nive ships clean, production-ready code faster than any tool I've used."
+            name="Aisha K."
+            role="Indie founder"
+          />
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="relative z-10 mx-auto max-w-[1100px] px-6 pb-24 sm:px-10">
+      {/* Free try AI demo (no signup) */}
+      <TryAiDemo />
+
+      {/* Guarantees */}
+      <section className="mx-auto max-w-[1280px] px-6 pb-4 sm:px-10">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Step n="1" title="Describe it" body="Tell Nive what you want to build in plain English. Any kind of web app." />
-          <Step n="2" title="See it built" body="Watch the UI, pages, and logic come together in seconds, with a live preview." />
-          <Step n="3" title="Ship it" body="Iterate, refine, and publish to a public URL. Your app, your domain." />
+          <GuaranteeCard
+            icon={BadgeCheck}
+            title="Affordable plans"
+            body="Starter from ₹149/month. Pay securely via UPI — no card required."
+          />
+          <GuaranteeCard
+            icon={RefreshCw}
+            title="Cancel anytime"
+            body="Month-to-month. Downgrade or cancel from your dashboard in one click."
+          />
+          <GuaranteeCard
+            icon={HeartHandshake}
+            title="Human support"
+            body="Real engineers reply within hours, not days. Email and live chat included."
+          />
         </div>
       </section>
 
+
+
+
+      {/* Working features */}
+      <section className="relative mx-auto max-w-[1280px] px-6 py-24 sm:px-10">
+        <div className="mb-14 max-w-[760px]">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">What Nive actually does today</p>
+          <h2 className="text-[34px] font-bold leading-tight tracking-[-0.02em] text-[#0a2540] sm:text-[44px]">
+            Working features. Live. Right now.
+          </h2>
+          <p className="mt-4 text-[17px] leading-relaxed text-[#425466]">
+            Nive generates production-grade code — not full deployed webapps — on any stack you use.
+            Point it at your bugs, your legacy systems, or your own media, and it works alongside your team.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          <FeatureCard
+            icon={Bug}
+            title="The Autonomous Bug-Squasher"
+            body="Point Nive at your error tracking log (like Sentry). It autonomously locates the bug, writes the fix, runs the regression tests, and opens a Pull Request — while your team sleeps."
+          />
+          <FeatureCard
+            icon={Recycle}
+            title="The Legacy Modernizer"
+            body="Upload an ancient COBOL or Java codebase. Nive automatically refactors it into a modern, containerized TypeScript microservice architecture with 90%+ test coverage."
+          />
+          <FeatureCard
+            icon={Layers}
+            title="Any Code Stack"
+            body="Nive generates code — not full webapps — across every stack: Arduino firmware, SwiftUI, React, Rust, Python ML, Go services. You stay in control of where it ships."
+          />
+        </div>
+
+        <div className="mt-12 flex flex-wrap items-center gap-3 rounded-2xl border border-[#0a2540]/8 bg-[#f6f9fc] px-5 py-4 text-[14px] text-[#425466]">
+          <Paperclip className="h-4 w-4 text-[#635bff]" />
+          <span>
+            New: attach your own <span className="font-semibold text-[#0a2540]">images, audio, video or files</span> in the
+            composer and tell Nive what to do with them.
+          </span>
+          <Link to="/" className="ml-auto whitespace-nowrap font-medium text-[#635bff] hover:text-[#0a2540]">
+            Try it now ›
+          </Link>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-[960px] px-6 pb-24 sm:px-10">
+        <div className="mb-8 text-center">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Common questions</p>
+          <h2 className="text-[28px] font-bold tracking-[-0.02em] text-[#0a2540] sm:text-[36px]">Everything you want to know</h2>
+        </div>
+        <div className="divide-y divide-[#0a2540]/8 rounded-2xl border border-[#0a2540]/8 bg-white">
+          <FaqItem
+            q="Is my code and data private?"
+            a="Yes. Your code and prompts are encrypted in transit and at rest. We never train shared models on your data, and you can delete your workspace at any time."
+          />
+          <FaqItem
+            q="Do I need a credit card to start?"
+            a="No. The free plan lets you try real generations without payment details. You only add billing when you want to scale up."
+          />
+          <FaqItem
+            q="Can I use Nive AI for production work?"
+            a="Yes. Teams ship production code daily with Nive — including PR-ready fixes, full services, and firmware. Every output is yours to use commercially."
+          />
+          <FaqItem
+            q="What if it doesn't work for my stack?"
+            a="If Nive can't help with your stack, email support within 7 days of payment and we'll refund — no questions asked."
+          />
+          <FaqItem
+            q="How do I get help?"
+            a="Email and in-app chat support is included on every plan. Most replies come back within a few hours from a real engineer."
+          />
+        </div>
+      </section>
       <LegalFooter />
     </div>
   );
 }
 
-function Step({ n, title, body }: { n: string; title: string; body: string }) {
+function GuaranteeCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+}) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
-      <div className="mb-4 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-[13px] font-semibold text-white">
-        {n}
+    <div className="flex gap-4 rounded-2xl border border-[#0a2540]/8 bg-white p-5">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#635bff]/10 text-[#635bff]">
+        <Icon className="h-5 w-5" />
       </div>
-      <h3 className="text-[17px] font-semibold tracking-tight">{title}</h3>
-      <p className="mt-2 text-[14px] leading-relaxed text-white/60">{body}</p>
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold text-[#0a2540]">{title}</h3>
+        <p className="mt-1 text-[14px] leading-relaxed text-[#425466]">{body}</p>
+      </div>
     </div>
   );
 }
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  return (
+    <details className="group p-5 sm:p-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-semibold text-[#0a2540] sm:text-[16px]">
+        {q}
+        <span className="ml-auto text-[#635bff] transition-transform group-open:rotate-45">+</span>
+      </summary>
+      <p className="mt-3 text-[14px] leading-relaxed text-[#425466] sm:text-[15px]">{a}</p>
+    </details>
+  );
+}
+
+
+function FeatureCard({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="group relative rounded-2xl border border-[#0a2540]/8 bg-white p-7 shadow-[0_2px_14px_rgba(13,42,148,0.04)] transition-all hover:-translate-y-1 hover:border-[#635bff]/30 hover:shadow-[0_12px_36px_rgba(99,91,255,0.14)]">
+      <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#635bff] to-[#00d4ff] text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)]">
+        <Icon className="h-5 w-5" />
+      </div>
+      <h3 className="mb-2 text-[19px] font-semibold tracking-tight text-[#0a2540]">{title}</h3>
+      <p className="text-[15px] leading-relaxed text-[#425466]">{body}</p>
+    </div>
+  );
+}
+
+function NavItem({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 transition-colors hover:text-[#635bff]"
+    >
+      {label}
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+        <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
+
+function TrustStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <div className="text-[26px] font-bold tracking-tight text-[#0a2540] sm:text-[32px]">{value}</div>
+      <div className="mt-1 text-[13px] text-[#425466]">{label}</div>
+    </div>
+  );
+}
+
+function Testimonial({ quote, name, role }: { quote: string; name: string; role: string }) {
+  return (
+    <figure className="rounded-2xl border border-[#0a2540]/8 bg-white p-6 shadow-[0_2px_14px_rgba(13,42,148,0.04)]">
+      <div className="mb-3 flex gap-0.5 text-[#f59e0b]">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} className="h-4 w-4 fill-current" />
+        ))}
+      </div>
+      <blockquote className="text-[15px] leading-relaxed text-[#0a2540]">"{quote}"</blockquote>
+      <figcaption className="mt-4 text-[13px] text-[#425466]">
+        <span className="font-semibold text-[#0a2540]">{name}</span> — {role}
+      </figcaption>
+    </figure>
+  );
+}
+
+
