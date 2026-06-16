@@ -114,7 +114,7 @@ function Welcome() {
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
-              to="/"
+              to={isLoggedIn ? "/" : "/auth"}
               className="inline-flex items-center gap-1.5 rounded-full bg-[#635bff] px-5 py-3 text-[15px] font-medium text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)] transition-all hover:translate-y-[-1px] hover:bg-[#5048d6] hover:shadow-[0_8px_24px_rgba(99,91,255,0.45)]"
             >
               Start building <span aria-hidden>›</span>
