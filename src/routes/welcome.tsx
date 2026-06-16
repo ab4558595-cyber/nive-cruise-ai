@@ -161,7 +161,7 @@ function Welcome() {
             role="Staff Engineer, Logistics"
           />
           <Testimonial
-            quote="The social manager + dev tools combo is wild — one platform for the whole launch."
+            quote="Nive ships clean, production-ready code faster than any tool I've used."
             name="Aisha K."
             role="Indie founder"
           />
