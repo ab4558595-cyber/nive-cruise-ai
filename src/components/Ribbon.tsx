@@ -8,27 +8,24 @@ export function Ribbon({
   className = "",
   shellClassName = "",
   fadeClassName = "",
-  theme = "light",
 }: {
   side?: "right" | "left";
   className?: string;
   shellClassName?: string;
   fadeClassName?: string;
-  theme?: "light" | "dark";
 }) {
   const flipStyle = side === "left" ? { transform: "scaleX(-1)" } : undefined;
-  const fadeColor = theme === "dark" ? "10,10,11" : "255,255,255";
   const fadeStyle =
     side === "left"
       ? {
           background:
-            `linear-gradient(270deg, rgba(${fadeColor},0.98) 0%, rgba(${fadeColor},0.78) 28%, rgba(${fadeColor},0.18) 56%, rgba(${fadeColor},0) 78%)`,
+            "linear-gradient(270deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.78) 28%, rgba(255,255,255,0.18) 56%, rgba(255,255,255,0) 78%)",
           right: 0,
           left: "auto",
         }
       : {
           background:
-            `linear-gradient(90deg, rgba(${fadeColor},0.98) 0%, rgba(${fadeColor},0.78) 28%, rgba(${fadeColor},0.18) 56%, rgba(${fadeColor},0) 78%)`,
+            "linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.78) 28%, rgba(255,255,255,0.18) 56%, rgba(255,255,255,0) 78%)",
         };
 
   return (
