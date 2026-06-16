@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Pin, PinOff, Trash2, Pencil, Check,
-  Search, MessageSquare, Library, PanelLeft, SquarePen, Plus,
+  Search, MessageSquare, Library, PanelLeft, SquarePen,
 } from "lucide-react";
 import type { Conversation } from "@/lib/chatStore";
 
