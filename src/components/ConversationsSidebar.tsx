@@ -223,17 +223,6 @@ export function ConversationsSidebar({
         })}
       </div>
 
-      {/* Notebooks section (visual parity with Gemini) */}
-      <div className="border-t border-[#ececec] px-2 py-2">
-        <div className="px-2 pb-1 pt-1 text-[12px] font-medium text-[#5f6368]">Notebooks</div>
-        <button
-          onClick={onNew}
-          className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-[14px] text-[#1f1f1f] transition-colors hover:bg-[#f1f3f4]"
-        >
-          <Plus className="h-[18px] w-[18px] text-[#1f1f1f]" />
-          <span>New notebook</span>
-        </button>
-      </div>
     </aside>
   );
 }
