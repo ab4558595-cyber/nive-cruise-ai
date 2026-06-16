@@ -116,6 +116,17 @@ function Index() {
   const removeAttachment = (i: number) => setAttachments((a) => a.filter((_, idx) => idx !== i));
 
   useEffect(() => { try { localStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
+  // Pick up a prompt typed on the welcome/landing page
+  useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem("nive-pending-prompt");
+      if (pending) {
+        setInput(pending);
+        sessionStorage.removeItem("nive-pending-prompt");
+        setTimeout(() => composerRef.current?.focus(), 50);
+      }
+    } catch {}
+  }, []);
 
   const latestAssistant = useMemo(
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
