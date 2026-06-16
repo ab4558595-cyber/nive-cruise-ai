@@ -9,7 +9,7 @@ export const Route = createFileRoute("/terms")({
       {
         name: "description",
         content:
-          "The terms and conditions that govern your use of Nive AI's AI coding copilot and business suite.",
+          "The terms and conditions that govern your use of Nive AI's AI coding copilot.",
       },
       { property: "og:title", content: "Terms & Conditions — Nive AI" },
       {
@@ -44,8 +44,8 @@ function Terms() {
 
         <Section title="2. The service">
           Nive AI provides (a) an AI coding copilot that generates source code and project files from
-          natural-language prompts, and (b) a Business suite for synthetic data generation, AI marketing
-          copy, and social-content drafting. All outputs are digital text/code delivered through the
+          natural-language prompts
+          . All outputs are digital text/code delivered through the
           platform.
         </Section>
 

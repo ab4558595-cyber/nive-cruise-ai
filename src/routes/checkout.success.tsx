@@ -27,12 +27,6 @@ function Success() {
         >
           Back to chat
         </Link>
-        <Link
-          to="/business"
-          className="rounded-md border border-[#e0e6eb] bg-white px-5 py-2.5 text-[14px] font-semibold text-[#0a2540] hover:border-[#cfd7df]"
-        >
-          Go to Business
-        </Link>
       </div>
     </div>
   );
