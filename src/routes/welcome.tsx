@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowUp, Sparkles, Layers, Globe, ShoppingBag, MessageSquare, BarChart3, Users } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
+import { Ribbon } from "@/components/Ribbon";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
