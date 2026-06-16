@@ -40,20 +40,9 @@ function Welcome() {
               <NavItem label="Resources" />
               <Link to="/pricing" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Pricing</Link>
               <Link to="/founder" className="whitespace-nowrap transition-colors hover:text-[#635bff]">Founder</Link>
-              <Link
-                to="/social"
-                className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-gradient-to-r from-[#635bff] to-[#ff4d8d] bg-clip-text text-transparent transition-opacity hover:opacity-80"
-              >
-                ✨ Social Manager
-              </Link>
-              <Link
-                to="/business"
-                className="whitespace-nowrap rounded-full bg-[#0a2540]/5 px-3 py-1 text-[#635bff] transition-colors hover:bg-[#635bff]/10"
-              >
-                For Business →
-              </Link>
             </nav>
           </div>
+
 
 
           <div className="flex items-center gap-2.5">
