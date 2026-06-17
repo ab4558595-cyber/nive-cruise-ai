@@ -36,7 +36,8 @@ function Welcome() {
 
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}>
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-sky-50">
+      <div className="relative overflow-hidden bg-white">
+        <Ribbon />
 
         {/* Nav */}
         <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
