@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Zap, Globe, Layers, CreditCard, RefreshCcw, Quote } from "lucide-react";
 import { PLANS, plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
