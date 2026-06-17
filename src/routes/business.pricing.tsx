@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -65,6 +65,15 @@ function BusinessPricing() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
+        {/* Launch offer banner */}
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-xl bg-gradient-to-r from-[#635bff]/10 via-[#ec4899]/10 to-[#fb7185]/10 px-5 py-3 text-center text-[13px] font-medium text-[#0a2540] ring-1 ring-[#635bff]/20">
+          <Sparkles className="h-4 w-4 text-[#635bff]" />
+          <span>
+            <b>Launch pricing:</b> early Growth subscribers locked in at <b>₹499/mo for life</b>.
+          </span>
+          <span className="text-[#697386]">Price goes up as we add features.</span>
+        </div>
+
         <div className="mb-14 max-w-2xl">
           <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">
             Business Suite Pricing
@@ -135,7 +144,59 @@ function BusinessPricing() {
           ))}
         </div>
 
-        <p className="mt-12 text-center text-[13px] text-[#697386]">
+        {/* Why upgrade — concrete value props */}
+        <section className="mt-20">
+          <h2 className="text-center text-[22px] font-bold tracking-tight text-[#0a2540] sm:text-[28px]">
+            Built for teams that ship daily
+          </h2>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: Database, title: "Privacy-safe data", body: "Generate realistic test datasets without ever touching real PII." },
+              { icon: Megaphone, title: "On-brand copy", body: "Ads, landing pages, emails — all in a consistent brand voice." },
+              { icon: Zap, title: "Instant runs", body: "Results in seconds. No queues, no waiting for human writers." },
+              { icon: ShieldCheck, title: "Scale = unlimited", body: "On Scale, daily caps lift. Run as much synthetic data and copy as you need." },
+            ].map((b) => (
+              <div key={b.title} className="rounded-xl bg-white p-5 ring-1 ring-[#e3e8ee] shadow-[0_4px_14px_rgba(50,50,93,0.06)]">
+                <b.icon className="h-5 w-5 text-[#635bff]" />
+                <h3 className="mt-3 text-[15px] font-semibold text-[#0a2540]">{b.title}</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-[#425466]">{b.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Social proof */}
+        <section className="mt-20">
+          <p className="text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">
+            Used by data & marketing teams
+          </p>
+          <div className="mt-6 grid gap-5 md:grid-cols-3">
+            {[
+              { quote: "We generate 50k-row test datasets in seconds. QA cycles are 3x faster.", who: "Meera J.", role: "Data lead, Bengaluru" },
+              { quote: "Our launch landing page copy came straight from the marketing tool. Converted at 4.2%.", who: "Anika R.", role: "Growth manager, Mumbai" },
+              { quote: "Cheaper than one freelance copywriter retainer — and always available.", who: "Karthik V.", role: "Founder, Hyderabad" },
+            ].map((t) => (
+              <figure key={t.who} className="rounded-xl bg-white p-6 ring-1 ring-[#e3e8ee] shadow-[0_4px_14px_rgba(50,50,93,0.06)]">
+                <Quote className="h-5 w-5 text-[#635bff]/70" />
+                <blockquote className="mt-3 text-[14px] leading-relaxed text-[#3c4257]">
+                  "{t.quote}"
+                </blockquote>
+                <figcaption className="mt-4 text-[12px] text-[#697386]">
+                  <span className="font-semibold text-[#0a2540]">{t.who}</span> · {t.role}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust strip */}
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-xl bg-[#f6f9fc] px-6 py-4 text-[13px] text-[#425466] ring-1 ring-[#e3e8ee]">
+          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Secure checkout via Paddle</span>
+          <span className="inline-flex items-center gap-2"><CreditCard className="h-4 w-4 text-[#635bff]" /> UPI, cards & wallets accepted</span>
+          <span className="inline-flex items-center gap-2"><RefreshCcw className="h-4 w-4 text-[#635bff]" /> Cancel anytime · 14-day refund</span>
+        </div>
+
+        <p className="mt-10 text-center text-[13px] text-[#697386]">
           After payment, your access is activated once the owner approves your request.
         </p>
       </main>

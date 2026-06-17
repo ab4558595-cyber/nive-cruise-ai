@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Zap, Globe, Layers, CreditCard, RefreshCcw, Quote } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Zap, Globe, Layers, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
 import { PLANS, plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
 import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
@@ -57,6 +57,15 @@ function Pricing() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
+        {/* Launch offer banner */}
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-xl bg-gradient-to-r from-[#635bff]/10 via-[#ec4899]/10 to-[#fb7185]/10 px-5 py-3 text-center text-[13px] font-medium text-[#0a2540] ring-1 ring-[#635bff]/20">
+          <Sparkles className="h-4 w-4 text-[#635bff]" />
+          <span>
+            <b>Launch pricing:</b> first 100 Pro subscribers locked in at <b>₹299/mo for life</b>.
+          </span>
+          <span className="text-[#697386]">Limited spots — once gone, regular pricing applies.</span>
+        </div>
+
         <div className="mb-14 max-w-2xl">
           <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Pricing</p>
           <h1 className="text-[40px] font-bold leading-[1.05] tracking-tight text-[#0a2540] sm:text-[56px]">
