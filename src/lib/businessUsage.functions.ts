@@ -121,7 +121,13 @@ export const getBusinessUsage = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
-    return loadUsage(supabase, userId, data.tool);
+    const planId = await requireBusinessPlan(supabase, userId);
+    const snapshot = await loadUsage(supabase, userId, data.tool);
+    // Scale tier: effectively unlimited
+    if (planId === "biz-scale" || planId === "admin") {
+      return { ...snapshot, limit: 9999, remaining: Math.max(0, 9999 - snapshot.used) };
+    }
+    return snapshot;
   });
 
 /** Increment usage + log a per-run event. Throws if over the effective limit. */
@@ -137,10 +143,12 @@ export const consumeBusinessUsage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<UsageSnapshot> => {
     const { supabase, userId } = context as any;
+    const planId = await requireBusinessPlan(supabase, userId);
     const current = await loadUsage(supabase, userId, data.tool);
-    if (current.remaining <= 0) {
+    const effectiveLimit = planId === "biz-scale" || planId === "admin" ? 9999 : current.limit;
+    if (current.used >= effectiveLimit) {
       throw new Error(
-        `Daily limit reached for ${data.tool} (${current.limit}/day). Top up or wait until midnight UTC.`,
+        `Daily limit reached for ${data.tool} (${effectiveLimit}/day). Top up or wait until midnight UTC.`,
       );
     }
     const day = todayUtc();
