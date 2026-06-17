@@ -7,6 +7,44 @@ export const DAILY_LIMITS = {
   marketing: 15,
 } as const;
 
+/** Plans that include access to the Business suite (synthetic + marketing). */
+export const BUSINESS_PLAN_IDS = ["biz-growth", "biz-scale"] as const;
+
+/**
+ * Throws a 403-style error unless the caller is on a Business plan (or admin).
+ * Use at the top of every Business-tool server fn.
+ */
+export async function requireBusinessPlan(supabase: any, userId: string): Promise<string> {
+  // Admins always pass
+  const { data: adminRow } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (adminRow) return "admin";
+
+  const { data: plan } = await supabase
+    .from("user_plans")
+    .select("plan_id, expires_at, active")
+    .eq("user_id", userId)
+    .eq("active", true)
+    .gte("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!plan || !BUSINESS_PLAN_IDS.includes(plan.plan_id)) {
+    const err: any = new Error(
+      "This tool is part of Nive AI for Business. Upgrade to Growth or Scale to unlock it.",
+    );
+    err.code = "BUSINESS_PLAN_REQUIRED";
+    throw err;
+  }
+  return plan.plan_id as string;
+}
+
+
 export type ToolKey = keyof typeof DAILY_LIMITS;
 
 export type UsageSnapshot = {
@@ -83,7 +121,13 @@ export const getBusinessUsage = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
-    return loadUsage(supabase, userId, data.tool);
+    const planId = await requireBusinessPlan(supabase, userId);
+    const snapshot = await loadUsage(supabase, userId, data.tool);
+    // Scale tier: effectively unlimited
+    if (planId === "biz-scale" || planId === "admin") {
+      return { ...snapshot, limit: 9999, remaining: Math.max(0, 9999 - snapshot.used) };
+    }
+    return snapshot;
   });
 
 /** Increment usage + log a per-run event. Throws if over the effective limit. */
@@ -99,10 +143,12 @@ export const consumeBusinessUsage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<UsageSnapshot> => {
     const { supabase, userId } = context as any;
+    const planId = await requireBusinessPlan(supabase, userId);
     const current = await loadUsage(supabase, userId, data.tool);
-    if (current.remaining <= 0) {
+    const effectiveLimit = planId === "biz-scale" || planId === "admin" ? 9999 : current.limit;
+    if (current.used >= effectiveLimit) {
       throw new Error(
-        `Daily limit reached for ${data.tool} (${current.limit}/day). Top up or wait until midnight UTC.`,
+        `Daily limit reached for ${data.tool} (${effectiveLimit}/day). Top up or wait until midnight UTC.`,
       );
     }
     const day = todayUtc();
