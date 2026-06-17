@@ -85,14 +85,12 @@ function Terms() {
         </Section>
 
         <Section title="7. Plans, payments & subscriptions">
-          Paid plans are billed in advance on a recurring monthly basis at the prices shown on our
-          pricing pages. Subscriptions renew automatically until cancelled. Our order process is
-          conducted by our online reseller <strong>Paddle.com</strong>. Paddle.com is the Merchant of
-          Record for all our orders. Paddle provides all customer service inquiries and handles
-          returns. Detailed payment, billing, tax, cancellation, and refund mechanics are governed by
-          the{" "}
-          <a className="text-[#635bff] underline" href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer">
-            Paddle Checkout Buyer Terms
+          Paid plans are billed as one-time 30-day access purchases at the prices shown on our
+          pricing pages. Payments are processed securely by <strong>Razorpay</strong>, our payment
+          gateway, which supports UPI, cards, wallets, and net banking. By making a payment you
+          agree to Razorpay's{" "}
+          <a className="text-[#635bff] underline" href="https://razorpay.com/terms/" target="_blank" rel="noopener noreferrer">
+            Terms of Use
           </a>
           . For refund requests, contact us at bansal.monikaji1982@gmail.com.
         </Section>

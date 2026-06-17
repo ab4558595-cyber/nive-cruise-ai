@@ -42,18 +42,17 @@ function Refund() {
         </Section>
 
         <Section title="2. How to request a refund">
-          Refunds are processed by our payment provider, <strong>Paddle</strong>. You can request a refund by:
+          Refunds are processed through our payment gateway, <strong>Razorpay</strong>. To request a refund:
           <ul className="mt-2 list-disc space-y-2 pl-5">
-            <li>Visiting <a className="text-[#635bff] underline" href="https://paddle.net" target="_blank" rel="noopener noreferrer">paddle.net</a> and using Paddle's refund request flow, or</li>
-            <li>Emailing us at <a className="text-[#635bff] underline" href="mailto:bansal.monikaji1982@gmail.com">bansal.monikaji1982@gmail.com</a> with your order details and we will forward the request to Paddle on your behalf.</li>
+            <li>Email us at <a className="text-[#635bff] underline" href="mailto:bansal.monikaji1982@gmail.com">bansal.monikaji1982@gmail.com</a> with your order details (payment ID, date, plan).</li>
+            <li>We review and initiate the refund via Razorpay within 3 business days. Refunds typically reach your account in 5–7 working days.</li>
           </ul>
         </Section>
 
         <Section title="3. What is refundable">
           <ul className="list-disc space-y-2 pl-5">
-            <li>Full subscription payments made within the last 30 days.</li>
-            <li>First-time and renewal payments.</li>
-            <li>Payments made via UPI, card, or wallet through Paddle.</li>
+            <li>Full plan payments made within the last 30 days.</li>
+            <li>Payments made via UPI, card, wallet, or net banking through Razorpay.</li>
           </ul>
         </Section>
 
