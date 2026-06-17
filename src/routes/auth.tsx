@@ -33,7 +33,10 @@ function AuthPage() {
   const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
   const safeRedirect =
-    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+    redirectTo &&
+    redirectTo.startsWith("/") &&
+    !redirectTo.startsWith("//") &&
+    !redirectTo.startsWith("/auth")
       ? redirectTo
       : "/welcome";
 
