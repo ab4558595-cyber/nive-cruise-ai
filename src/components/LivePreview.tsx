@@ -268,9 +268,9 @@ export function LivePreview({
         {mode === "preview" ? (
           <iframe
             ref={iframeRef}
-            key={reloadKey}
+            key={`${blobUrl}-${reloadKey}`}
             title="Live preview"
-            srcDoc={doc}
+            src={blobUrl}
             sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
             className="h-full w-full border-0 bg-white"
           />
