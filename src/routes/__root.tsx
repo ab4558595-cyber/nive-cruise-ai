@@ -115,6 +115,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: `try{var t=localStorage.getItem('cruise-ai-theme')||'dark';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}`,
       },
       {
+        children: `(function(){function isStale(msg){return typeof msg==='string'&&(/Failed to fetch dynamically imported module/i.test(msg)||/Importing a module script failed/i.test(msg)||/error loading dynamically imported module/i.test(msg)||/ChunkLoadError/i.test(msg));}function recover(){try{var k='__nive_chunk_reload';var last=Number(sessionStorage.getItem(k)||0);var now=Date.now();if(now-last<10000)return;sessionStorage.setItem(k,String(now));location.reload();}catch(e){location.reload();}}window.addEventListener('error',function(e){if(e&&(isStale(e.message)||(e.target&&(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK'))))recover();},true);window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;var m=r&&(r.message||String(r));if(isStale(m))recover();});})();`,
+      },
+      {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
