@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
-import { Sandpack } from "@codesandbox/sandpack-react";
-import { X, ExternalLink, Code2, Eye, FileCode, Lock } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { X, ExternalLink, Code2, Eye, FileCode, Lock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 
@@ -26,13 +25,9 @@ function normalizePath(p: string): string {
 /** Detect HTML / React / multi-file projects in an assistant message. */
 export function detectPreview(content: string): PreviewSpec | null {
   if (!content) return null;
-
-  // Close any unterminated fence so we can preview *while streaming*.
   const fenceCount = (content.match(/```/g) || []).length;
   const text = fenceCount % 2 === 1 ? content + "\n```" : content;
 
-  // Walk the content sequentially so we can attach a filename header that
-  // appears immediately before a fenced code block (Nive AI convention).
   const re = /```(\w+)?\n?([\s\S]*?)```/g;
   const blocks: { lang: string; code: string; name?: string }[] = [];
   let m: RegExpExecArray | null;
@@ -40,16 +35,11 @@ export function detectPreview(content: string): PreviewSpec | null {
   while ((m = re.exec(text)) !== null) {
     const preceding = text.slice(cursor, m.index).split("\n").slice(-4).join("\n");
     const nameMatch = preceding.match(FILENAME_RE);
-    blocks.push({
-      lang: (m[1] || "").toLowerCase(),
-      code: m[2] || "",
-      name: nameMatch?.[1],
-    });
+    blocks.push({ lang: (m[1] || "").toLowerCase(), code: m[2] || "", name: nameMatch?.[1] });
     cursor = re.lastIndex;
   }
   if (blocks.length === 0) return null;
 
-  // ---- Multi-file React-style project (any block has a /src or App.* filename)
   const named = blocks.filter((b) => b.name);
   const reactish = named.filter((b) =>
     /\.(tsx|jsx)$/i.test(b.name!) || /^src\//i.test(b.name!.replace(/^\/+/, "")),
@@ -57,7 +47,6 @@ export function detectPreview(content: string): PreviewSpec | null {
   if (reactish.length >= 1 && named.length >= 2) {
     const files: Record<string, string> = {};
     for (const b of named) files[normalizePath(b.name!)] = b.code;
-    // Ensure an entry exists
     if (!files["/App.tsx"] && !files["/App.jsx"] && !files["/src/App.tsx"] && !files["/src/App.jsx"]) {
       const firstTsx = Object.keys(files).find((k) => /\.(tsx|jsx)$/.test(k));
       if (firstTsx && firstTsx !== "/App.tsx") files["/App.tsx"] = files[firstTsx];
@@ -65,14 +54,12 @@ export function detectPreview(content: string): PreviewSpec | null {
     return { template: "react", files };
   }
 
-  // ---- Multi-file static (index.html + others)
   if (named.some((b) => /index\.html?$/i.test(b.name!))) {
     const files: Record<string, string> = {};
     for (const b of named) files[normalizePath(b.name!)] = b.code;
     return { template: "static", files, entry: "/index.html" };
   }
 
-  // ---- Single full HTML doc
   const htmlBlock =
     blocks.find((b) => /^html?$/.test(b.lang) && /<html[\s>]/i.test(b.code)) ||
     blocks.find((b) => /^html?$/.test(b.lang)) ||
@@ -89,7 +76,6 @@ export function detectPreview(content: string): PreviewSpec | null {
     return { template: "static", files: { "/index.html": code } };
   }
 
-  // ---- Single React component
   const jsx = blocks.find(
     (b) => ["jsx", "tsx"].includes(b.lang) && /(export\s+default|function\s+App|=>\s*\()/.test(b.code),
   );
@@ -98,7 +84,6 @@ export function detectPreview(content: string): PreviewSpec | null {
     return { template: "react", files: { [`/App.${ext}`]: jsx.code } };
   }
 
-  // ---- JS that touches the DOM → wrap
   const js = blocks.find((b) => ["js", "javascript"].includes(b.lang));
   const css = blocks.find((b) => b.lang === "css");
   if (js && /document\.|window\.|getElementById|querySelector/.test(js.code)) {
@@ -109,6 +94,69 @@ export function detectPreview(content: string): PreviewSpec | null {
 }
 
 const PAID_PLANS = new Set(["starter", "pro"]);
+
+/** Build a single HTML document from a spec so we can render it inside a plain <iframe srcDoc>. */
+function buildIframeDoc(spec: PreviewSpec): string {
+  // ---- Static / vanilla: prefer the entry HTML, inline any sibling css/js by name.
+  if (spec.template !== "react") {
+    const entry =
+      spec.files[spec.entry ?? "/index.html"] ||
+      spec.files["/index.html"] ||
+      Object.values(spec.files)[0] ||
+      "";
+    let doc = entry;
+    // Inline same-folder assets referenced by <link href> / <script src>.
+    for (const [path, content] of Object.entries(spec.files)) {
+      const name = path.replace(/^\//, "");
+      if (/\.css$/i.test(name)) {
+        const tag = new RegExp(`<link[^>]+href=["']\\.?/?${name}["'][^>]*>`, "i");
+        doc = doc.replace(tag, `<style>${content}</style>`);
+      } else if (/\.js$/i.test(name)) {
+        const tag = new RegExp(`<script[^>]+src=["']\\.?/?${name}["'][^>]*></script>`, "i");
+        doc = doc.replace(tag, `<script>${content}</script>`);
+      }
+    }
+    return doc;
+  }
+
+  // ---- React: bundle the user's files into one Babel-transpiled in-browser module.
+  const reactFiles: Record<string, string> = {};
+  for (const [k, v] of Object.entries(spec.files)) {
+    reactFiles[k.replace(/^\//, "")] = v;
+  }
+  const entry =
+    reactFiles["src/App.tsx"] ||
+    reactFiles["src/App.jsx"] ||
+    reactFiles["App.tsx"] ||
+    reactFiles["App.jsx"] ||
+    Object.values(reactFiles)[0] ||
+    "export default function App(){return null}";
+
+  // Strip imports/exports so Babel can run the file as a script that defines `App`.
+  const cleaned = entry
+    .replace(/^\s*import[^;]+;?\s*$/gm, "")
+    .replace(/^\s*export\s+default\s+/gm, "var App = ")
+    .replace(/^\s*export\s+/gm, "");
+
+  return `<!DOCTYPE html><html><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>html,body,#root{height:100%;margin:0;font-family:system-ui,sans-serif}</style>
+</head><body><div id="root"></div>
+<script type="text/babel" data-presets="env,react,typescript">
+${cleaned}
+try {
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(React.createElement(typeof App !== 'undefined' ? App : (() => 'No <App /> export found')));
+} catch (e) {
+  document.getElementById('root').innerText = String(e);
+}
+</script>
+</body></html>`;
+}
 
 export function LivePreview({
   spec,
@@ -121,16 +169,26 @@ export function LivePreview({
 }) {
   const isPaid = plan ? PAID_PLANS.has(plan) : false;
   const [mode, setMode] = useState<"preview" | "code">("preview");
+  const [reloadKey, setReloadKey] = useState(0);
   const fileNames = useMemo(() => Object.keys(spec.files), [spec.files]);
   const [activeFile, setActiveFile] = useState<string>(fileNames[0] ?? "");
-  const key = useMemo(
-    () => JSON.stringify(spec.files).length + ":" + spec.template + ":" + mode,
-    [spec, mode],
-  );
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const doc = useMemo(() => buildIframeDoc(spec), [spec]);
+
+  // Refresh srcDoc when spec changes.
+  useEffect(() => {
+    if (iframeRef.current) iframeRef.current.srcdoc = doc;
+  }, [doc, reloadKey]);
 
   const tryCode = () => {
     if (!isPaid) return;
     setMode("code");
+  };
+
+  const openInTab = () => {
+    const blob = new Blob([doc], { type: "text/html" });
+    window.open(URL.createObjectURL(blob), "_blank");
   };
 
   return (
@@ -170,15 +228,22 @@ export function LivePreview({
               {isPaid ? <Code2 className="h-3 w-3" /> : <Lock className="h-3 w-3" />} Code
             </button>
           </div>
+          {mode === "preview" && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+              aria-label="Reload preview"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button
             size="sm"
             variant="ghost"
             className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => {
-              const file = spec.files[spec.entry ?? "/index.html"] || Object.values(spec.files)[0];
-              const blob = new Blob([file], { type: "text/html" });
-              window.open(URL.createObjectURL(blob), "_blank");
-            }}
+            onClick={openInTab}
           >
             <ExternalLink className="h-3.5 w-3.5" /> Open
           </Button>
@@ -193,20 +258,15 @@ export function LivePreview({
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden bg-white">
         {mode === "preview" ? (
-          <Sandpack
-            key={key}
-            template={spec.template === "react" ? "react" : "static"}
-            files={spec.files}
-            theme="dark"
-            options={{
-              showNavigator: true,
-              showTabs: false,
-              showLineNumbers: false,
-              editorHeight: "100%",
-              layout: "preview",
-            }}
+          <iframe
+            ref={iframeRef}
+            key={reloadKey}
+            title="Live preview"
+            srcDoc={doc}
+            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
+            className="h-full w-full border-0 bg-white"
           />
         ) : isPaid ? (
           <div className="flex h-full">
