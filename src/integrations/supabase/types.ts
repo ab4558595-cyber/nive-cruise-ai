@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_profiles: {
+        Row: {
+          audience: string | null
+          brand_name: string | null
+          forbidden_words: string[]
+          keywords: string[]
+          updated_at: string
+          user_id: string
+          usp: string | null
+          voice: string | null
+        }
+        Insert: {
+          audience?: string | null
+          brand_name?: string | null
+          forbidden_words?: string[]
+          keywords?: string[]
+          updated_at?: string
+          user_id: string
+          usp?: string | null
+          voice?: string | null
+        }
+        Update: {
+          audience?: string | null
+          brand_name?: string | null
+          forbidden_words?: string[]
+          keywords?: string[]
+          updated_at?: string
+          user_id?: string
+          usp?: string | null
+          voice?: string | null
+        }
+        Relationships: []
+      }
       business_credit_topups: {
         Row: {
           amount_inr: number
