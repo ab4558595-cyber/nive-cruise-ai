@@ -119,24 +119,23 @@ function buildIframeDoc(spec: PreviewSpec): string {
     return doc;
   }
 
-  // ---- React: bundle the user's files into one Babel-transpiled in-browser module.
+  // ---- React: bundle all files and let Babel resolve cross-file imports in-browser.
   const reactFiles: Record<string, string> = {};
   for (const [k, v] of Object.entries(spec.files)) {
     reactFiles[k.replace(/^\//, "")] = v;
   }
-  const entry =
-    reactFiles["src/App.tsx"] ||
-    reactFiles["src/App.jsx"] ||
-    reactFiles["App.tsx"] ||
-    reactFiles["App.jsx"] ||
-    Object.values(reactFiles)[0] ||
-    "export default function App(){return null}";
+  const entryKey =
+    ["src/main.tsx", "src/main.jsx", "src/index.tsx", "src/index.jsx",
+     "src/App.tsx", "src/App.jsx", "App.tsx", "App.jsx",
+     "main.tsx", "main.jsx", "index.tsx", "index.jsx"]
+      .find((k) => reactFiles[k]) || Object.keys(reactFiles)[0];
 
-  // Strip imports/exports so Babel can run the file as a script that defines `App`.
-  const cleaned = entry
-    .replace(/^\s*import[^;]+;?\s*$/gm, "")
-    .replace(/^\s*export\s+default\s+/gm, "var App = ")
-    .replace(/^\s*export\s+/gm, "");
+  const cssBundle = Object.entries(reactFiles)
+    .filter(([k]) => k.endsWith(".css"))
+    .map(([, v]) => v)
+    .join("\n");
+
+  const filesJson = JSON.stringify(reactFiles);
 
   return `<!DOCTYPE html><html><head>
 <meta charset="utf-8"/>
@@ -144,16 +143,68 @@ function buildIframeDoc(spec: PreviewSpec): string {
 <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<style>html,body,#root{height:100%;margin:0;font-family:system-ui,sans-serif}</style>
+<style>html,body,#root{height:100%;margin:0;font-family:system-ui,sans-serif}${cssBundle}</style>
 </head><body><div id="root"></div>
-<script type="text/babel" data-presets="env,react,typescript">
-${cleaned}
-try {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(React.createElement(typeof App !== 'undefined' ? App : (() => 'No <App /> export found')));
-} catch (e) {
-  document.getElementById('root').innerText = String(e);
-}
+<script>
+(function(){
+  const FILES = ${filesJson};
+  const ENTRY = ${JSON.stringify(entryKey)};
+  const cache = {};
+
+  function resolve(from, spec) {
+    if (!spec.startsWith(".") && !spec.startsWith("/")) return null; // bare → external
+    const baseParts = from.split("/").slice(0, -1);
+    const specParts = spec.replace(/^\\.?\\//, "").split("/");
+    const out = [...baseParts];
+    for (const p of specParts) {
+      if (p === "..") out.pop();
+      else if (p !== ".") out.push(p);
+    }
+    const path = out.join("/").replace(/^\\/+/, "");
+    const candidates = [path, path + ".tsx", path + ".ts", path + ".jsx", path + ".js",
+                        path + "/index.tsx", path + "/index.ts", path + "/index.jsx", path + "/index.js",
+                        path + ".css"];
+    return candidates.find((c) => FILES[c]) || null;
+  }
+
+  function load(path) {
+    if (cache[path]) return cache[path].exports;
+    const mod = { exports: {} };
+    cache[path] = mod;
+    if (path.endsWith(".css")) return mod.exports;
+    let code = FILES[path] || "";
+    try {
+      code = Babel.transform(code, { presets: ["env", "react", "typescript"], filename: path }).code;
+    } catch (e) {
+      throw new Error("Babel error in " + path + ": " + e.message);
+    }
+    const require = (spec) => {
+      if (spec === "react") return React;
+      if (spec === "react-dom" || spec === "react-dom/client") return ReactDOM;
+      const resolved = resolve(path, spec);
+      if (!resolved) throw new Error("Cannot resolve '" + spec + "' from " + path);
+      return load(resolved);
+    };
+    try {
+      new Function("require", "module", "exports", "React", code)(require, mod, mod.exports, React);
+    } catch (e) {
+      throw new Error("Runtime error in " + path + ": " + e.message);
+    }
+    return mod.exports;
+  }
+
+  try {
+    const entryMod = load(ENTRY);
+    const App = entryMod.default || entryMod.App;
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    if (App) root.render(React.createElement(App));
+    // If entry is main.tsx it already called createRoot itself — nothing to do.
+  } catch (e) {
+    document.getElementById("root").innerHTML =
+      '<pre style="color:#b91c1c;padding:16px;font:13px ui-monospace,monospace;white-space:pre-wrap">' +
+      String(e.stack || e.message || e) + '</pre>';
+  }
+})();
 </script>
 </body></html>`;
 }
@@ -176,10 +227,17 @@ export function LivePreview({
 
   const doc = useMemo(() => buildIframeDoc(spec), [spec]);
 
-  // Refresh srcDoc when spec changes.
+  // Build a real hosted blob: URL so the iframe loads from src (not srcDoc).
+  // This gives React apps a proper document origin, working relative URLs,
+  // history, and devtools navigation.
+  const blobUrl = useMemo(() => {
+    const blob = new Blob([doc], { type: "text/html" });
+    return URL.createObjectURL(blob);
+  }, [doc]);
+
   useEffect(() => {
-    if (iframeRef.current) iframeRef.current.srcdoc = doc;
-  }, [doc, reloadKey]);
+    return () => URL.revokeObjectURL(blobUrl);
+  }, [blobUrl]);
 
   const tryCode = () => {
     if (!isPaid) return;
@@ -187,8 +245,7 @@ export function LivePreview({
   };
 
   const openInTab = () => {
-    const blob = new Blob([doc], { type: "text/html" });
-    window.open(URL.createObjectURL(blob), "_blank");
+    window.open(blobUrl, "_blank");
   };
 
   return (
@@ -262,9 +319,9 @@ export function LivePreview({
         {mode === "preview" ? (
           <iframe
             ref={iframeRef}
-            key={reloadKey}
+            key={`${blobUrl}-${reloadKey}`}
             title="Live preview"
-            srcDoc={doc}
+            src={blobUrl}
             sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
             className="h-full w-full border-0 bg-white"
           />
