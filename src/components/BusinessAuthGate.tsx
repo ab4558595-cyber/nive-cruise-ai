@@ -20,7 +20,9 @@ export function BusinessAuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    const fullPath = `${location.pathname}${location.searchStr || ""}`;
+    const rawPath = `${location.pathname}${location.searchStr || ""}`;
+    // Never redirect back to /auth itself — prevents nested redirect loops.
+    const fullPath = location.pathname.startsWith("/auth") ? "/business" : rawPath;
     const sendToAuth = () =>
       navigate({
         to: "/auth",
