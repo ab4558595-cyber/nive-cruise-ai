@@ -36,11 +36,8 @@ export const Route = createFileRoute("/business/pricing")({
       }),
     })),
   }),
-  component: () => (
-    <BusinessAuthGate>
-      <BusinessPricing />
-    </BusinessAuthGate>
-  ),
+  component: BusinessPricing,
+
 });
 
 function BusinessPricing() {
