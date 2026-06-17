@@ -103,8 +103,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Require an active plan unless a working free OpenRouter key is configured
-    if ((!planId || !PLAN_CONFIG[planId]) && !Deno.env.get("OPENROUTER_API_KEY")) {
+    // Require an active plan unless a free fallback (OpenRouter or ApiFreeLLM) is configured
+    const hasFreeFallback = !!(Deno.env.get("OPENROUTER_API_KEY") || Deno.env.get("APIFREELLM_API_KEY"));
+    if ((!planId || !PLAN_CONFIG[planId]) && !hasFreeFallback) {
       return new Response(
         JSON.stringify({
           error: "Your free trial has ended. Upgrade to Starter or Pro to keep building.",
