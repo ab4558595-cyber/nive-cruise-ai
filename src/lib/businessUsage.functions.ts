@@ -2,20 +2,23 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/** Base daily limits for free Business plans. Multiplied by plan tier. */
 export const DAILY_LIMITS = {
-  synthetic: 20,
-  marketing: 15,
+  synthetic: 40,
+  marketing: 30,
 } as const;
+
+/** Plan multiplier on top of base. Scale/admin are effectively unlimited. */
+const PLAN_MULTIPLIER: Record<string, number> = {
+  "biz-growth": 2,
+  "biz-scale": 1, // overridden to 9999 below
+  admin: 1,
+};
 
 /** Plans that include access to the Business suite (synthetic + marketing). */
 export const BUSINESS_PLAN_IDS = ["biz-growth", "biz-scale"] as const;
 
-/**
- * Throws a 403-style error unless the caller is on a Business plan (or admin).
- * Use at the top of every Business-tool server fn.
- */
 export async function requireBusinessPlan(supabase: any, userId: string): Promise<string> {
-  // Admins always pass
   const { data: adminRow } = await supabase
     .from("user_roles")
     .select("role")
@@ -44,12 +47,11 @@ export async function requireBusinessPlan(supabase: any, userId: string): Promis
   return plan.plan_id as string;
 }
 
-
 export type ToolKey = keyof typeof DAILY_LIMITS;
 
 export type UsageSnapshot = {
   tool: ToolKey;
-  limit: number;        // effective limit (base + today's topups)
+  limit: number;
   baseLimit: number;
   bonus: number;
   used: number;
@@ -74,10 +76,17 @@ function tomorrowUtcIso(): string {
   return d.toISOString();
 }
 
+function effectiveBaseLimit(tool: ToolKey, planId: string): number {
+  if (planId === "biz-scale" || planId === "admin") return 9999;
+  const mult = PLAN_MULTIPLIER[planId] ?? 1;
+  return DAILY_LIMITS[tool] * mult;
+}
+
 export async function loadUsage(
   supabase: any,
   userId: string,
   tool: ToolKey,
+  planId: string = "biz-growth",
 ): Promise<UsageSnapshot> {
   const day = todayUtc();
   const [{ data: usageRow, error: usageErr }, { data: topupRows, error: topupErr }] =
@@ -101,7 +110,7 @@ export async function loadUsage(
 
   const used = usageRow?.count ?? 0;
   const bonus = (topupRows ?? []).reduce((s: number, r: any) => s + (r.credits ?? 0), 0);
-  const baseLimit = DAILY_LIMITS[tool];
+  const baseLimit = effectiveBaseLimit(tool, planId);
   const limit = baseLimit + bonus;
   return {
     tool,
@@ -122,21 +131,17 @@ export const getBusinessUsage = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     const planId = await requireBusinessPlan(supabase, userId);
-    const snapshot = await loadUsage(supabase, userId, data.tool);
-    // Scale tier: effectively unlimited
-    if (planId === "biz-scale" || planId === "admin") {
-      return { ...snapshot, limit: 9999, remaining: Math.max(0, 9999 - snapshot.used) };
-    }
-    return snapshot;
+    return loadUsage(supabase, userId, data.tool, planId);
   });
 
-/** Increment usage + log a per-run event. Throws if over the effective limit. */
+/** Increment usage by `credits` (default 1). Throws if over the effective limit. */
 export const consumeBusinessUsage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
       .object({
         tool: z.enum(["synthetic", "marketing"]),
+        credits: z.number().int().min(1).max(10).optional(),
         metadata: z.record(z.string(), z.any()).optional(),
       })
       .parse(input),
@@ -144,15 +149,15 @@ export const consumeBusinessUsage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<UsageSnapshot> => {
     const { supabase, userId } = context as any;
     const planId = await requireBusinessPlan(supabase, userId);
-    const current = await loadUsage(supabase, userId, data.tool);
-    const effectiveLimit = planId === "biz-scale" || planId === "admin" ? 9999 : current.limit;
-    if (current.used >= effectiveLimit) {
+    const current = await loadUsage(supabase, userId, data.tool, planId);
+    const cost = data.credits ?? 1;
+    if (current.used + cost > current.limit) {
       throw new Error(
-        `Daily limit reached for ${data.tool} (${effectiveLimit}/day). Top up or wait until midnight UTC.`,
+        `Not enough ${data.tool} credits left (need ${cost}, have ${current.remaining}/${current.limit}). Top up or wait until midnight UTC.`,
       );
     }
     const day = todayUtc();
-    const nextCount = current.used + 1;
+    const nextCount = current.used + cost;
     const { error: upErr } = await supabase
       .from("business_tool_usage")
       .upsert(
@@ -170,7 +175,7 @@ export const consumeBusinessUsage = createServerFn({ method: "POST" })
     const { error: evErr } = await supabase.from("business_tool_events").insert({
       user_id: userId,
       tool: data.tool,
-      credits: 1,
+      credits: cost,
       metadata: data.metadata ?? {},
     });
     if (evErr) console.error("event log insert failed", evErr);
@@ -182,7 +187,6 @@ export const consumeBusinessUsage = createServerFn({ method: "POST" })
     };
   });
 
-/** Purchase a top-up pack. Credits are granted instantly for today (UTC). */
 export const purchaseBusinessTopup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -196,6 +200,7 @@ export const purchaseBusinessTopup = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<UsageSnapshot> => {
     const { supabase, userId } = context as any;
+    const planId = await requireBusinessPlan(supabase, userId);
     const pack = TOPUP_PACKS[data.pack as TopupPackId];
     const { error } = await supabase.from("business_credit_topups").insert({
       user_id: userId,
@@ -205,11 +210,11 @@ export const purchaseBusinessTopup = createServerFn({ method: "POST" })
       pack: data.pack,
     });
     if (error) throw new Error(error.message);
-    return loadUsage(supabase, userId, pack.tool);
+    return loadUsage(supabase, userId, pack.tool, planId);
   });
 
 export type UsageHistoryDay = {
-  day: string; // YYYY-MM-DD (UTC)
+  day: string;
   synthetic: { runs: number; credits: number; lastAt: string | null };
   marketing: { runs: number; credits: number; lastAt: string | null };
   topupsInr: number;
