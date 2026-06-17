@@ -222,7 +222,7 @@ function Checkout() {
                 </div>
               )}
               {/* Paddle injects checkout here */}
-              <div id="paddle-checkout-container" className="min-h-[450px] rounded-xl" />
+              <div className="paddle-checkout-container min-h-[450px] rounded-xl" />
               {getPaddleEnvironment() === "sandbox" && (
                 <p className="mt-3 text-[12px] text-[#697386]">
                   Test mode — use card <span className="font-mono">4242 4242 4242 4242</span>, any future expiry, CVC <span className="font-mono">123</span>.
