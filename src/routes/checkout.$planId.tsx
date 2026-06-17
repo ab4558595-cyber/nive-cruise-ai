@@ -76,8 +76,10 @@ function Checkout() {
         // Ensure the inline container exists in the DOM before Paddle tries
         // to mount its iframe into it (otherwise paddle.js throws
         // "Cannot read properties of undefined (reading 'appendChild')").
+        // Paddle's `frameTarget` is a CLASS NAME, not an id — wait for the
+        // container with that class to be in the DOM before opening.
         for (let i = 0; i < 20; i++) {
-          if (document.getElementById("paddle-checkout-container")) break;
+          if (document.querySelector(".paddle-checkout-container")) break;
           await new Promise((r) => setTimeout(r, 50));
         }
         window.Paddle.Checkout.open({
@@ -220,7 +222,7 @@ function Checkout() {
                 </div>
               )}
               {/* Paddle injects checkout here */}
-              <div id="paddle-checkout-container" className="min-h-[450px] rounded-xl" />
+              <div className="paddle-checkout-container min-h-[450px] rounded-xl" />
               {getPaddleEnvironment() === "sandbox" && (
                 <p className="mt-3 text-[12px] text-[#697386]">
                   Test mode — use card <span className="font-mono">4242 4242 4242 4242</span>, any future expiry, CVC <span className="font-mono">123</span>.
