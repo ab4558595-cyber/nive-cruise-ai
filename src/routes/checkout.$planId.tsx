@@ -73,6 +73,13 @@ function Checkout() {
       try {
         await initializePaddle();
         const paddlePriceId = await getPaddlePriceId(paddlePriceExternalId);
+        // Ensure the inline container exists in the DOM before Paddle tries
+        // to mount its iframe into it (otherwise paddle.js throws
+        // "Cannot read properties of undefined (reading 'appendChild')").
+        for (let i = 0; i < 20; i++) {
+          if (document.getElementById("paddle-checkout-container")) break;
+          await new Promise((r) => setTimeout(r, 50));
+        }
         window.Paddle.Checkout.open({
           items: [{ priceId: paddlePriceId, quantity: 1 }],
           customer: userEmail ? { email: userEmail } : undefined,
@@ -81,10 +88,10 @@ function Checkout() {
             displayMode: "inline",
             frameTarget: "paddle-checkout-container",
             frameInitialHeight: 450,
-            frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
+            frameStyle:
+              "width: 100%; min-width: 312px; background-color: transparent; border: none;",
             successUrl: `${window.location.origin}/checkout/success`,
             allowLogout: false,
-            variant: "one-page",
           },
         });
       } catch (err: any) {
