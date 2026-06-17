@@ -176,10 +176,17 @@ export function LivePreview({
 
   const doc = useMemo(() => buildIframeDoc(spec), [spec]);
 
-  // Refresh srcDoc when spec changes.
+  // Build a real hosted blob: URL so the iframe loads from src (not srcDoc).
+  // This gives React apps a proper document origin, working relative URLs,
+  // history, and devtools navigation.
+  const blobUrl = useMemo(() => {
+    const blob = new Blob([doc], { type: "text/html" });
+    return URL.createObjectURL(blob);
+  }, [doc]);
+
   useEffect(() => {
-    if (iframeRef.current) iframeRef.current.srcdoc = doc;
-  }, [doc, reloadKey]);
+    return () => URL.revokeObjectURL(blobUrl);
+  }, [blobUrl]);
 
   const tryCode = () => {
     if (!isPaid) return;
@@ -187,8 +194,7 @@ export function LivePreview({
   };
 
   const openInTab = () => {
-    const blob = new Blob([doc], { type: "text/html" });
-    window.open(URL.createObjectURL(blob), "_blank");
+    window.open(blobUrl, "_blank");
   };
 
   return (
