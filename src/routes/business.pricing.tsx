@@ -65,6 +65,15 @@ function BusinessPricing() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
+        {/* Launch offer banner */}
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-xl bg-gradient-to-r from-[#635bff]/10 via-[#ec4899]/10 to-[#fb7185]/10 px-5 py-3 text-center text-[13px] font-medium text-[#0a2540] ring-1 ring-[#635bff]/20">
+          <Sparkles className="h-4 w-4 text-[#635bff]" />
+          <span>
+            <b>Launch pricing:</b> early Growth subscribers locked in at <b>₹499/mo for life</b>.
+          </span>
+          <span className="text-[#697386]">Price goes up as we add features.</span>
+        </div>
+
         <div className="mb-14 max-w-2xl">
           <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">
             Business Suite Pricing
