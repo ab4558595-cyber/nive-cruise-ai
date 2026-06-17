@@ -14,11 +14,12 @@ function getSupabase(): any {
 }
 
 // Map Paddle product external_id -> our internal plan id (used in user_plans).
+// Keep in sync with the Paddle catalog (see src/lib/plans.ts).
 const PRODUCT_TO_PLAN: Record<string, string> = {
-  starter_plan: "starter",
-  pro_plan: "pro",
-  biz_growth_plan: "biz-growth",
-  biz_scale_plan: "biz-scale",
+  starter: "starter",
+  pro: "pro",
+  biz_growth: "biz-growth",
+  biz_scale: "biz-scale",
 };
 
 async function activateUserPlan(
