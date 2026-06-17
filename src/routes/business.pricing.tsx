@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
-import { PaddleCheckoutButton } from "@/components/PaddleCheckoutButton";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { LegalFooter } from "@/components/LegalFooter";
 
@@ -187,7 +186,7 @@ function BusinessPricing() {
 
         {/* Trust strip */}
         <div className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-xl bg-[#f6f9fc] px-6 py-4 text-[13px] text-[#425466] ring-1 ring-[#e3e8ee]">
-          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Secure checkout via Paddle</span>
+          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Secure checkout via Razorpay</span>
           <span className="inline-flex items-center gap-2"><CreditCard className="h-4 w-4 text-[#635bff]" /> UPI, cards & wallets accepted</span>
           <span className="inline-flex items-center gap-2"><RefreshCcw className="h-4 w-4 text-[#635bff]" /> Cancel anytime · 14-day refund</span>
         </div>
