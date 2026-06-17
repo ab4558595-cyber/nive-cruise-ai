@@ -96,6 +96,19 @@ export function getPlan(id: string): Plan | undefined {
   return PLANS.find((p) => p.id === id);
 }
 
+// Maps our internal plan IDs to the Paddle price `external_id`s created via
+// the payments tool. Keep in sync with the Paddle catalog.
+const PADDLE_PRICE_BY_PLAN: Record<string, string> = {
+  starter: "starter_30d",
+  pro: "pro_30d",
+  "biz-growth": "biz_growth_30d",
+  "biz-scale": "biz_scale_30d",
+};
+
+export function getPaddlePriceIdForPlan(planId: string): string | undefined {
+  return PADDLE_PRICE_BY_PLAN[planId];
+}
+
 export function buildUpiUri(amount: number, note: string): string {
   const params = new URLSearchParams({
     pa: UPI_ID,
