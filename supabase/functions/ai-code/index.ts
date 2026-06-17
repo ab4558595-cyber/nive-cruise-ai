@@ -103,8 +103,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Require an active plan unless a working free OpenRouter key is configured
-    if ((!planId || !PLAN_CONFIG[planId]) && !Deno.env.get("OPENROUTER_API_KEY")) {
+    // Require an active plan unless a free fallback (OpenRouter or ApiFreeLLM) is configured
+    const hasFreeFallback = !!(Deno.env.get("OPENROUTER_API_KEY") || Deno.env.get("APIFREELLM_API_KEY"));
+    if ((!planId || !PLAN_CONFIG[planId]) && !hasFreeFallback) {
       return new Response(
         JSON.stringify({
           error: "Your free trial has ended. Upgrade to Starter or Pro to keep building.",
@@ -192,21 +193,66 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!response.ok) {
-      if (response.status === 429) {
+    // Final fallback: ApiFreeLLM (free, non-streaming, single-message)
+    const APIFREELLM_API_KEY = Deno.env.get("APIFREELLM_API_KEY");
+    if ((!response || !response.ok) && APIFREELLM_API_KEY) {
+      try {
+        if (response) {
+          const errText = await response.text().catch(() => "");
+          console.error("Primary providers failed, trying ApiFreeLLM:", response.status, errText.slice(0, 300));
+        }
+        const flatPrompt = fullMessages
+          .map((m: { role: string; content: string }) => `[${m.role.toUpperCase()}]\n${m.content}`)
+          .join("\n\n");
+        const afResp = await fetch("https://apifreellm.com/api/v1/chat", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${APIFREELLM_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: flatPrompt }),
+        });
+        if (afResp.ok) {
+          const data = await afResp.json();
+          const text: string =
+            data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? "";
+          // Emit one OpenAI-style SSE chunk + [DONE] so the client streaming parser works as-is
+          const sse =
+            `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n` +
+            `data: [DONE]\n\n`;
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode(sse));
+              controller.close();
+            },
+          });
+          response = new Response(stream, { status: 200, headers: { "Content-Type": "text/event-stream" } });
+          usedProvider = "apifreellm";
+          usedModel = "apifreellm";
+        } else {
+          console.error("ApiFreeLLM failed:", afResp.status, (await afResp.text()).slice(0, 300));
+        }
+      } catch (e) {
+        console.error("ApiFreeLLM threw:", e);
+      }
+    }
+
+    if (!response || !response.ok) {
+      const status = response?.status ?? 500;
+      if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
+      if (status === 402) {
         return new Response(
           JSON.stringify({ error: "AI credits exhausted. Add funds in Lovable Cloud settings." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      const t = response ? await response.text() : "";
+      console.error("AI gateway error:", status, t);
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
