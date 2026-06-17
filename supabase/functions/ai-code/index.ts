@@ -32,9 +32,12 @@ Live preview (CRITICAL):
 
 // Plan tiers — keep in sync with src/lib/plans.ts
 const PLAN_CONFIG: Record<string, { dailyLimit: number | null; model: string; orModels: string[]; multilingual: boolean; longContext: boolean; label: string }> = {
-  trial:     { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModels: ["openai/gpt-oss-120b:free", "deepseek/deepseek-v4-flash:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Trial" },
-  starter:   { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModels: ["qwen/qwen3-coder:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Starter" },
-  pro:       { dailyLimit: null, model: "openai/gpt-5.5",                orModels: ["openai/gpt-oss-120b:free", "qwen/qwen3-coder:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: true,  label: "Pro" },
+  trial:       { dailyLimit: 30,   model: "google/gemini-3-flash-preview", orModels: ["openai/gpt-oss-120b:free", "deepseek/deepseek-v4-flash:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Trial" },
+  starter:     { dailyLimit: 200,  model: "google/gemini-3.5-flash",       orModels: ["qwen/qwen3-coder:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Starter" },
+  pro:         { dailyLimit: null, model: "openai/gpt-5.5",                orModels: ["openai/gpt-oss-120b:free", "qwen/qwen3-coder:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: true,  label: "Pro" },
+  // Business tiers — include code-chat access on top of the Business suite
+  "biz-growth": { dailyLimit: 500,  model: "google/gemini-3.5-flash",       orModels: ["qwen/qwen3-coder:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: false, label: "Growth" },
+  "biz-scale":  { dailyLimit: null, model: "openai/gpt-5.5",                orModels: ["openai/gpt-oss-120b:free", "qwen/qwen3-coder:free", "meta-llama/llama-3.3-70b-instruct:free"], multilingual: true,  longContext: true,  label: "Scale" },
 };
 
 const PRESET_PROMPTS: Record<string, string> = {
