@@ -128,6 +128,11 @@ function Checkout() {
             ))}
           </ul>
 
+          <div className="mt-5 flex items-center justify-center gap-1.5">
+            <BadgeCheck className="h-4 w-4 text-blue-500" />
+            <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
+          </div>
+
           {authed === false ? (
             <Link
               to="/auth"
