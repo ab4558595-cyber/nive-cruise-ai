@@ -679,7 +679,325 @@ function HeroPanel({ usage, setUsage }: PanelProps) {
   );
 }
 
-// ============ Brand voice drawer ============
+// ============ 6. Competitor + SEO panel ============
+
+function CompetitorPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateCompetitor);
+  const [url, setUrl] = useState("");
+  const [niche, setNiche] = useState("");
+  const [audience, setAudience] = useState("");
+  const [result, setResult] = useState<CompetitorResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (!/^https?:\/\//i.test(url)) return setError("Enter a full URL starting with https://");
+    if (niche.trim().length < 2) return setError("Tell us your niche.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { competitor_url: url.trim(), niche: niche.trim(), audience: audience.trim() } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Competitor URL</Label>
+        <input value={url} onChange={(e) => setUrl(e.target.value.slice(0, 300))} placeholder="https://example.com"
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Your niche / category</Label>
+        <input value={niche} onChange={(e) => setNiche(e.target.value.slice(0, 200))} placeholder="indian payments SaaS"
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience (optional)</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <GenerateButton loading={loading} onClick={run}>Run teardown + SEO gap (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <h2 className="text-[16px] font-semibold">Findings</h2>
+        {!result ? <Empty>Competitor teardown, keyword gaps and long-tail ideas appear here.</Empty> : (
+          <div className="mt-5 space-y-4">
+            <CopyableBlock label="Summary" text={result.competitor_summary}>
+              <p className="text-[13.5px] leading-relaxed text-[#3c4257]">{result.competitor_summary}</p>
+            </CopyableBlock>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <CopyableBlock label="Strengths" text={result.strengths.join("\n")}>
+                <ul className="space-y-1 text-[13px] text-[#3c4257]">{result.strengths.map((s, i) => <li key={i}>+ {s}</li>)}</ul>
+              </CopyableBlock>
+              <CopyableBlock label="Weaknesses" text={result.weaknesses.join("\n")}>
+                <ul className="space-y-1 text-[13px] text-[#3c4257]">{result.weaknesses.map((s, i) => <li key={i}>− {s}</li>)}</ul>
+              </CopyableBlock>
+            </div>
+            <CopyableBlock label="Positioning gap" text={result.positioning_gap}>
+              <p className="text-[13.5px] text-[#0a2540]">{result.positioning_gap}</p>
+            </CopyableBlock>
+            <CopyableBlock label="Keyword gaps" text={result.keyword_gaps.map(k => `${k.keyword} (${k.intent}, ${k.estimated_difficulty})`).join("\n")}>
+              <table className="w-full text-left text-[12.5px]">
+                <thead className="text-[10.5px] uppercase tracking-wider text-[#697386]"><tr><th className="py-1">Keyword</th><th>Intent</th><th>Difficulty</th></tr></thead>
+                <tbody className="divide-y divide-[#eef1f5]">
+                  {result.keyword_gaps.map((k, i) => (
+                    <tr key={i}><td className="py-1.5 pr-2 font-medium text-[#0a2540]">{k.keyword}</td><td className="text-[#3c4257]">{k.intent}</td><td className="text-[#635bff]">{k.estimated_difficulty}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </CopyableBlock>
+            <CopyableBlock label="Long-tail ideas" text={result.long_tail_ideas.map(k => `${k.keyword} — ${k.angle}`).join("\n")}>
+              <ul className="space-y-1 text-[12.5px] text-[#3c4257]">
+                {result.long_tail_ideas.map((k, i) => (
+                  <li key={i}><b className="text-[#0a2540]">{k.keyword}</b> <span className="text-[#697386]">({k.intent})</span> — {k.angle}</li>
+                ))}
+              </ul>
+            </CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ============ 7. Email drip panel ============
+
+function DripPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateEmailDrip);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [goal, setGoal] = useState<"onboarding" | "reengagement" | "launch" | "nurture">("onboarding");
+  const [tone, setTone] = useState<(typeof TONES)[number]>("friendly");
+  const [result, setResult] = useState<EmailDripResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product first.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { product: product.trim(), audience, goal, tone } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  const downloadMd = () => {
+    if (!result) return;
+    const md = `# ${result.goal} drip\n\n${result.emails.map(e => `## Day ${e.send_day_offset} — Step ${e.step}\n\n**Subject:** ${e.subject}\n\n**Preview:** ${e.preview_text}\n\n${e.body_markdown}\n\n**CTA:** ${e.cta_label}\n\n---\n`).join("\n")}`;
+    downloadText(`drip-${result.goal}-${Date.now()}.md`, md, "text/markdown");
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product / service</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 280))} rows={2}
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Sequence goal</Label>
+        <select value={goal} onChange={(e) => setGoal(e.target.value as any)}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]">
+          <option value="onboarding">Onboarding (0, 1, 3, 7, 14 days)</option>
+          <option value="reengagement">Re-engagement (0, 3, 7, 14, 28)</option>
+          <option value="launch">Launch (-3, -1, 0, 1, 3)</option>
+          <option value="nurture">Nurture (0, 7, 14, 21, 30)</option>
+        </select>
+        <Label className="mt-3">Tone</Label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {TONES.map((t) => (
+            <button key={t} onClick={() => setTone(t)}
+              className={`rounded-full border px-3 py-1.5 text-[12.5px] font-medium ${tone === t ? "border-[#635bff] bg-[#635bff] text-white" : "border-[#e3e8ee] bg-white text-[#0a2540] hover:border-[#635bff]"}`}>{t}</button>
+          ))}
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate 5-step drip (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold">Email sequence</h2>
+          <button disabled={!result} onClick={downloadMd}
+            className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+            <Download className="h-3.5 w-3.5" /> .md
+          </button>
+        </div>
+        {!result ? <Empty>Five timed lifecycle emails appear here.</Empty> : (
+          <div className="mt-5 space-y-4">
+            {result.emails.map((e, i) => (
+              <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-4">
+                <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-[#697386]">
+                  <span>Step {e.step} · Day {e.send_day_offset}</span>
+                  <span className="text-[#635bff]">{e.cta_label}</span>
+                </div>
+                <p className="mt-1 text-[15px] font-semibold text-[#0a2540]">{e.subject}</p>
+                <p className="text-[12px] italic text-[#697386]">{e.preview_text}</p>
+                <pre className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-[#3c4257]">{e.body_markdown}</pre>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ============ 8. Ad pack panel ============
+
+function AdPackPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateAdPack);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [offer, setOffer] = useState("");
+  const [tone, setTone] = useState<(typeof TONES)[number]>("bold");
+  const [result, setResult] = useState<AdPackResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product first.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { product: product.trim(), audience, offer, tone } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  const Variant = ({ v }: { v: { id: string; text: string; chars: number; max: number; ok: boolean } }) => (
+    <div className="rounded-md border border-[#eef1f5] bg-white p-2.5">
+      <p className="text-[13px] text-[#0a2540]">{v.text || <em className="text-[#a3acb9]">empty</em>}</p>
+      <p className={`mt-1 text-[10.5px] font-mono ${v.ok ? "text-[#0a8a3a]" : "text-[#c0392b]"}`}>{v.chars}/{v.max}</p>
+    </div>
+  );
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 280))} rows={2}
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Offer / hook</Label>
+        <input value={offer} onChange={(e) => setOffer(e.target.value.slice(0, 200))} placeholder="20% off launch week"
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Tone</Label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {TONES.map((t) => (
+            <button key={t} onClick={() => setTone(t)}
+              className={`rounded-full border px-3 py-1.5 text-[12.5px] font-medium ${tone === t ? "border-[#635bff] bg-[#635bff] text-white" : "border-[#e3e8ee] bg-white text-[#0a2540] hover:border-[#635bff]"}`}>{t}</button>
+          ))}
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate ad pack (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <h2 className="text-[16px] font-semibold">Platform-spec ads</h2>
+        {!result ? <Empty>Google · Meta · LinkedIn · X variants with character validation.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <div>
+              <Label>Google Ads · headlines (≤30) + descriptions (≤90)</Label>
+              <div className="mt-1.5 grid gap-2 sm:grid-cols-3">{result.google.headlines.map((v) => <Variant key={v.id} v={v} />)}</div>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">{result.google.descriptions.map((v) => <Variant key={v.id} v={v} />)}</div>
+            </div>
+            <div>
+              <Label>Meta Ads · headlines (≤40) + bodies (≤125)</Label>
+              <div className="mt-1.5 grid gap-2 sm:grid-cols-5">{result.meta.headlines.map((v) => <Variant key={v.id} v={v} />)}</div>
+              <div className="mt-2 grid gap-2 sm:grid-cols-5">{result.meta.bodies.map((v) => <Variant key={v.id} v={v} />)}</div>
+            </div>
+            <div>
+              <Label>LinkedIn · intro (≤150) + headline (≤70)</Label>
+              <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
+                <Variant v={result.linkedin.intro} /><Variant v={result.linkedin.headline} />
+              </div>
+            </div>
+            <div>
+              <Label>X / Twitter · posts (≤270)</Label>
+              <div className="mt-1.5 grid gap-2 sm:grid-cols-3">{result.x.posts.map((v) => <Variant key={v.id} v={v} />)}</div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ============ 9. Landing HTML panel ============
+
+function LandingPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateLandingHtml);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [style, setStyle] = useState<"minimal" | "vibrant" | "dark" | "warm" | "techy">("minimal");
+  const [color, setColor] = useState("#635bff");
+  const [result, setResult] = useState<LandingHtmlResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product first.");
+    if (!/^#[0-9a-fA-F]{6}$/.test(color)) return setError("Color must be a #hex like #635bff");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { product: product.trim(), audience, style, primary_color: color } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  const downloadHtml = () => {
+    if (!result) return;
+    downloadText(`landing-${Date.now()}.html`, result.html, "text/html");
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 280))} rows={2}
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Style</Label>
+        <div className="mt-1.5 grid grid-cols-5 gap-1.5">
+          {(["minimal","vibrant","dark","warm","techy"] as const).map((s) => (
+            <button key={s} onClick={() => setStyle(s)}
+              className={`rounded-md border px-2 py-2 text-[12px] font-medium ${style === s ? "border-[#635bff] bg-[#635bff]/8 text-[#635bff]" : "border-[#e3e8ee] bg-white text-[#0a2540] hover:border-[#635bff]"}`}>{s}</button>
+          ))}
+        </div>
+        <Label className="mt-3">Brand color (hex)</Label>
+        <div className="mt-1.5 flex gap-2">
+          <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-14 rounded-md border border-[#e3e8ee]" />
+          <input value={color} onChange={(e) => setColor(e.target.value)}
+            className="flex-1 rounded-md border border-[#e3e8ee] bg-white px-3 py-2 font-mono text-[13px] outline-none focus:border-[#635bff]" />
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate landing HTML (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold">Landing preview</h2>
+          <button disabled={!result} onClick={downloadHtml}
+            className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+            <Download className="h-3.5 w-3.5" /> index.html
+          </button>
+        </div>
+        {!result ? <Empty>Self-contained Tailwind-CDN HTML appears here.</Empty> : (
+          <div className="mt-5">
+            <iframe srcDoc={result.html} title="landing preview" className="h-[600px] w-full rounded-lg border border-[#e3e8ee] bg-white" sandbox="allow-same-origin" />
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 
 function BrandVoiceDrawer({ onClose }: { onClose: () => void }) {
   const fetchBrand = useServerFn(getBrandProfile);
