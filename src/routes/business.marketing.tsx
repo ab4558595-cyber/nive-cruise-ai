@@ -49,7 +49,8 @@ type Mode =
   | "quick" | "campaign" | "blog" | "strategy" | "hero"
   | "competitor" | "drip" | "adpack" | "landing"
   | "calendar" | "video" | "press" | "outreach" | "voice"
-  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy";
+  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy"
+  | MarketingToolKey;
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
@@ -71,7 +72,33 @@ const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "seometa", label: "SEO meta pack", icon: Code2, credits: 2 },
   { id: "pricing", label: "Pricing copy", icon: Tags, credits: 2 },
   { id: "casestudy", label: "Case study", icon: BookOpen, credits: 3 },
+  { id: "tagline", label: "Taglines", icon: Quote, credits: 2 },
+  { id: "slogan", label: "Slogans", icon: Lightbulb, credits: 2 },
+  { id: "naming", label: "Product naming", icon: Type, credits: 2 },
+  { id: "domain", label: "Domain ideas", icon: Globe2, credits: 2 },
+  { id: "valueprop", label: "Value prop canvas", icon: Heart, credits: 2 },
+  { id: "journey", label: "Customer journey", icon: MapIcon, credits: 2 },
+  { id: "webinar", label: "Webinar promo", icon: Video, credits: 2 },
+  { id: "podcast", label: "Podcast pitch", icon: Mic, credits: 2 },
+  { id: "influencer", label: "Influencer DM", icon: AtSign, credits: 2 },
+  { id: "thread", label: "X/Twitter thread", icon: Twitter, credits: 2 },
+  { id: "carousel", label: "LinkedIn carousel", icon: Linkedin, credits: 2 },
+  { id: "youtube", label: "YouTube SEO", icon: Youtube, credits: 2 },
+  { id: "tiktok", label: "TikTok hooks", icon: Music2, credits: 2 },
+  { id: "objections", label: "Sales objections", icon: ShieldQuestion, credits: 2 },
+  { id: "promo", label: "Promo / discount", icon: Percent, credits: 2 },
+  { id: "referral", label: "Referral program", icon: Gift, credits: 2 },
+  { id: "survey", label: "Survey questions", icon: ClipboardList, credits: 2 },
+  { id: "faq", label: "FAQ pack", icon: HelpCircle, credits: 2 },
+  { id: "affiliate", label: "Affiliate program", icon: Link2, credits: 2 },
+  { id: "event", label: "Event invite", icon: PartyPopper, credits: 2 },
 ];
+
+const TOOL_KEYS_SET = new Set<string>([
+  "tagline","slogan","naming","domain","valueprop","journey","webinar","podcast",
+  "influencer","thread","carousel","youtube","tiktok","objections","promo",
+  "referral","survey","faq","affiliate","event",
+]);
 
 
 const TONES = ["professional","friendly","bold","playful","luxurious","minimal","urgent"] as const;
