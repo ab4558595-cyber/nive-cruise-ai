@@ -42,7 +42,7 @@ export const Route = createFileRoute("/api/public/razorpay/webhook")({
               );
               await supabaseAdmin
                 .from("processed_webhook_events")
-                .insert({ event_id: p.id, event_type: event.event });
+                .insert({ event_id: p.id, source: "razorpay" });
             }
           }
         }
