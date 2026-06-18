@@ -7,6 +7,7 @@ import {
   Calendar, Video, Newspaper, Send, MessageSquare, Users, FlaskConical, Code2, Tags, BookOpen,
   Quote, Lightbulb, Type, Globe2, Heart, Map as MapIcon, Mic, AtSign, Twitter, Linkedin,
   Youtube, Music2, ShieldQuestion, Percent, Gift, ClipboardList, HelpCircle, Link2, PartyPopper,
+  Rocket, FileJson,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
