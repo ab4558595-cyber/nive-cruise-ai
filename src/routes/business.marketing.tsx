@@ -142,6 +142,16 @@ function MarketingPage() {
         {mode === "drip" && <DripPanel usage={usage} setUsage={setUsage} />}
         {mode === "adpack" && <AdPackPanel usage={usage} setUsage={setUsage} />}
         {mode === "landing" && <LandingPanel usage={usage} setUsage={setUsage} />}
+        {mode === "calendar" && <CalendarPanel usage={usage} setUsage={setUsage} />}
+        {mode === "video" && <VideoPanel usage={usage} setUsage={setUsage} />}
+        {mode === "press" && <PressPanel usage={usage} setUsage={setUsage} />}
+        {mode === "outreach" && <OutreachPanel usage={usage} setUsage={setUsage} />}
+        {mode === "voice" && <VoicePanel usage={usage} setUsage={setUsage} />}
+        {mode === "personas" && <PersonasPanel usage={usage} setUsage={setUsage} />}
+        {mode === "abtest" && <ABPanel usage={usage} setUsage={setUsage} />}
+        {mode === "seometa" && <SeoMetaPanel usage={usage} setUsage={setUsage} />}
+        {mode === "pricing" && <PricingCopyPanel usage={usage} setUsage={setUsage} />}
+        {mode === "casestudy" && <CaseStudyPanel usage={usage} setUsage={setUsage} />}
       </main>
 
       {brandOpen && <BrandVoiceDrawer onClose={() => setBrandOpen(false)} />}
