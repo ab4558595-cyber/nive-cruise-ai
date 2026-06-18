@@ -582,3 +582,410 @@ export const saveBrandProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return data;
   });
+
+// ============================================================
+//  v2 expansion — Competitor research / Email drip / Ad pack / Landing HTML
+// ============================================================
+
+// ---------- 6. Competitor + SEO keyword research ----------
+
+const CompetitorInput = z.object({
+  competitor_url: z.string().trim().url("Enter a valid URL").max(500),
+  niche: z.string().trim().min(2).max(200),
+  audience: z.string().trim().max(200).optional().default(""),
+});
+
+export type CompetitorResult = {
+  competitor_summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  positioning_gap: string;
+  keyword_gaps: { keyword: string; intent: string; estimated_difficulty: "low" | "medium" | "high" }[];
+  long_tail_ideas: { keyword: string; intent: string; angle: string }[];
+  usage: UsageSnapshot;
+};
+
+async function fetchPageText(url: string): Promise<string> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": "NiveAI/1.0 (+https://nive-ai.co.in)" },
+      redirect: "follow",
+    });
+    if (!res.ok) throw new Error(`Page returned ${res.status}`);
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("text/html") && !ct.includes("text/plain")) {
+      throw new Error("URL did not return HTML");
+    }
+    // Cap at 200KB to protect against huge pages.
+    const raw = (await res.text()).slice(0, 200_000);
+    // Strip scripts/styles/tags
+    return raw
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 8000);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+export const generateCompetitor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => CompetitorInput.parse(input))
+  .handler(async ({ data, context }): Promise<CompetitorResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+
+    let pageText = "";
+    let fetchError = "";
+    try {
+      pageText = await fetchPageText(data.competitor_url);
+    } catch (e) {
+      fetchError = e instanceof Error ? e.message : "Could not fetch page";
+    }
+
+    const system = `You are a senior SEO and competitive-research analyst. Output strictly valid JSON:
+{
+  "competitor_summary": string,                       // 2-3 sentences
+  "strengths": string[3],
+  "weaknesses": string[3],
+  "positioning_gap": string,                          // 1-2 sentences
+  "keyword_gaps": [
+    {"keyword": string, "intent": "informational"|"commercial"|"transactional"|"navigational",
+     "estimated_difficulty": "low"|"medium"|"high"}
+  ],                                                  // exactly 5
+  "long_tail_ideas": [
+    {"keyword": string, "intent": "informational"|"commercial"|"transactional"|"navigational",
+     "angle": string}
+  ]                                                   // exactly 20
+}
+Base findings on the supplied page text when available. JSON only.`;
+
+    const user = `Competitor URL: ${data.competitor_url}
+Your niche: ${data.niche}
+Your audience: ${data.audience || "general"}${brandBlock(brand)}
+
+${pageText ? `Page content (cleaned, truncated):\n"""${pageText}"""` : `Could not load the page (${fetchError}). Use general knowledge about the URL's likely positioning.`}`;
+
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "competitor", url: data.competitor_url });
+
+    const arr = (v: any, n: number) => (Array.isArray(v) ? v.slice(0, n) : []);
+    return {
+      competitor_summary: String(p.competitor_summary ?? "").slice(0, 800),
+      strengths: arr(p.strengths, 5).map((s: any) => String(s).slice(0, 200)),
+      weaknesses: arr(p.weaknesses, 5).map((s: any) => String(s).slice(0, 200)),
+      positioning_gap: String(p.positioning_gap ?? "").slice(0, 400),
+      keyword_gaps: arr(p.keyword_gaps, 8).map((k: any) => ({
+        keyword: String(k.keyword ?? "").slice(0, 100),
+        intent: ["informational", "commercial", "transactional", "navigational"].includes(k.intent) ? k.intent : "informational",
+        estimated_difficulty: ["low", "medium", "high"].includes(k.estimated_difficulty) ? k.estimated_difficulty : "medium",
+      })),
+      long_tail_ideas: arr(p.long_tail_ideas, 25).map((k: any) => ({
+        keyword: String(k.keyword ?? "").slice(0, 120),
+        intent: ["informational", "commercial", "transactional", "navigational"].includes(k.intent) ? k.intent : "informational",
+        angle: String(k.angle ?? "").slice(0, 200),
+      })),
+      usage,
+    };
+  });
+
+// ---------- 7. Email drip (5-step) ----------
+
+const EmailDripInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  goal: z.enum(["onboarding", "reengagement", "launch", "nurture"]).default("onboarding"),
+  tone: z.string().trim().max(40).default("friendly"),
+});
+
+export type EmailDripResult = {
+  goal: string;
+  emails: {
+    step: number;
+    send_day_offset: number;
+    subject: string;
+    preview_text: string;
+    body_markdown: string;
+    cta_label: string;
+  }[];
+  usage: UsageSnapshot;
+};
+
+export const generateEmailDrip = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => EmailDripInput.parse(input))
+  .handler(async ({ data, context }): Promise<EmailDripResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+
+    const system = `You are a senior lifecycle email copywriter. Output strictly valid JSON:
+{
+  "emails": [
+    {
+      "step": number,                  // 1..5
+      "send_day_offset": number,       // days from trigger (0 = same day)
+      "subject": string,               // <=55 chars
+      "preview_text": string,          // 40-90 chars
+      "body_markdown": string,         // 90-200 words, conversational, single CTA
+      "cta_label": string              // <=24 chars, imperative
+    }
+  ]                                    // EXACTLY 5 emails, ordered by step
+}
+Sequence pacing for goal:
+- onboarding: 0, 1, 3, 7, 14
+- reengagement: 0, 3, 7, 14, 28
+- launch: -3, -1, 0, 1, 3
+- nurture: 0, 7, 14, 21, 30
+JSON only.`;
+
+    const user = `Product / service: ${data.product}
+Audience: ${data.audience || "general"}
+Sequence goal: ${data.goal}
+Tone: ${data.tone}${brandBlock(brand)}`;
+
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "email_drip", goal: data.goal });
+
+    const emails = Array.isArray(p.emails)
+      ? p.emails.slice(0, 5).map((e: any, i: number) => ({
+          step: Number(e.step) || i + 1,
+          send_day_offset: Number(e.send_day_offset ?? i),
+          subject: String(e.subject ?? "").slice(0, 80),
+          preview_text: String(e.preview_text ?? "").slice(0, 150),
+          body_markdown: String(e.body_markdown ?? "").slice(0, 3000),
+          cta_label: String(e.cta_label ?? "Open").slice(0, 40),
+        }))
+      : [];
+
+    return { goal: data.goal, emails, usage };
+  });
+
+// ---------- 8. Ad pack with platform specs ----------
+
+const AdPackInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  offer: z.string().trim().max(200).optional().default(""),
+  tone: z.string().trim().max(40).default("bold"),
+});
+
+type AdVariant = { id: string; text: string; chars: number; max: number; ok: boolean };
+
+export type AdPackResult = {
+  google: { headlines: AdVariant[]; descriptions: AdVariant[] };
+  meta: { headlines: AdVariant[]; bodies: AdVariant[] };
+  linkedin: { intro: AdVariant; headline: AdVariant };
+  x: { posts: AdVariant[] };
+  usage: UsageSnapshot;
+};
+
+function ad(text: string, max: number, id: string): AdVariant {
+  const t = String(text ?? "").trim().slice(0, max + 50);
+  return { id, text: t, chars: t.length, max, ok: t.length <= max && t.length > 0 };
+}
+
+export const generateAdPack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => AdPackInput.parse(input))
+  .handler(async ({ data, context }): Promise<AdPackResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+
+    const system = `You are a senior performance-marketing copywriter. Output strictly valid JSON:
+{
+  "google_headlines": string[3],          // each <=30 chars
+  "google_descriptions": string[2],       // each <=90 chars
+  "meta_headlines": string[5],            // each <=40 chars
+  "meta_bodies": string[5],               // each <=125 chars
+  "linkedin_intro": string,               // <=150 chars
+  "linkedin_headline": string,            // <=70 chars
+  "x_posts": string[3]                    // each <=270 chars (leaves room for link)
+}
+Hard limits. JSON only.`;
+
+    const user = `Product: ${data.product}
+Audience: ${data.audience || "general"}
+Offer / hook: ${data.offer || "none"}
+Tone: ${data.tone}${brandBlock(brand)}`;
+
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "ad_pack" });
+
+    const arr = (v: any, n: number) => (Array.isArray(v) ? v.slice(0, n) : []);
+    return {
+      google: {
+        headlines: arr(p.google_headlines, 3).map((t: any, i: number) => ad(t, 30, `g-h-${i + 1}`)),
+        descriptions: arr(p.google_descriptions, 2).map((t: any, i: number) => ad(t, 90, `g-d-${i + 1}`)),
+      },
+      meta: {
+        headlines: arr(p.meta_headlines, 5).map((t: any, i: number) => ad(t, 40, `m-h-${i + 1}`)),
+        bodies: arr(p.meta_bodies, 5).map((t: any, i: number) => ad(t, 125, `m-b-${i + 1}`)),
+      },
+      linkedin: {
+        intro: ad(p.linkedin_intro ?? "", 150, "li-intro"),
+        headline: ad(p.linkedin_headline ?? "", 70, "li-headline"),
+      },
+      x: {
+        posts: arr(p.x_posts, 3).map((t: any, i: number) => ad(t, 270, `x-${i + 1}`)),
+      },
+      usage,
+    };
+  });
+
+// ---------- 9. Landing page → HTML export ----------
+
+const LandingHtmlInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  style: z.enum(["minimal", "vibrant", "dark", "warm", "techy"]).default("minimal"),
+  primary_color: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Use a hex color like #635bff").default("#635bff"),
+});
+
+export type LandingHtmlResult = {
+  html: string;
+  sections: {
+    hero: { h1: string; subhead: string; cta_primary: string; cta_secondary: string };
+    features: { title: string; body: string }[];
+    faq: { q: string; a: string }[];
+    footer_note: string;
+  };
+  usage: UsageSnapshot;
+};
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildLandingHtml(
+  product: string,
+  primaryColor: string,
+  sections: LandingHtmlResult["sections"],
+): string {
+  const safeColor = /^#[0-9a-fA-F]{6}$/.test(primaryColor) ? primaryColor : "#635bff";
+  const title = escapeHtml(sections.hero.h1 || product);
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${title}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>:root{--brand:${safeColor};} body{font-family:Inter,system-ui,-apple-system,Sans-serif;}</style>
+</head>
+<body class="bg-white text-slate-900">
+<header class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+  <div class="font-bold text-lg">${escapeHtml(product).slice(0, 40)}</div>
+  <a href="#cta" class="rounded-full px-4 py-2 text-white text-sm font-semibold" style="background:var(--brand);">${escapeHtml(sections.hero.cta_primary)}</a>
+</header>
+<section class="max-w-5xl mx-auto px-6 pt-16 pb-24 text-center">
+  <h1 class="text-4xl md:text-6xl font-bold tracking-tight">${escapeHtml(sections.hero.h1)}</h1>
+  <p class="mt-6 text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">${escapeHtml(sections.hero.subhead)}</p>
+  <div class="mt-8 flex justify-center gap-3">
+    <a id="cta" href="#" class="rounded-full px-6 py-3 text-white text-base font-semibold" style="background:var(--brand);">${escapeHtml(sections.hero.cta_primary)}</a>
+    <a href="#features" class="rounded-full px-6 py-3 text-base font-semibold ring-1 ring-slate-200">${escapeHtml(sections.hero.cta_secondary)}</a>
+  </div>
+</section>
+<section id="features" class="bg-slate-50 border-y border-slate-200">
+  <div class="max-w-6xl mx-auto px-6 py-20 grid gap-8 md:grid-cols-3">
+    ${sections.features
+      .map(
+        (f) => `<div class="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <h3 class="text-lg font-semibold">${escapeHtml(f.title)}</h3>
+      <p class="mt-2 text-sm text-slate-600 leading-relaxed">${escapeHtml(f.body)}</p>
+    </div>`,
+      )
+      .join("\n    ")}
+  </div>
+</section>
+<section class="max-w-3xl mx-auto px-6 py-20">
+  <h2 class="text-3xl font-bold text-center">Frequently asked</h2>
+  <div class="mt-10 space-y-4">
+    ${sections.faq
+      .map(
+        (q) => `<details class="group rounded-xl bg-white ring-1 ring-slate-200 p-5">
+      <summary class="flex justify-between cursor-pointer text-base font-semibold">${escapeHtml(q.q)}<span class="ml-4 text-slate-400 group-open:rotate-45 transition-transform">+</span></summary>
+      <p class="mt-3 text-sm text-slate-600 leading-relaxed">${escapeHtml(q.a)}</p>
+    </details>`,
+      )
+      .join("\n    ")}
+  </div>
+</section>
+<section class="text-white" style="background:var(--brand);">
+  <div class="max-w-5xl mx-auto px-6 py-16 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold">${escapeHtml(sections.hero.h1)}</h2>
+    <a href="#" class="mt-6 inline-block rounded-full bg-white px-6 py-3 text-base font-semibold" style="color:var(--brand);">${escapeHtml(sections.hero.cta_primary)}</a>
+  </div>
+</section>
+<footer class="max-w-6xl mx-auto px-6 py-10 text-center text-xs text-slate-500">
+  ${escapeHtml(sections.footer_note)}
+</footer>
+</body>
+</html>`;
+}
+
+export const generateLandingHtml = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => LandingHtmlInput.parse(input))
+  .handler(async ({ data, context }): Promise<LandingHtmlResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+
+    const system = `You are a senior landing-page copywriter. Output strictly valid JSON:
+{
+  "hero": {"h1": string, "subhead": string, "cta_primary": string, "cta_secondary": string},
+  "features": [{"title": string, "body": string}, ...],   // exactly 3
+  "faq": [{"q": string, "a": string}, ...],               // exactly 4
+  "footer_note": string                                   // short legal/footer line
+}
+JSON only.`;
+    const user = `Product: ${data.product}
+Audience: ${data.audience || "general"}
+Style: ${data.style}${brandBlock(brand)}`;
+
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "landing_html", style: data.style });
+
+    const sections: LandingHtmlResult["sections"] = {
+      hero: {
+        h1: String(p.hero?.h1 ?? "").slice(0, 140),
+        subhead: String(p.hero?.subhead ?? "").slice(0, 280),
+        cta_primary: String(p.hero?.cta_primary ?? "Get started").slice(0, 30),
+        cta_secondary: String(p.hero?.cta_secondary ?? "Learn more").slice(0, 30),
+      },
+      features: Array.isArray(p.features)
+        ? p.features.slice(0, 3).map((f: any) => ({
+            title: String(f.title ?? "").slice(0, 80),
+            body: String(f.body ?? "").slice(0, 240),
+          }))
+        : [],
+      faq: Array.isArray(p.faq)
+        ? p.faq.slice(0, 4).map((f: any) => ({
+            q: String(f.q ?? "").slice(0, 160),
+            a: String(f.a ?? "").slice(0, 400),
+          }))
+        : [],
+      footer_note: String(p.footer_note ?? `© ${new Date().getFullYear()} ${data.product}`).slice(0, 200),
+    };
+
+    return {
+      html: buildLandingHtml(data.product, data.primary_color, sections),
+      sections,
+      usage,
+    };
+  });

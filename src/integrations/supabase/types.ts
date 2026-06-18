@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      abuse_log: {
+        Row: {
+          hits: number
+          id: string
+          ip: string
+          route: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          hits?: number
+          id?: string
+          ip: string
+          route: string
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          hits?: number
+          id?: string
+          ip?: string
+          route?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       brand_profiles: {
         Row: {
           audience: string | null
@@ -260,6 +287,24 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_webhook_events: {
+        Row: {
+          event_id: string
+          processed_at: string
+          source: string
+        }
+        Insert: {
+          event_id: string
+          processed_at?: string
+          source: string
+        }
+        Update: {
+          event_id?: string
+          processed_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -275,6 +320,39 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+        }
+        Relationships: []
+      }
+      saved_schemas: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          schema_json: Json
+          share_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          schema_json: Json
+          share_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          schema_json?: Json
+          share_token?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

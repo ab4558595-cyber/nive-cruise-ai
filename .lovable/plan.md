@@ -1,93 +1,100 @@
-# Upgrade Marketing Agent + Synthetic Data
+# Security hardening + big Business suite expansion
 
-## 1. Marketing Agent — multi-mode generator
+## 1. Security — fix all findings + harden surface
 
-Convert `business.marketing.tsx` from a single "headline+body" tool into a tabbed workspace with five modes, each backed by its own server fn in `src/lib/marketing.functions.ts` (shared OpenRouter helper, shared usage accounting via `consumeBusinessUsage` so credits stay consistent).
+### 1a. Fix scanner findings (one migration)
+- **`payment_requests.approval_token`** is currently readable by the owning user. Revoke column SELECT on `approval_token` from `authenticated` + `anon` (column-level `REVOKE`), and replace the `own requests read` policy with one that's still row-scoped to `auth.uid()`. Server code that needs the token already uses `service_role`.
+- **`business_tool_events`** has a client INSERT policy → users can fabricate credit usage. Drop the `own events insert` policy. Only `service_role` (used by `consumeBusinessUsage`) writes; clients still SELECT their own rows for history.
+- **SECURITY DEFINER pgmq wrappers** (`enqueue_email`, `read_email_batch`, `delete_email`, `move_to_dlq`) are callable by `authenticated` → `REVOKE EXECUTE … FROM authenticated, anon`. Keep `service_role` for the queue worker. (Email infra still works — cron job uses service role.)
+- Re-verify `has_role` stays executable by `authenticated` (it has to be, for RLS policies).
 
-**Modes**
-1. **Quick copy** — current flow (headline + 5 variants + body + CTA). 1 credit.
-2. **Full campaign pack** — one run produces: 5 ad headlines, 3 ad bodies (Google/Meta-sized), 5 email subject lines + 1 email body, 3 social posts (Twitter ≤270c, LinkedIn ≤900c, Instagram caption + 8 hashtags), 1 landing hero (h1, subhead, 3 bullets, CTA). 3 credits.
-3. **SEO blog writer** — title, meta description (≤155c), slug, H2/H3 outline, 700–1000 word markdown body, FAQ block (3 Qs), suggested internal-link anchors. 3 credits.
-4. **Marketing strategy** — 30-day go-to-market plan: positioning statement, 3 target segments, channel mix with weekly cadence, 5 content pillars, KPI table, week-by-week action list. 2 credits.
-5. **Hero image + landing wireframe** — calls Lovable AI image model (`google/gemini-2.5-flash-image`) for one hero image (returned as base64 → blob URL, downloadable), plus a JSON wireframe (sections: hero, social proof, 3 feature blocks, pricing teaser, FAQ, footer-CTA) rendered as a stacked preview. 2 credits (1 text + image).
+### 1b. Webhook + API hardening (`src/routes/api/public/razorpay/webhook.ts`, `try-ai.ts`, `approve-payment.tsx`)
+- Razorpay webhook already verifies HMAC — add timing-safe compare + **replay protection** via a new `processed_webhook_events` table (UNIQUE on `event_id`); insert before processing, ignore duplicates.
+- `try-ai.ts`: add IP-based rate limit (10 req / hour / IP) using new `abuse_log` table; Zod-validate body (`max(2000)` chars, no control chars).
+- `approve-payment.tsx`: confirm timing-safe token compare, add per-token attempt counter (lock after 5 fails).
 
-**Brand voice memory** (new table `brand_profiles`)
-- Fields: `user_id` (PK), `brand_name`, `voice`, `audience`, `usp`, `keywords`, `forbidden_words`, `updated_at`.
-- New "Brand voice" drawer on the marketing page to save/edit. Auto-injected into every prompt when present.
-- New server fns `getBrandProfile` / `saveBrandProfile` (auth-gated).
+### 1c. Security headers + abuse log
+- New `src/middleware/security-headers.ts` registered as `requestMiddleware` in `src/start.ts`:
+  - `Content-Security-Policy` (strict; allow self, supabase, openrouter, razorpay)
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+  - `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(self), geolocation=()`
+- New `abuse_log` table (ip, route, hits, window_start) used by a shared `rateLimit(ip, route, max, windowSec)` helper in `src/lib/rate-limit.server.ts`. Applied to `try-ai`, `generateMarketing`, `generateSynthetic`, `purchaseBusinessTopup`.
 
-**UI**
-- Tabs across the top of `business.marketing.tsx`: Quick · Campaign · Blog · Strategy · Hero & wireframe · Brand voice.
-- Each result panel gets its own renderer (markdown for blog/strategy, image preview for hero, structured cards for campaign pack).
-- Copy/Download per block (already exists for Quick — extended to other modes; downloads `.md` for blog/strategy, `.png` for hero, `.json` for wireframe, `.txt` for campaign).
-- Loading + error states reuse existing `Block` component.
+### 1d. Auth/session polish
+- Re-confirm `password_hibp_enabled` via `configure_auth`.
+- Set min password length 10, OTP expiry 5 min.
 
-## 2. Synthetic Data — bigger, richer, relational
+## 2. Marketing Agent — 4 new modes (added to existing tabs)
 
-Rewrite `business.synthetic-data.tsx` (UI) and create `src/lib/synthetic.functions.ts` for the new relational generator (kept client-side for single-table — fast and free; relational is server-side because it requires deterministic cross-table joins and counts as 1 credit per call).
+In `src/lib/marketing.functions.ts` + `src/routes/business.marketing.tsx`:
 
-**Schema builder upgrades**
-- Up to **24 fields** (was 12).
-- New field types: `uuid`, `username`, `company`, `job_title`, `country`, `state`, `zip`, `street`, `lat`, `lng`, `currency_inr`, `currency_usd`, `currency_eur`, `percent`, `rating_1_5`, `iso_datetime`, `url`, `ipv4`, `paragraph`, `tag` (custom enum), `int_range`, `float_range`.
-- Locale selector: **India / US / EU / Global** — swaps first/last name pools, city/state lists, phone format, currency, postal code.
-- Optional per-field config (modal): nullable %, custom enum values, min/max for numbers, date range.
+| Mode | Credits | Output |
+|---|---|---|
+| **Competitor + SEO research** | 3 | Paste competitor URL + your niche → positioning teardown (3 strengths / 3 weaknesses), 5 keyword gaps, 20 long-tail keyword ideas with intent + difficulty estimate |
+| **Email drip (5-step)** | 3 | Onboarding / re-engagement / launch templates; each step has subject, preview text, body (markdown), send-day offset, primary CTA |
+| **Ad pack with platform specs** | 3 | Google (3×30/2×90), Meta (5 headlines×40 + 5 bodies×125), LinkedIn (intro≤150, headline≤70), X (≤280) — each variant validated against limit, A/B-pair tagged |
+| **Landing page → HTML export** | 3 | Hero/features/FAQ/CTA — renders as preview AND downloads a single self-contained `index.html` with inline Tailwind-CDN classes |
 
-**Volume + export**
-- Rows: up to **5000** for single-table (already supported), default 100.
-- Export buttons: **CSV**, **JSON**, **NDJSON**, **SQL INSERT** (asks for table name), **Markdown table** preview.
-- Streaming download for >1000 rows (build CSV/SQL via `Blob` chunks).
+All new modes use brand voice memory; competitor mode fetches the URL via `fetch` server-side (15s timeout, max 200 KB) and feeds the cleaned text into the prompt.
 
-**Relational mode (new toggle)**
-- Preset blueprints: `SaaS users + workspaces + subscriptions`, `E-commerce customers + orders + line_items + products`, `Support tickets + agents + messages`, `Healthcare patients + appointments + providers`, `Finance accounts + transactions`.
-- Generator produces 2–4 linked tables with valid FK ids and realistic distributions (e.g. 1 user → 0–8 orders, each order → 1–5 line items).
-- Output: a zip-like multi-file download — emits one combined `.sql` (CREATE TABLE + INSERT) and per-table CSVs in a single `.zip` (use `jszip`).
-- Counts as **2 credits** per run.
+## 3. Synthetic Data — 4 new capabilities
 
-**Presets expansion**
-- Add: SaaS users, Subscriptions, Tickets, Patients, Transactions, Products, Inventory, Employees — alongside existing Customers / Orders / Users (auth).
+In `src/routes/business.synthetic-data.tsx` + new `src/lib/synthetic-advanced.functions.ts`:
 
-## 3. Limits + Pro multiplier
+| Feature | Where | Cost |
+|---|---|---|
+| **Import schema (CSV header / SQL DDL)** | New "Import" button → modal accepts paste; client-side parses `CREATE TABLE (...)` and CSV first-row; maps to existing field types using rules + a tiny inference table (`email`→email, `_at`→datetime, `price/amount`→currency, etc.). | free / client |
+| **AI-described schema** | "Describe your dataset" textarea → server fn calls Gemini, returns `{ fields: [...] }` JSON matching our schema. | 2 credits |
+| **Time-series + event streams** | New mode: pick entity (users), date range, event types (signup/login/purchase…), DAU pattern (linear/exp/seasonal). Generates timestamped event log with funnel drop-off + session ids. Up to 50 000 events. | 2 credits |
+| **Saved schemas + re-run** | New `saved_schemas` table (user_id, name, schema_json, kind, created_at). Sidebar list with re-run button and shareable read-only link `/business/synthetic-data/shared/:token`. | 1 credit per re-run |
 
-Edit `src/lib/businessUsage.functions.ts`:
-- Raise base daily limits: `synthetic: 40` (was 20), `marketing: 30` (was 15).
-- Add **plan multiplier**: `biz-growth` → ×2 (so 80 / 60), `biz-scale`/admin already unlimited (unchanged at 9999).
-- `loadUsage` returns the multiplied effective limit; `UsageBadge` already displays `limit` correctly.
-- Heavy modes consume more credits per run (campaign 3, blog 3, strategy 2, hero+wireframe 2, relational 2) — enforced by passing an optional `credits` param to `consumeBusinessUsage` (default 1). Adds `credits` to the upsert math and to the event log.
+## 4. Database migrations (one file)
 
-## 4. Database migration
-
-Single migration:
 ```sql
-CREATE TABLE public.brand_profiles (
-  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  brand_name text, voice text, audience text, usp text,
-  keywords text[] DEFAULT '{}', forbidden_words text[] DEFAULT '{}',
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.brand_profiles TO authenticated;
-GRANT ALL ON public.brand_profiles TO service_role;
-ALTER TABLE public.brand_profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "own brand" ON public.brand_profiles
-  FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+-- finding fixes
+REVOKE SELECT (approval_token) ON public.payment_requests FROM authenticated, anon;
+DROP POLICY "own events insert" ON public.business_tool_events;
+REVOKE EXECUTE ON FUNCTION public.enqueue_email, public.read_email_batch,
+  public.delete_email, public.move_to_dlq FROM authenticated, anon;
+
+-- abuse + replay
+CREATE TABLE public.abuse_log (...);          -- ip, route, hits, window_start
+CREATE TABLE public.processed_webhook_events (event_id text PK, source text, processed_at);
+CREATE TABLE public.saved_schemas (...);      -- user_id, name, kind, schema_json, share_token
+
+-- grants + RLS for the 3 new tables (server-only writes for abuse_log + webhook table,
+-- user-scoped CRUD for saved_schemas; anon SELECT for shared schema via token).
 ```
 
-## 5. Files touched
+## 5. Files
 
 **New**
-- `src/lib/marketing.functions.ts` — add `generateCampaign`, `generateBlog`, `generateStrategy`, `generateHeroWireframe`, `getBrandProfile`, `saveBrandProfile`.
-- `src/lib/synthetic.functions.ts` — `generateRelationalDataset` server fn.
-- `src/components/BrandVoiceDrawer.tsx`
-- `src/components/MarketingTabs.tsx` (or inlined in the route)
+- `supabase/migrations/<ts>_security_and_business_v2.sql`
+- `src/lib/rate-limit.server.ts`
+- `src/middleware/security-headers.ts`
+- `src/lib/synthetic-advanced.functions.ts`
+- `src/components/SchemaImportDialog.tsx`
+- `src/components/SavedSchemasPanel.tsx`
+- `src/routes/business.synthetic-data.shared.$token.tsx`
 
 **Edited**
-- `src/routes/business.marketing.tsx` — tabbed UI, all 5 modes, brand voice drawer.
-- `src/routes/business.synthetic-data.tsx` — new field types, locale picker, relational toggle, expanded presets, new exports (CSV/JSON/NDJSON/SQL/Markdown/zip).
-- `src/lib/businessUsage.functions.ts` — raised limits, plan multiplier, optional `credits` arg on `consumeBusinessUsage`.
-- `src/routes/business.index.tsx` — update feature bullets to mention new capabilities.
-
-**Dependency**
-- `bun add jszip` for relational zip export.
+- `src/start.ts` — register security-headers middleware
+- `src/lib/marketing.functions.ts` — 4 new server fns
+- `src/routes/business.marketing.tsx` — 4 new tabs
+- `src/routes/business.synthetic-data.tsx` — import button, AI describe, time-series mode, saved-schemas sidebar
+- `src/routes/api/public/razorpay/webhook.ts` — replay table, timing-safe compare
+- `src/routes/api/public/try-ai.ts` — Zod + rate limit
+- `src/routes/api/public/approve-payment.tsx` — attempt counter
+- `src/lib/businessUsage.functions.ts` — call rate-limit helper
 
 ## 6. Verification
-- Typecheck passes (build runs automatically).
-- Manually generate one run per marketing mode and one relational dataset to confirm credit math and downloads work.
+- Re-run security scan + linter; all errors gone.
+- Manual sanity: one run per new marketing mode + new synthetic mode.
+- Typecheck via auto build.
+
+## 7. Notes / trade-offs
+- Strict CSP may need tweaking for Razorpay's iframe — included `https://checkout.razorpay.com` + `https://api.razorpay.com`.
+- AI-described schema may occasionally return invalid JSON → graceful fallback message; user retries free.
+- Competitor URL fetch is a single GET; SPAs that need JS won't render — clearly stated in UI.

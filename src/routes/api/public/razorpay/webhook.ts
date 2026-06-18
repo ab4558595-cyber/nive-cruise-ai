@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { markWebhookProcessed } from "@/lib/rate-limit.server";
 
 // Safety-net webhook: activates the user_plan in case the client-side verify
-// call fails (e.g. user closes the tab right after payment). The checkout
-// success flow normally activates the plan synchronously via verifyRazorpayPayment.
+// call fails (e.g. user closes the tab right after payment). HMAC verified +
+// replay-protected via processed_webhook_events.
 
 const VALID_PLANS = new Set(["starter", "pro", "biz-growth", "biz-scale"]);
 
@@ -23,6 +24,20 @@ export const Route = createFileRoute("/api/public/razorpay/webhook")({
           event = JSON.parse(rawBody);
         } catch {
           return new Response("Invalid JSON", { status: 400 });
+        }
+
+        // Replay protection: dedupe by Razorpay event id.
+        const eventId = event?.id ?? event?.payload?.payment?.entity?.id;
+        if (eventId) {
+          try {
+            const fresh = await markWebhookProcessed(String(eventId), "razorpay");
+            if (!fresh) {
+              return Response.json({ received: true, duplicate: true });
+            }
+          } catch (e) {
+            console.error("replay-protection insert failed:", e);
+            // Continue — better to risk a rare double-process than to fail webhooks.
+          }
         }
 
         try {
