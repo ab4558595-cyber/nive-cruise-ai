@@ -49,6 +49,7 @@ export const Route = createFileRoute("/business/marketing")({
 });
 
 type Mode =
+  | "megapack"
   | "quick" | "campaign" | "blog" | "strategy" | "hero"
   | "competitor" | "drip" | "adpack" | "landing"
   | "calendar" | "video" | "press" | "outreach" | "voice"
