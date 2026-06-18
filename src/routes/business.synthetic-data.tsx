@@ -964,8 +964,94 @@ function SyntheticDataPage() {
               </div>
             </div>
           </div>
+        ) : (
+          // Time-series mode
+          <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+            <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
+              <h2 className="text-[16px] font-semibold">Event stream</h2>
+              <p className="mt-1 text-[12px] text-[#697386]">Generates session-grouped events with funnel drop-off.</p>
+              <div className="mt-4 space-y-3">
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Users (10–2000)</span>
+                  <input type="number" min={10} max={2000} value={tsUsers} onChange={(e) => setTsUsers(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Days back (1–180)</span>
+                  <input type="number" min={1} max={180} value={tsDays} onChange={(e) => setTsDays(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Event types (comma-separated, in funnel order)</span>
+                  <input value={tsEventTypes} onChange={(e) => setTsEventTypes(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="flex items-center gap-2 text-[13px] text-[#0a2540]">
+                  <input type="checkbox" checked={tsFunnel} onChange={(e) => setTsFunnel(e.target.checked)} />
+                  Apply funnel drop-off at each step
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Seed</span>
+                  <input type="number" value={seed} onChange={(e) => setSeed(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+              </div>
+              <button onClick={handleGenerateTimeSeries} disabled={generating}
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] hover:bg-[#5048d6] disabled:opacity-60">
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+                Generate event stream (2 credits)
+              </button>
+              {error && <p className="mt-3 rounded-md bg-[#fff1f0] px-3 py-2 text-[12.5px] text-[#c0392b]">{error}</p>}
+            </div>
+            <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-[16px] font-semibold">Events</h2>
+                  <p className="mt-0.5 text-[12px] text-[#697386]">
+                    {tsResult ? `${tsResult.summary.total_events} events from ${tsResult.summary.user_count} users over ${tsResult.summary.days} days` : "Generate an event stream to see preview."}
+                  </p>
+                </div>
+                <div className="flex gap-1.5">
+                  <ExportBtn label="CSV" disabled={!tsResult} onClick={() => tsResult && downloadBlob(`events-${Date.now()}.csv`, toCSV(tsResult.events.map((e) => ({ ...e, properties: JSON.stringify(e.properties) }))), "text/csv")} />
+                  <ExportBtn label="NDJSON" disabled={!tsResult} onClick={() => tsResult && downloadBlob(`events-${Date.now()}.ndjson`, toNDJSON(tsResult.events as any), "application/x-ndjson")} />
+                </div>
+              </div>
+              {tsResult && (
+                <div className="mt-4">
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {Object.entries(tsResult.summary.by_type).map(([t, n]) => (
+                      <span key={t} className="rounded-md bg-[#f6f9fc] px-2 py-1 text-[11px] font-mono text-[#425466] ring-1 ring-[#e3e8ee]">{t}: <b className="text-[#635bff]">{n}</b></span>
+                    ))}
+                  </div>
+                  <div className="overflow-auto rounded-lg border border-[#e3e8ee]">
+                    <table className="w-full text-left text-[12px]">
+                      <thead className="bg-[#f6f9fc] text-[10.5px] uppercase text-[#697386]">
+                        <tr><th className="px-2.5 py-1.5">event_id</th><th>user_id</th><th>event_type</th><th>occurred_at</th><th>session_id</th></tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#eef1f5]">
+                        {tsResult.events.slice(0, 30).map((e) => (
+                          <tr key={e.event_id} className="text-[#3c4257]">
+                            <td className="whitespace-nowrap px-2.5 py-1.5 font-mono">{e.event_id}</td>
+                            <td className="px-2.5 py-1.5">{e.user_id}</td>
+                            <td className="px-2.5 py-1.5 font-medium text-[#0a2540]">{e.event_type}</td>
+                            <td className="whitespace-nowrap px-2.5 py-1.5">{e.occurred_at}</td>
+                            <td className="whitespace-nowrap px-2.5 py-1.5 font-mono text-[11px] text-[#697386]">{e.session_id}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </main>
+
+      {aiOpen && <AIDescribeModal onClose={() => setAiOpen(false)} onApply={handleAIDescribe} />}
+      {importOpen && <ImportModal onClose={() => setImportOpen(false)} onApply={handleImport} />}
+      {savedOpen && <SavedSchemasModal items={savedList} onClose={() => setSavedOpen(false)}
+        onLoad={loadSaved} onDelete={async (id) => { await delFn({ data: { id } }); listFn().then(setSavedList).catch(() => {}); }} />}
 
       {/* Field config modal */}
       {configIdx !== null && (
