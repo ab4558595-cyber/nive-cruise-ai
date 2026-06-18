@@ -1051,7 +1051,7 @@ function SyntheticDataPage() {
       {aiOpen && <AIDescribeModal onClose={() => setAiOpen(false)} onApply={handleAIDescribe} />}
       {importOpen && <ImportModal onClose={() => setImportOpen(false)} onApply={handleImport} />}
       {savedOpen && <SavedSchemasModal items={savedList} onClose={() => setSavedOpen(false)}
-        onLoad={loadSaved} onDelete={async (id) => { await delFn({ data: { id } }); listFn().then(setSavedList).catch(() => {}); }} />}
+        onLoad={loadSaved} onDelete={async (id: string) => { await delFn({ data: { id } }); listFn().then(setSavedList).catch(() => {}); }} />}
 
       {/* Field config modal */}
       {configIdx !== null && (
