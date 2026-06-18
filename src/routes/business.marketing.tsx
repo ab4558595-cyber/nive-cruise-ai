@@ -5,6 +5,8 @@ import {
   ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check, FileText, Compass,
   Image as ImageIcon, Layout, Palette, X, Plus, Trash2, Search, Mail, Target, Globe,
   Calendar, Video, Newspaper, Send, MessageSquare, Users, FlaskConical, Code2, Tags, BookOpen,
+  Quote, Lightbulb, Type, Globe2, Heart, Map as MapIcon, Mic, AtSign, Twitter, Linkedin,
+  Youtube, Music2, ShieldQuestion, Percent, Gift, ClipboardList, HelpCircle, Link2, PartyPopper,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -16,6 +18,7 @@ import {
   generateSocialCalendar, generateVideoScript, generatePressRelease, generateColdOutreach,
   generateBrandVoice, generatePersonas, generateABVariants, generateSeoMeta,
   generatePricingCopy, generateCaseStudy,
+  generateMarketingTool, type MarketingToolKey,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
   type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
@@ -46,7 +49,8 @@ type Mode =
   | "quick" | "campaign" | "blog" | "strategy" | "hero"
   | "competitor" | "drip" | "adpack" | "landing"
   | "calendar" | "video" | "press" | "outreach" | "voice"
-  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy";
+  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy"
+  | MarketingToolKey;
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
@@ -68,7 +72,33 @@ const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "seometa", label: "SEO meta pack", icon: Code2, credits: 2 },
   { id: "pricing", label: "Pricing copy", icon: Tags, credits: 2 },
   { id: "casestudy", label: "Case study", icon: BookOpen, credits: 3 },
+  { id: "tagline", label: "Taglines", icon: Quote, credits: 2 },
+  { id: "slogan", label: "Slogans", icon: Lightbulb, credits: 2 },
+  { id: "naming", label: "Product naming", icon: Type, credits: 2 },
+  { id: "domain", label: "Domain ideas", icon: Globe2, credits: 2 },
+  { id: "valueprop", label: "Value prop canvas", icon: Heart, credits: 2 },
+  { id: "journey", label: "Customer journey", icon: MapIcon, credits: 2 },
+  { id: "webinar", label: "Webinar promo", icon: Video, credits: 2 },
+  { id: "podcast", label: "Podcast pitch", icon: Mic, credits: 2 },
+  { id: "influencer", label: "Influencer DM", icon: AtSign, credits: 2 },
+  { id: "thread", label: "X/Twitter thread", icon: Twitter, credits: 2 },
+  { id: "carousel", label: "LinkedIn carousel", icon: Linkedin, credits: 2 },
+  { id: "youtube", label: "YouTube SEO", icon: Youtube, credits: 2 },
+  { id: "tiktok", label: "TikTok hooks", icon: Music2, credits: 2 },
+  { id: "objections", label: "Sales objections", icon: ShieldQuestion, credits: 2 },
+  { id: "promo", label: "Promo / discount", icon: Percent, credits: 2 },
+  { id: "referral", label: "Referral program", icon: Gift, credits: 2 },
+  { id: "survey", label: "Survey questions", icon: ClipboardList, credits: 2 },
+  { id: "faq", label: "FAQ pack", icon: HelpCircle, credits: 2 },
+  { id: "affiliate", label: "Affiliate program", icon: Link2, credits: 2 },
+  { id: "event", label: "Event invite", icon: PartyPopper, credits: 2 },
 ];
+
+const TOOL_KEYS_SET = new Set<string>([
+  "tagline","slogan","naming","domain","valueprop","journey","webinar","podcast",
+  "influencer","thread","carousel","youtube","tiktok","objections","promo",
+  "referral","survey","faq","affiliate","event",
+]);
 
 
 const TONES = ["professional","friendly","bold","playful","luxurious","minimal","urgent"] as const;
@@ -152,6 +182,9 @@ function MarketingPage() {
         {mode === "seometa" && <SeoMetaPanel usage={usage} setUsage={setUsage} />}
         {mode === "pricing" && <PricingCopyPanel usage={usage} setUsage={setUsage} />}
         {mode === "casestudy" && <CaseStudyPanel usage={usage} setUsage={setUsage} />}
+        {TOOL_KEYS_SET.has(mode) && (
+          <ToolPanel key={mode} tool={mode as MarketingToolKey} label={TABS.find(t => t.id === mode)?.label ?? mode} usage={usage} setUsage={setUsage} />
+        )}
       </main>
 
       {brandOpen && <BrandVoiceDrawer onClose={() => setBrandOpen(false)} />}
@@ -1784,4 +1817,73 @@ function Label({ children, className = "" }: { children: React.ReactNode; classN
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="mt-6 flex h-72 items-center justify-center rounded-lg border border-dashed border-[#e3e8ee] text-[13.5px] text-[#697386]">{children}</div>;
+}
+
+// ============ Generic markdown ToolPanel (powers 20 lightweight features) ============
+
+function ToolPanel({ tool, label, usage, setUsage }: PanelProps & { tool: MarketingToolKey; label: string }) {
+  const gen = useServerFn(generateMarketingTool);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [extra, setExtra] = useState("");
+  const [markdown, setMarkdown] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product or service first.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { tool, product: product.trim(), audience: audience.trim(), extra: extra.trim() } });
+      setMarkdown(r.markdown); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product / service</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 400))} rows={3}
+          placeholder="What are you marketing?"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Audience (optional)</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Extra context (optional)</Label>
+        <textarea value={extra} onChange={(e) => setExtra(e.target.value.slice(0, 800))} rows={3}
+          placeholder="Goals, constraints, must-mention details…"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <GenerateButton loading={loading} onClick={run}>Generate {label.toLowerCase()} (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold">{label}</h2>
+          {markdown && (
+            <div className="flex gap-2">
+              <button type="button" onClick={async () => {
+                try { await navigator.clipboard.writeText(markdown); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch {}
+              }} className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}{copied ? "Copied" : "Copy"}
+              </button>
+              <button type="button" onClick={() => downloadText(`${tool}-${Date.now()}.md`, markdown, "text/markdown")}
+                className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                <Download className="h-3 w-3" /> .md
+              </button>
+            </div>
+          )}
+        </div>
+        {!markdown ? <Empty>Fill in the form to generate.</Empty> : (
+          <pre className="mt-5 max-h-[640px] overflow-auto whitespace-pre-wrap rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-4 font-sans text-[13.5px] leading-relaxed text-[#3c4257]">{markdown}</pre>
+        )}
+      </Card>
+    </div>
+  );
 }
