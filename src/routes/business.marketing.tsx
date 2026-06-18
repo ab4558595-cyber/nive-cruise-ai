@@ -57,6 +57,7 @@ type Mode =
   | MarketingToolKey;
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
+  { id: "megapack", label: "Mega Pack ⚡", icon: Rocket, credits: 8 },
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
   { id: "campaign", label: "Campaign pack", icon: Megaphone, credits: 3 },
   { id: "blog", label: "SEO blog", icon: FileText, credits: 3 },
