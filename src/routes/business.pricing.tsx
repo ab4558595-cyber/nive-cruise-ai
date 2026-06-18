@@ -125,14 +125,15 @@ function BusinessPricing() {
                   Start free pilot
                 </Link>
               ) : (
-                <a
-                  href={`mailto:bansal.monikaji1982@gmail.com?subject=${encodeURIComponent(`Request: ${plan.name} business plan`)}`}
+                <Link
+                  to="/checkout/$planId"
+                  params={{ planId: plan.id }}
                   className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
                     plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
                   }`}
                 >
-                  Contact sales
-                </a>
+                  Get {plan.name} — ₹{plan.price}
+                </Link>
               )}
             </div>
           ))}
