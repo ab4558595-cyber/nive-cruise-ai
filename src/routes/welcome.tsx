@@ -5,7 +5,7 @@ import { TryAiDemo } from "@/components/TryAiDemo";
 import { Bug, Recycle, Layers, Paperclip, Sparkles, Building2 } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
 import { supabase } from "@/integrations/supabase/client";
-import complianceBadges from "@/assets/compliance-badges.png";
+
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
