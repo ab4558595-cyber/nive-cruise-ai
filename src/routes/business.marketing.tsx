@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check, FileText, Compass,
   Image as ImageIcon, Layout, Palette, X, Plus, Trash2, Search, Mail, Target, Globe,
+  Calendar, Video, Newspaper, Send, MessageSquare, Users, FlaskConical, Code2, Tags, BookOpen,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -12,10 +13,17 @@ import {
   generateMarketing, generateCampaign, generateBlog, generateStrategy, generateHeroWireframe,
   getBrandProfile, saveBrandProfile,
   generateCompetitor, generateEmailDrip, generateAdPack, generateLandingHtml,
+  generateSocialCalendar, generateVideoScript, generatePressRelease, generateColdOutreach,
+  generateBrandVoice, generatePersonas, generateABVariants, generateSeoMeta,
+  generatePricingCopy, generateCaseStudy,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
   type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
+  type SocialCalendarResult, type VideoScriptResult, type PressReleaseResult, type ColdOutreachResult,
+  type BrandVoiceResult, type PersonasResult, type ABVariantsResult, type SeoMetaResult,
+  type PricingCopyResult, type CaseStudyResult,
 } from "@/lib/marketing.functions";
+
 
 export const Route = createFileRoute("/business/marketing")({
   head: () => ({
