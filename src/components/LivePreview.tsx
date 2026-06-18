@@ -365,7 +365,7 @@ export function LivePreview({
               </p>
             </div>
             <Button asChild size="sm" className="mt-1">
-              <Link to="/pricing">See plans</Link>
+              <Link to="/business/pricing">See plans</Link>
             </Button>
           </div>
         )}
