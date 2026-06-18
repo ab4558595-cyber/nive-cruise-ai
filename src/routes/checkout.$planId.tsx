@@ -133,6 +133,11 @@ function Checkout() {
             <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
           </div>
 
+          <div className="mt-2 flex items-center justify-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#d97706]" />
+            <span className="text-[11px] font-medium text-[#92400e]">Razorpay trusted business</span>
+          </div>
+
           {authed === false ? (
             <Link
               to="/auth"
