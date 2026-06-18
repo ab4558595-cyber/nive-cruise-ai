@@ -11,6 +11,7 @@ import {
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import {
   generateMarketing, generateCampaign, generateBlog, generateStrategy, generateHeroWireframe,
   getBrandProfile, saveBrandProfile,
