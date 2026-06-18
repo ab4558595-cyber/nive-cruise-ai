@@ -137,7 +137,7 @@ function Business() {
       </section>
 
       {/* Trust strip */}
-      <section className="relative z-10 border-t border-[#0a2540]/[8 bg-white">
+      <section className="relative z-10 border-t border-[#0a2540]/8 bg-white">
         <div className="mx-auto grid max-w-[1280px] gap-6 px-6 py-16 sm:px-10 md:grid-cols-3">
           <MiniCard icon={<Shield className="h-4 w-4" />} title="Privacy-first" body="Your real data never leaves your control. Synthetic outputs are statistically faithful but record-level anonymous." />
           <MiniCard icon={<Zap className="h-4 w-4" />} title="Built for speed" body="Generate 10k rows or 100 ad variants in seconds, not days. APIs and webhooks for production pipelines." />
