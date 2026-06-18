@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, ShieldCheck, Check } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Check, BadgeCheck } from "lucide-react";
 import { getPlan } from "@/lib/plans";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,7 @@ declare global {
 export const Route = createFileRoute("/checkout/$planId")({
   head: () => ({
     meta: [
-      { title: "Checkout — Razorpay trusted business" },
+      { title: "Checkout — Nive AI" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -70,7 +70,7 @@ function Checkout() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: "Razorpay trusted business",
+        name: "Nive AI",
         description: `${order.planName} plan — 30 days`,
         order_id: order.orderId,
         prefill: { email: order.userEmail },
@@ -127,6 +127,11 @@ function Checkout() {
               </li>
             ))}
           </ul>
+
+          <div className="mt-5 flex items-center justify-center gap-1.5">
+            <BadgeCheck className="h-4 w-4 text-blue-500" />
+            <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
+          </div>
 
           {authed === false ? (
             <Link
