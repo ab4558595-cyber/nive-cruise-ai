@@ -126,7 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           alternateName: ["nive ai", "niveai", "Nive", "Nive A.I."],
           url: "https://nive-ai.co.in",
           logo: "https://nive-ai.co.in/favicon.ico",
-          description: "Nive AI is an elite AI coding copilot that writes production-quality code for any language or platform.",
+          description: "Nive AI Business Suite: privacy-safe synthetic data and AI marketing copy generation.",
           foundingDate: "2025",
         }),
       },
