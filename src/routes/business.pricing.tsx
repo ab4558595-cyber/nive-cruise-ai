@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles, CheckCircle2 } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
+import { CurrentPlanBadge, useCurrentPlan } from "@/components/CurrentPlanBadge";
 
 import { LegalFooter } from "@/components/LegalFooter";
 
