@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
@@ -43,6 +44,7 @@ function Business() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            <CurrentPlanBadge className="hidden sm:inline-flex" />
             <Link
               to="/auth"
               className="hidden whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"

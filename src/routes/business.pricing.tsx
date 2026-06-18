@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
+import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles, CheckCircle2 } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
+import { CurrentPlanBadge, useCurrentPlan } from "@/components/CurrentPlanBadge";
 
 import { LegalFooter } from "@/components/LegalFooter";
 
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/business/pricing")({
 });
 
 function BusinessPricing() {
+  const { plan: activePlan } = useCurrentPlan();
   return (
     <div
       className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
@@ -51,12 +53,15 @@ function BusinessPricing() {
         <Link to="/business" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
-        <Link
-          to="/business"
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to overview
-        </Link>
+        <div className="flex items-center gap-3">
+          <CurrentPlanBadge />
+          <Link
+            to="/business"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to overview
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
@@ -89,26 +94,39 @@ function BusinessPricing() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {BUSINESS_PLANS.map((plan) => (
+          {BUSINESS_PLANS.map((plan) => {
+            const isActive = activePlan?.plan_id === plan.id;
+            return (
             <div
               key={plan.id}
               className={`relative flex flex-col rounded-2xl bg-white p-7 transition-all hover:-translate-y-1 ${
-                plan.highlight
+                isActive
+                  ? "shadow-[0_20px_60px_rgba(34,197,94,0.18),0_8px_24px_rgba(50,50,93,0.1)] ring-2 ring-emerald-500"
+                  : plan.highlight
                   ? "shadow-[0_20px_60px_rgba(99,91,255,0.25),0_8px_24px_rgba(50,50,93,0.1)] ring-2 ring-[#635bff]"
                   : "shadow-[0_15px_50px_rgba(50,50,93,0.1),0_5px_15px_rgba(0,0,0,0.05)] ring-1 ring-[#e3e8ee]"
               }`}
             >
-              {plan.highlight && (
+              {isActive ? (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-md">
+                  <CheckCircle2 className="h-3 w-3" /> Your current plan
+                </span>
+              ) : plan.highlight ? (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#635bff] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-md">
                   Most popular
                 </span>
-              )}
+              ) : null}
               <h2 className="text-[18px] font-semibold text-[#0a2540]">{plan.name}</h2>
               <p className="mt-1 text-[13px] text-[#697386]">{plan.tagline}</p>
               <div className="mt-5 flex items-baseline gap-1">
                 <span className="text-[42px] font-bold tracking-tight text-[#0a2540]">₹{plan.price}</span>
                 <span className="text-[14px] text-[#697386]">/ {plan.period}</span>
               </div>
+              {isActive && activePlan && (
+                <p className="mt-3 text-[12.5px] font-medium text-emerald-700">
+                  Active until {new Date(activePlan.expires_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+              )}
               <ul className="mt-6 flex-1 space-y-2.5 text-[14px]">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
@@ -117,7 +135,14 @@ function BusinessPricing() {
                   </li>
                 ))}
               </ul>
-              {plan.price === 0 ? (
+              {isActive ? (
+                <Link
+                  to="/business/usage"
+                  className="mt-7 inline-flex items-center justify-center rounded-md bg-emerald-500 py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(34,197,94,0.3)] transition-all hover:bg-emerald-600"
+                >
+                  ✓ Active — View usage
+                </Link>
+              ) : plan.price === 0 ? (
                 <Link
                   to="/auth"
                   className="mt-7 inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-semibold text-[#0a2540] shadow-sm transition-all hover:border-[#cfd7df] hover:shadow"
@@ -136,7 +161,8 @@ function BusinessPricing() {
                 </Link>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Why upgrade — concrete value props */}
