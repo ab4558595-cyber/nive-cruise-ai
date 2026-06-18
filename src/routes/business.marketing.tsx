@@ -5,6 +5,8 @@ import {
   ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check, FileText, Compass,
   Image as ImageIcon, Layout, Palette, X, Plus, Trash2, Search, Mail, Target, Globe,
   Calendar, Video, Newspaper, Send, MessageSquare, Users, FlaskConical, Code2, Tags, BookOpen,
+  Quote, Lightbulb, Type, Globe2, Heart, Map as MapIcon, Mic, AtSign, Twitter, Linkedin,
+  Youtube, Music2, ShieldQuestion, Percent, Gift, ClipboardList, HelpCircle, Link2, PartyPopper,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -16,6 +18,7 @@ import {
   generateSocialCalendar, generateVideoScript, generatePressRelease, generateColdOutreach,
   generateBrandVoice, generatePersonas, generateABVariants, generateSeoMeta,
   generatePricingCopy, generateCaseStudy,
+  generateMarketingTool, type MarketingToolKey,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
   type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
