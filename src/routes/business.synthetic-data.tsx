@@ -723,7 +723,10 @@ function SyntheticDataPage() {
               <Package className="h-3.5 w-3.5" /> Single table
             </button>
             <button onClick={() => setMode("relational")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition-all ${mode === "relational" ? "bg-white text-[#635bff] shadow-sm" : "text-[#697386] hover:text-[#0a2540]"}`}>
-              <Network className="h-3.5 w-3.5" /> Relational <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2 credits</span>
+              <Network className="h-3.5 w-3.5" /> Relational <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
+            </button>
+            <button onClick={() => setMode("timeseries")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition-all ${mode === "timeseries" ? "bg-white text-[#635bff] shadow-sm" : "text-[#697386] hover:text-[#0a2540]"}`}>
+              <Activity className="h-3.5 w-3.5" /> Time-series <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
             </button>
           </div>
           <div className="ml-2 flex items-center gap-2">
@@ -732,6 +735,22 @@ function SyntheticDataPage() {
               <option value="india">India</option><option value="us">United States</option>
               <option value="eu">Europe</option><option value="global">Global</option>
             </select>
+          </div>
+          <div className="ml-auto flex flex-wrap gap-1.5">
+            <button onClick={() => setAiOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <Wand2 className="h-3.5 w-3.5" /> AI schema <span className="rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
+            </button>
+            <button onClick={() => setImportOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <Upload className="h-3.5 w-3.5" /> Import CSV/SQL
+            </button>
+            <button onClick={() => setSavedOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <FolderOpen className="h-3.5 w-3.5" /> Saved
+            </button>
+            <input value={saveName} onChange={(e) => setSaveName(e.target.value.slice(0, 80))} placeholder="schema name"
+              className="rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[12px] outline-none focus:border-[#635bff]" />
+            <button onClick={handleSaveCurrent} className="inline-flex items-center gap-1.5 rounded-md bg-[#0a2540] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-[#1a3550]">
+              <Save className="h-3.5 w-3.5" /> Save
+            </button>
           </div>
         </div>
 
