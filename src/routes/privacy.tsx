@@ -71,7 +71,7 @@ function Privacy() {
 
         <Section title="4. Who we share data with">
           <ul className="list-disc space-y-2 pl-5">
-            <li><strong>Razorpay Software Private Limited</strong> — our payment gateway for all transactions. Razorpay processes payments (UPI, cards, wallets, net banking), handles refunds, and issues receipts. See <a className="text-[#635bff] underline" href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer">Razorpay's Privacy Policy</a>.</li>
+            <li><strong>Cloud hosting & infrastructure providers</strong> — to host the service and store data.</li>
             <li><strong>Cloud hosting & infrastructure providers</strong> — to host the service and store data.</li>
             <li><strong>AI model providers</strong> — your prompts may be sent to upstream large-language-model providers (e.g. Google AI, OpenRouter) to generate responses.</li>
             <li><strong>Analytics providers</strong> — Google Analytics for aggregate usage statistics.</li>
