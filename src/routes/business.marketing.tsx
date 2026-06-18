@@ -115,6 +115,10 @@ function MarketingPage() {
         {mode === "blog" && <BlogPanel usage={usage} setUsage={setUsage} />}
         {mode === "strategy" && <StrategyPanel usage={usage} setUsage={setUsage} />}
         {mode === "hero" && <HeroPanel usage={usage} setUsage={setUsage} />}
+        {mode === "competitor" && <CompetitorPanel usage={usage} setUsage={setUsage} />}
+        {mode === "drip" && <DripPanel usage={usage} setUsage={setUsage} />}
+        {mode === "adpack" && <AdPackPanel usage={usage} setUsage={setUsage} />}
+        {mode === "landing" && <LandingPanel usage={usage} setUsage={setUsage} />}
       </main>
 
       {brandOpen && <BrandVoiceDrawer onClose={() => setBrandOpen(false)} />}
