@@ -153,36 +153,6 @@ function Pricing() {
           </div>
         </section>
 
-        {/* Social proof */}
-        <section className="mt-20">
-          <p className="text-center text-[12px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">
-            Loved by builders across India
-          </p>
-          <div className="mt-6 grid gap-5 md:grid-cols-3">
-            {[
-              { quote: "Replaced three tools in my workflow. The multi-file output is honestly wild.", who: "Aarav S.", role: "Indie hacker, Pune" },
-              { quote: "Tamil prompts → working Flutter screens. My team finally adopted an AI tool.", who: "Priya N.", role: "Founder, Chennai" },
-              { quote: "₹299 for unlimited prompts is a steal once you see the Pro model in action.", who: "Rohan K.", role: "CS student, Bengaluru" },
-            ].map((t) => (
-              <figure key={t.who} className="rounded-xl bg-white p-6 ring-1 ring-[#e3e8ee] shadow-[0_4px_14px_rgba(50,50,93,0.06)]">
-                <Quote className="h-5 w-5 text-[#635bff]/70" />
-                <blockquote className="mt-3 text-[14px] leading-relaxed text-[#3c4257]">
-                  "{t.quote}"
-                </blockquote>
-                <figcaption className="mt-4 text-[12px] text-[#697386]">
-                  <span className="font-semibold text-[#0a2540]">{t.who}</span> · {t.role}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-
-        {/* Trust strip */}
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-xl bg-[#f6f9fc] px-6 py-4 text-[13px] text-[#425466] ring-1 ring-[#e3e8ee]">
-          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Secure checkout via Razorpay</span>
-          <span className="inline-flex items-center gap-2"><CreditCard className="h-4 w-4 text-[#635bff]" /> UPI, cards & wallets accepted</span>
-          <span className="inline-flex items-center gap-2"><RefreshCcw className="h-4 w-4 text-[#635bff]" /> Cancel anytime · 14-day refund</span>
-        </div>
 
         <p className="mt-10 text-center text-[13px] text-[#697386]">
           Plan activates the moment your payment is confirmed. No manual approval needed.
