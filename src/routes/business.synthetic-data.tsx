@@ -519,7 +519,7 @@ function SyntheticDataPage() {
   const consume = useServerFn(consumeBusinessUsage);
   const { usage, setUsage } = useUsage("synthetic");
 
-  const [mode, setMode] = useState<"single" | "relational">("single");
+  const [mode, setMode] = useState<"single" | "relational" | "timeseries">("single");
   const [locale, setLocale] = useState<Locale>("india");
 
   // Single table state
@@ -534,8 +534,94 @@ function SyntheticDataPage() {
   const [relSize, setRelSize] = useState(80);
   const [relTables, setRelTables] = useState<Record<string, Record<string, any>[]>>({});
 
+  // Time-series state
+  const [tsUsers, setTsUsers] = useState(200);
+  const [tsDays, setTsDays] = useState(30);
+  const [tsEventTypes, setTsEventTypes] = useState("page_view, signup, activate, subscribe");
+  const [tsFunnel, setTsFunnel] = useState(true);
+  const [tsResult, setTsResult] = useState<TimeSeriesResult | null>(null);
+  const tsGen = useServerFn(generateTimeSeries);
+
+  // Advanced modals + saved
+  const [aiOpen, setAiOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const aiGen = useServerFn(generateAISchema);
+  const saveFn = useServerFn(saveSchema);
+  const listFn = useServerFn(listSavedSchemas);
+  const delFn = useServerFn(deleteSavedSchema);
+  const [savedList, setSavedList] = useState<SavedSchema[]>([]);
+
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!savedOpen) return;
+    listFn().then(setSavedList).catch(() => {});
+  }, [savedOpen, listFn]);
+
+  const handleGenerateTimeSeries = async () => {
+    setError(null);
+    const eventTypes = tsEventTypes.split(",").map((s) => s.trim()).filter(Boolean);
+    if (eventTypes.length < 2) { setError("At least 2 event types."); return; }
+    if (usage && usage.remaining < 2) { setError(`Need 2 credits, have ${usage.remaining}.`); return; }
+    setGenerating(true);
+    try {
+      const r = await tsGen({ data: { entity: "user", user_count: tsUsers, days: tsDays, events_per_user_max: 8, event_types: eventTypes, funnel: tsFunnel, seed } });
+      setTsResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setGenerating(false); }
+  };
+
+  const handleAIDescribe = async (description: string) => {
+    setError(null);
+    if (usage && usage.remaining < 2) throw new Error(`Need 2 credits, have ${usage.remaining}.`);
+    const r = await aiGen({ data: { description } });
+    setUsage(r.usage);
+    setFields(r.fields.map((f) => ({ name: f.name, type: f.type as FieldType, config: f.config as any })));
+    return r;
+  };
+
+  const handleSaveCurrent = async () => {
+    setError(null);
+    const name = saveName.trim() || `schema_${Date.now()}`;
+    try {
+      if (mode === "single") {
+        await saveFn({ data: { name, kind: "tabular", schema_json: { fields, locale, count, seed } } });
+      } else if (mode === "relational") {
+        await saveFn({ data: { name, kind: "relational", schema_json: { blueprintId, relSize, locale, seed } } });
+      } else {
+        await saveFn({ data: { name, kind: "timeseries", schema_json: { tsUsers, tsDays, tsEventTypes, tsFunnel, seed } } });
+      }
+      setSaveName("");
+      if (savedOpen) listFn().then(setSavedList).catch(() => {});
+    } catch (e) { setError(e instanceof Error ? e.message : "Save failed"); }
+  };
+
+  const loadSaved = (s: SavedSchema) => {
+    const j = s.schema_json as any;
+    if (s.kind === "tabular" && Array.isArray(j.fields)) {
+      setMode("single"); setFields(j.fields); if (j.locale) setLocale(j.locale);
+      if (j.count) setCount(j.count); if (j.seed) setSeed(j.seed);
+    } else if (s.kind === "relational") {
+      setMode("relational"); if (j.blueprintId) setBlueprintId(j.blueprintId);
+      if (j.relSize) setRelSize(j.relSize); if (j.locale) setLocale(j.locale); if (j.seed) setSeed(j.seed);
+    } else if (s.kind === "timeseries") {
+      setMode("timeseries");
+      if (j.tsUsers) setTsUsers(j.tsUsers); if (j.tsDays) setTsDays(j.tsDays);
+      if (j.tsEventTypes) setTsEventTypes(j.tsEventTypes);
+      if (typeof j.tsFunnel === "boolean") setTsFunnel(j.tsFunnel);
+      if (j.seed) setSeed(j.seed);
+    }
+    setSavedOpen(false);
+  };
+
+  const handleImport = (raw: string, kind: "csv" | "sql") => {
+    setError(null);
+    const newFields = parseSchemaImport(raw, kind);
+    if (!newFields.length) { setError("Could not detect any fields."); return; }
+    setFields(newFields); setMode("single"); setImportOpen(false);
+  };
 
   const previewRows = useMemo(() => rows.slice(0, 25), [rows]);
   const blueprint = useMemo(() => BLUEPRINTS.find((b) => b.id === blueprintId)!, [blueprintId]);
