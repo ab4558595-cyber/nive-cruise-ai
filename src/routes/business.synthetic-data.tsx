@@ -1131,3 +1131,155 @@ function FieldConfigModal({ field, onClose, onSave }: {
 
 // Silence unused warning (kept for parity with field type list ordering)
 void FIELD_TYPES_FLAT;
+
+// ============ Schema import parser ============
+
+function inferFieldType(name: string): FieldType {
+  const n = name.toLowerCase();
+  if (n === "id" || n.endsWith("_id")) return "id";
+  if (n.includes("uuid")) return "uuid";
+  if (n.includes("email")) return "email";
+  if (n.includes("phone")) return "phone";
+  if (n.includes("first")) return "first_name";
+  if (n.includes("last")) return "last_name";
+  if (n === "name" || n.includes("full_name")) return "full_name";
+  if (n.includes("user")) return "username";
+  if (n.includes("city")) return "city";
+  if (n.includes("state")) return "state";
+  if (n.includes("country")) return "country";
+  if (n.includes("zip") || n.includes("postal")) return "zip";
+  if (n.includes("street") || n.includes("address")) return "street";
+  if (n.includes("company")) return "company";
+  if (n.includes("job") || n.includes("title")) return "job_title";
+  if (n.includes("age")) return "age";
+  if (n.includes("rating")) return "rating_1_5";
+  if (n.includes("percent")) return "percent";
+  if (n.includes("price") || n.includes("amount") || n.includes("total")) return "amount";
+  if (n.includes("status")) return "status";
+  if (n.includes("priority")) return "priority";
+  if (n.includes("plan")) return "plan_name";
+  if (n.includes("product") || n.includes("sku")) return "product";
+  if (n.includes("active") || n.startsWith("is_") || n.startsWith("has_")) return "boolean";
+  if (n.includes("url") || n.includes("link")) return "url";
+  if (n.includes("ip")) return "ipv4";
+  if (n.endsWith("_at") || n.includes("timestamp") || n.includes("datetime")) return "iso_datetime";
+  if (n.includes("date")) return "date";
+  return "paragraph";
+}
+
+function parseSchemaImport(raw: string, kind: "csv" | "sql"): Field[] {
+  const text = raw.trim();
+  if (!text) return [];
+  if (kind === "csv") {
+    const header = text.split(/\r?\n/)[0];
+    return header.split(",").map((c) => c.trim().replace(/^"|"$/g, "")).filter(Boolean)
+      .slice(0, 24).map((name) => {
+        const safe = name.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 40) || "field";
+        return { name: safe, type: inferFieldType(safe) };
+      });
+  }
+  // SQL DDL: extract column names from CREATE TABLE (...)
+  const m = text.match(/create\s+table[^(]*\(([\s\S]+?)\)\s*;?/i);
+  if (!m) return [];
+  return m[1].split(",").map((line) => line.trim()).filter(Boolean)
+    .filter((line) => !/^(primary|foreign|unique|constraint|check)\b/i.test(line))
+    .slice(0, 24).map((line) => {
+      const name = (line.split(/\s+/)[0] || "").replace(/[`"\[\]]/g, "").replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 40);
+      return name ? { name, type: inferFieldType(name) } as Field : null;
+    }).filter((f): f is Field => f !== null);
+}
+
+// ============ AI / Import / Saved modals ============
+
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2540]/50 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+        <div className="flex items-center justify-between"><h3 className="text-[16px] font-bold text-[#0a2540]">{title}</h3>
+          <button onClick={onClose} className="rounded-md p-1 text-[#697386] hover:bg-[#f6f9fc]"><X className="h-4 w-4" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AIDescribeModal({ onClose, onApply }: { onClose: () => void; onApply: (d: string) => Promise<any> }) {
+  const [desc, setDesc] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const run = async () => {
+    if (desc.trim().length < 8) { setErr("Describe in at least 8 characters."); return; }
+    setLoading(true); setErr(null);
+    try { await onApply(desc.trim()); onClose(); }
+    catch (e) { setErr(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <ModalShell title="Describe your dataset" onClose={onClose}>
+      <p className="mt-1 text-[12px] text-[#697386]">AI builds a schema you can edit. Costs 2 credits.</p>
+      <textarea value={desc} onChange={(e) => setDesc(e.target.value.slice(0, 600))} rows={5}
+        placeholder="e.g. SaaS customers with company, plan, MRR in USD, churned flag, signup date"
+        className="mt-3 w-full resize-none rounded-md border border-[#e3e8ee] px-3 py-2 text-[13.5px] outline-none focus:border-[#635bff]" />
+      {err && <p className="mt-2 rounded-md bg-[#fff1f0] px-3 py-2 text-[12.5px] text-[#c0392b]">{err}</p>}
+      <div className="mt-4 flex justify-end gap-2">
+        <button onClick={onClose} className="rounded-md px-3 py-1.5 text-[13px] font-medium text-[#697386] hover:bg-[#f6f9fc]">Cancel</button>
+        <button onClick={run} disabled={loading} className="inline-flex items-center gap-1.5 rounded-md bg-[#635bff] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#5048d6] disabled:opacity-60">
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />} Build schema
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function ImportModal({ onClose, onApply }: { onClose: () => void; onApply: (raw: string, kind: "csv" | "sql") => void }) {
+  const [kind, setKind] = useState<"csv" | "sql">("csv");
+  const [raw, setRaw] = useState("");
+  return (
+    <ModalShell title="Import schema" onClose={onClose}>
+      <div className="mt-2 flex gap-1.5">
+        {(["csv","sql"] as const).map((k) => (
+          <button key={k} onClick={() => setKind(k)} className={`rounded-md px-3 py-1.5 text-[12.5px] font-semibold ${kind === k ? "bg-[#635bff] text-white" : "bg-[#f6f9fc] text-[#0a2540]"}`}>
+            {k === "csv" ? "CSV header" : "SQL DDL"}
+          </button>
+        ))}
+      </div>
+      <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={8}
+        placeholder={kind === "csv" ? "id,name,email,city,signup_date" : "CREATE TABLE users (id INT, email TEXT, created_at TIMESTAMP);"}
+        className="mt-3 w-full resize-none rounded-md border border-[#e3e8ee] px-3 py-2 font-mono text-[12px] outline-none focus:border-[#635bff]" />
+      <p className="mt-2 text-[11.5px] text-[#697386]">Field types are inferred from column names — you can edit them after.</p>
+      <div className="mt-4 flex justify-end gap-2">
+        <button onClick={onClose} className="rounded-md px-3 py-1.5 text-[13px] font-medium text-[#697386] hover:bg-[#f6f9fc]">Cancel</button>
+        <button onClick={() => onApply(raw, kind)} className="inline-flex items-center gap-1.5 rounded-md bg-[#635bff] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#5048d6]">
+          <Upload className="h-3.5 w-3.5" /> Import
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function SavedSchemasModal({ items, onClose, onLoad, onDelete }: {
+  items: SavedSchema[]; onClose: () => void; onLoad: (s: SavedSchema) => void; onDelete: (id: string) => void;
+}) {
+  return (
+    <ModalShell title="Saved schemas" onClose={onClose}>
+      {items.length === 0 ? (
+        <p className="mt-4 text-[13px] text-[#697386]">No saved schemas yet. Save one with the button above.</p>
+      ) : (
+        <ul className="mt-3 max-h-[400px] space-y-2 overflow-auto">
+          {items.map((s) => (
+            <li key={s.id} className="flex items-center justify-between rounded-md border border-[#e3e8ee] bg-white p-3">
+              <div className="min-w-0">
+                <p className="truncate text-[13.5px] font-semibold text-[#0a2540]">{s.name}</p>
+                <p className="text-[11.5px] text-[#697386]">{s.kind} · {new Date(s.updated_at).toLocaleDateString()}</p>
+              </div>
+              <div className="flex gap-1.5">
+                <button onClick={() => onLoad(s)} className="rounded-md bg-[#635bff] px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-[#5048d6]">Load</button>
+                <button onClick={() => onDelete(s.id)} className="rounded-md p-1.5 text-[#697386] hover:text-[#c0392b]"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ModalShell>
+  );
+}
