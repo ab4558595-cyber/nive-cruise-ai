@@ -137,13 +137,24 @@ function Business() {
       </section>
 
       {/* Trust strip */}
-      <section className="relative z-10 border-t border-[#0a2540]/8 bg-white">
+      <section className="relative z-10 border-t border-[#0a2540]/[8 bg-white">
         <div className="mx-auto grid max-w-[1280px] gap-6 px-6 py-16 sm:px-10 md:grid-cols-3">
           <MiniCard icon={<Shield className="h-4 w-4" />} title="Privacy-first" body="Your real data never leaves your control. Synthetic outputs are statistically faithful but record-level anonymous." />
           <MiniCard icon={<Zap className="h-4 w-4" />} title="Built for speed" body="Generate 10k rows or 100 ad variants in seconds, not days. APIs and webhooks for production pipelines." />
           <MiniCard icon={<Megaphone className="h-4 w-4" />} title="One brand, every channel" body="Define your brand voice once. Reuse it across ads, email, social, and product copy." />
         </div>
       </section>
+
+      {/* Feedback button */}
+      <a
+        href="https://docs.google.com/forms/d/e/1FAIpQLSeydBaE7sbnuuJuTvVep3P3nAVyz6nIPwlt6b7DV8BDT_aILQ/viewform?usp=publish-editor"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-[#635bff] px-4 py-2.5 text-[14px] font-medium text-white shadow-lg transition-all hover:bg-[#5048d6] hover:shadow-xl"
+      >
+        <MessageSquare className="h-4 w-4" />
+        Feedback
+      </a>
     </div>
   );
 }
