@@ -182,6 +182,9 @@ function MarketingPage() {
         {mode === "seometa" && <SeoMetaPanel usage={usage} setUsage={setUsage} />}
         {mode === "pricing" && <PricingCopyPanel usage={usage} setUsage={setUsage} />}
         {mode === "casestudy" && <CaseStudyPanel usage={usage} setUsage={setUsage} />}
+        {TOOL_KEYS_SET.has(mode) && (
+          <ToolPanel key={mode} tool={mode as MarketingToolKey} label={TABS.find(t => t.id === mode)?.label ?? mode} usage={usage} setUsage={setUsage} />
+        )}
       </main>
 
       {brandOpen && <BrandVoiceDrawer onClose={() => setBrandOpen(false)} />}
