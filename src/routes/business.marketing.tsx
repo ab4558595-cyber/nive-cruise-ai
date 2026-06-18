@@ -1894,3 +1894,224 @@ function ToolPanel({ tool, label, usage, setUsage }: PanelProps & { tool: Market
     </div>
   );
 }
+
+// ---------- Mega Pack: complete marketing system from one brief ----------
+
+function MegaPackPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateMegaPack);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [goal, setGoal] = useState("acquire first 1000 customers");
+  const [budget, setBudget] = useState<"bootstrapped" | "lean" | "funded" | "enterprise">("lean");
+  const [region, setRegion] = useState("global");
+  const [result, setResult] = useState<MegaPackResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product first.");
+    if (usage && usage.remaining < 8) return setError(`Need 8 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { product: product.trim(), audience, goal, budget, region } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  const downloadMd = () => {
+    if (!result) return;
+    downloadText(`megapack-${Date.now()}.md`, megaPackMarkdown(result), "text/markdown");
+  };
+  const downloadJson = () => {
+    if (!result) return;
+    const { usage: _u, ...rest } = result;
+    downloadText(`megapack-${Date.now()}.json`, JSON.stringify(rest, null, 2), "application/json");
+  };
+  const downloadCsv = () => {
+    if (!result) return;
+    const rows: string[] = ["day,platform,hook,body,hashtags"];
+    for (const s of result.social_calendar) {
+      const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+      rows.push([s.day, esc(s.platform), esc(s.hook), esc(s.body), esc(s.hashtags.join(" "))].join(","));
+    }
+    downloadText(`megapack-social-${Date.now()}.csv`, rows.join("\n"), "text/csv");
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <div className="mb-2 rounded-md bg-gradient-to-r from-[#635bff]/10 to-[#00d4ff]/10 px-3 py-2 text-[12px] font-semibold text-[#635bff]">
+          One brief → positioning, voice, personas, channel mix, 5 ads, 5-email drip, 14-day social calendar, SEO, landing copy, 30-day plan, KPIs.
+        </div>
+        <Label>Product / company</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 400))} rows={3}
+          placeholder="e.g. AI-powered invoice OCR for Indian SMEs"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          placeholder="e.g. CFOs at 50-500 person companies"
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">30-day goal</Label>
+        <input value={goal} onChange={(e) => setGoal(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <Label>Budget</Label>
+            <select value={budget} onChange={(e) => setBudget(e.target.value as any)}
+              className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]">
+              <option value="bootstrapped">Bootstrapped</option>
+              <option value="lean">Lean</option>
+              <option value="funded">Funded</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div>
+            <Label>Region</Label>
+            <input value={region} onChange={(e) => setRegion(e.target.value.slice(0, 80))}
+              className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+          </div>
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate Mega Pack (8 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[16px] font-semibold">Complete marketing system</h2>
+          <div className="flex gap-2">
+            <button disabled={!result} onClick={downloadMd}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <Download className="h-3.5 w-3.5" /> .md
+            </button>
+            <button disabled={!result} onClick={downloadJson}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <FileJson className="h-3.5 w-3.5" /> .json
+            </button>
+            <button disabled={!result} onClick={downloadCsv}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <Download className="h-3.5 w-3.5" /> calendar.csv
+            </button>
+          </div>
+        </div>
+        {!result ? <Empty>Your end-to-end marketing system will appear here. Export-ready for any team.</Empty> : (
+          <div className="mt-5 space-y-4">
+            <CopyableBlock label="Positioning" text={result.positioning}>
+              <p className="text-[14px] leading-relaxed text-[#0a2540]">{result.positioning}</p>
+            </CopyableBlock>
+
+            <CopyableBlock label="Brand voice" text={`Adjectives: ${result.brand_voice.adjectives.join(", ")}\nDo: ${result.brand_voice.do.join("; ")}\nDon't: ${result.brand_voice.dont.join("; ")}\nSample: ${result.brand_voice.sample_paragraph}`}>
+              <div className="space-y-2 text-[13px]">
+                <p><b className="text-[#635bff]">Adjectives:</b> {result.brand_voice.adjectives.join(" · ")}</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-md bg-emerald-50 p-2"><b className="text-emerald-700">Do</b><ul className="mt-1 space-y-0.5">{result.brand_voice.do.map((d, i) => <li key={i}>• {d}</li>)}</ul></div>
+                  <div className="rounded-md bg-rose-50 p-2"><b className="text-rose-700">Don't</b><ul className="mt-1 space-y-0.5">{result.brand_voice.dont.map((d, i) => <li key={i}>• {d}</li>)}</ul></div>
+                </div>
+                <p className="italic text-[#425466]">"{result.brand_voice.sample_paragraph}"</p>
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Personas" text={result.personas.map(p => `${p.name} (${p.role})`).join("\n")}>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {result.personas.map((p, i) => (
+                  <div key={i} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12px]">
+                    <p className="text-[13px] font-semibold text-[#635bff]">{p.name}</p>
+                    <p className="text-[11.5px] text-[#697386]">{p.role}</p>
+                    <p className="mt-1"><b>Goals:</b> {p.goals.join("; ")}</p>
+                    <p className="mt-1"><b>Pains:</b> {p.pains.join("; ")}</p>
+                    <p className="mt-1"><b>Channels:</b> {p.channels.join(", ")}</p>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Channel mix" text={result.channel_mix.map(c => `${c.name} (${c.weekly_cadence}): ${c.why}`).join("\n")}>
+              <ul className="space-y-1.5 text-[13px]">
+                {result.channel_mix.map((c, i) => (
+                  <li key={i}><b>{c.name}</b> · <span className="text-[#635bff]">{c.weekly_cadence}</span> — {c.why}</li>
+                ))}
+              </ul>
+            </CopyableBlock>
+
+            <CopyableBlock label="Ads" text={result.ads.map(a => `[${a.platform}] ${a.headline} — ${a.primary_text} (${a.cta})`).join("\n")}>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {result.ads.map((a, i) => (
+                  <div key={i} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12.5px]">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#635bff]">{a.platform}</p>
+                    <p className="mt-1 font-bold text-[#0a2540]">{a.headline}</p>
+                    <p className="mt-1 text-[#3c4257]">{a.primary_text}</p>
+                    <p className="mt-1 text-[11.5px] text-[#697386]">CTA: {a.cta}</p>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Email drip" text={result.email_drip.map(e => `Day ${e.day} — ${e.subject}\n${e.body}`).join("\n\n")}>
+              <div className="space-y-2">
+                {result.email_drip.map((e, i) => (
+                  <details key={i} className="rounded-md border border-[#eef1f5] bg-white p-2 text-[13px]">
+                    <summary className="cursor-pointer font-semibold text-[#0a2540]">Day {e.day} — {e.subject}</summary>
+                    <p className="mt-1 text-[11.5px] text-[#697386]">{e.preview}</p>
+                    <pre className="mt-2 whitespace-pre-wrap text-[12.5px] text-[#3c4257]">{e.body}</pre>
+                  </details>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Social calendar (14 days)" text={result.social_calendar.map(s => `Day ${s.day} ${s.platform}: ${s.hook}`).join("\n")}>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-[12px]">
+                  <thead><tr className="text-left text-[#697386]"><th className="py-1 pr-3">Day</th><th className="pr-3">Platform</th><th className="pr-3">Hook</th><th>Hashtags</th></tr></thead>
+                  <tbody>
+                    {result.social_calendar.map((s, i) => (
+                      <tr key={i} className="border-t border-[#eef1f5]">
+                        <td className="py-1 pr-3 font-semibold">{s.day}</td>
+                        <td className="pr-3 text-[#635bff]">{s.platform}</td>
+                        <td className="pr-3">{s.hook}</td>
+                        <td className="text-[#697386]">{s.hashtags.map(h => `#${h.replace(/^#/, "")}`).join(" ")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="SEO" text={`Keywords: ${result.seo.primary_keywords.join(", ")}\nTitle: ${result.seo.meta_title}\nDescription: ${result.seo.meta_description}`}>
+              <p className="text-[12.5px]"><b>Keywords:</b> {result.seo.primary_keywords.join(" · ")}</p>
+              <p className="mt-1 text-[12.5px]"><b>Meta title:</b> {result.seo.meta_title}</p>
+              <p className="mt-1 text-[12.5px]"><b>Meta description:</b> {result.seo.meta_description}</p>
+              <div className="mt-2 space-y-1">
+                {result.seo.faqs.map((f, i) => (
+                  <details key={i} className="rounded bg-[#f6f9fc] p-2 text-[12.5px]"><summary className="cursor-pointer font-semibold">{f.q}</summary><p className="mt-1 text-[#3c4257]">{f.a}</p></details>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Landing page copy" text={`${result.landing_copy.hero}\n${result.landing_copy.subhero}\n\n${result.landing_copy.bullets.join("\n- ")}\n\nCTA: ${result.landing_copy.cta}`}>
+              <p className="text-[18px] font-bold text-[#0a2540]">{result.landing_copy.hero}</p>
+              <p className="mt-1 text-[14px] text-[#425466]">{result.landing_copy.subhero}</p>
+              <ul className="mt-2 space-y-1 text-[13px]">{result.landing_copy.bullets.map((b, i) => <li key={i}>✓ {b}</li>)}</ul>
+              <p className="mt-2 inline-block rounded-md bg-[#635bff] px-3 py-1.5 text-[12.5px] font-semibold text-white">{result.landing_copy.cta}</p>
+              <p className="mt-2 text-[11.5px] italic text-[#697386]">Testimonial template: {result.landing_copy.testimonial_template}</p>
+            </CopyableBlock>
+
+            <CopyableBlock label="30-day plan" text={result.thirty_day_plan.map(w => `Week ${w.week} — ${w.focus}\n${w.actions.map(a => `- ${a}`).join("\n")}`).join("\n\n")}>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {result.thirty_day_plan.map((w) => (
+                  <div key={w.week} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12.5px]">
+                    <p className="font-bold">Week {w.week} — <span className="text-[#635bff]">{w.focus}</span></p>
+                    <ul className="mt-1 space-y-0.5">{w.actions.map((a, i) => <li key={i}>• {a}</li>)}</ul>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="KPIs" text={result.kpis.map(k => `${k.metric}: ${k.target}`).join("\n")}>
+              <ul className="grid gap-1 text-[13px] sm:grid-cols-2">{result.kpis.map((k, i) => <li key={i}><b>{k.metric}:</b> {k.target}</li>)}</ul>
+            </CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
