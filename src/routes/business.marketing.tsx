@@ -21,12 +21,13 @@ import {
   generateBrandVoice, generatePersonas, generateABVariants, generateSeoMeta,
   generatePricingCopy, generateCaseStudy,
   generateMarketingTool, type MarketingToolKey,
+  generateMegaPack, megaPackMarkdown,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
   type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
   type SocialCalendarResult, type VideoScriptResult, type PressReleaseResult, type ColdOutreachResult,
   type BrandVoiceResult, type PersonasResult, type ABVariantsResult, type SeoMetaResult,
-  type PricingCopyResult, type CaseStudyResult,
+  type PricingCopyResult, type CaseStudyResult, type MegaPackResult,
 } from "@/lib/marketing.functions";
 
 
