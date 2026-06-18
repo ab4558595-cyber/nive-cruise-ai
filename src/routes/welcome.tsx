@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Ribbon } from "@/components/Ribbon";
 import { TryAiDemo } from "@/components/TryAiDemo";
-import { Bug, Recycle, Layers, Paperclip, ShieldCheck, Lock, Star, Users, Sparkles, Building2, BadgeCheck, RefreshCw, HeartHandshake } from "lucide-react";
+import { Bug, Recycle, Layers, Paperclip, Sparkles, Building2 } from "lucide-react";
 import { LegalFooter } from "@/components/LegalFooter";
 import { supabase } from "@/integrations/supabase/client";
 import complianceBadges from "@/assets/compliance-badges.png";
