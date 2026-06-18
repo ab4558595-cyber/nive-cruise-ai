@@ -133,9 +133,11 @@ function Checkout() {
             <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
           </div>
 
-          <div className="mt-2 flex items-center justify-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#d97706]" />
-            <span className="text-[11px] font-medium text-[#92400e]">Razorpay trusted business</span>
+          <div className="mt-3 flex items-center justify-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 shadow-sm">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#d97706]" />
+              <span className="text-[11px] font-semibold tracking-wide text-[#78350f] uppercase">Razorpay trusted business</span>
+            </div>
           </div>
 
           {authed === false ? (
