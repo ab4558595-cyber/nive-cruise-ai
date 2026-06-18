@@ -9,7 +9,7 @@ export const Route = createFileRoute("/checkout/success")({
   }),
   head: () => ({
     meta: [
-      { title: "Payment successful — Nive AI" },
+      { title: "Payment successful — Razorpay trusted business" },
       { name: "robots", content: "noindex" },
     ],
   }),

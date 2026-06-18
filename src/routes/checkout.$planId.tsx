@@ -15,7 +15,7 @@ declare global {
 export const Route = createFileRoute("/checkout/$planId")({
   head: () => ({
     meta: [
-      { title: "Checkout — Nive AI" },
+      { title: "Checkout — Razorpay trusted business" },
       { name: "robots", content: "noindex" },
     ],
   }),
