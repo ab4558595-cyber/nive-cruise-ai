@@ -13,7 +13,7 @@ export function LegalFooter() {
             Privacy
           </Link>
           <Link to="/feedback" className="transition-colors hover:text-[#635bff]">
-            Refund
+            Feedback
           </Link>
           <a href="mailto:bansal.monikaji1982@gmail.com" className="transition-colors hover:text-[#635bff]">
             Contact
