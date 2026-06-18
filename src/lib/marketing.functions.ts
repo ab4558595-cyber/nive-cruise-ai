@@ -1559,3 +1559,60 @@ ${data.outcomes}${brandBlock(brand)}`;
       usage,
     };
   });
+
+// ---------- 20. Generic markdown tools (taglines, names, threads, etc.) ----------
+
+export const MARKETING_TOOL_KEYS = [
+  "tagline", "slogan", "naming", "domain", "valueprop",
+  "journey", "webinar", "podcast", "influencer", "thread",
+  "carousel", "youtube", "tiktok", "objections", "promo",
+  "referral", "survey", "faq", "affiliate", "event",
+] as const;
+export type MarketingToolKey = (typeof MARKETING_TOOL_KEYS)[number];
+
+const TOOL_SYSTEM: Record<MarketingToolKey, string> = {
+  tagline: "You are a senior brand copywriter. Produce 12 distinctive taglines (<=8 words each) for the product. Group as: Bold, Friendly, Minimal, Witty. Markdown with H3 per group + bullets.",
+  slogan: "You are a brand strategist. Produce 10 memorable slogans with a 1-line rationale each. Markdown bullets.",
+  naming: "You are a naming consultant. Produce 15 brand/product name ideas grouped: Invented, Descriptive, Evocative, Compound. For each, give the name + a 1-line meaning. Markdown.",
+  domain: "You are a domain naming expert. Suggest 15 available-sounding .com domains plus 5 alternatives on .ai, .io, .co. Mark each with short rationale. Markdown bullets.",
+  valueprop: "You are a positioning strategist. Output a value proposition canvas in markdown: Customer Jobs, Pains, Gains, Products & Services, Pain Relievers, Gain Creators. Use bullets under H3 headings.",
+  journey: "You are a CX strategist. Produce a 5-stage customer journey map (Awareness, Consideration, Decision, Onboarding, Advocacy). For each: Actions, Touchpoints, Emotions, Opportunities. Markdown.",
+  webinar: "You are an event marketer. Produce a webinar promo pack in markdown: Title, Subtitle, 3 learning outcomes, 2 email invites (subject + body), 1 LinkedIn post, 1 Twitter post, 1 reminder email.",
+  podcast: "You are a PR specialist. Write 3 podcast pitch emails: (1) cold pitch, (2) follow-up, (3) post-recording thank-you. Each with subject + body. Markdown.",
+  influencer: "You are a partnerships lead. Write 3 influencer outreach DMs (Instagram, TikTok, LinkedIn), each <=120 words, plus a 1-page collab brief. Markdown.",
+  thread: "You are a viral Twitter/X writer. Produce one 9-tweet thread with strong hook, body tweets numbered 1/ to 8/, and a CTA tweet. Each tweet <=270 chars. Markdown.",
+  carousel: "You are a LinkedIn carousel designer. Produce a 10-slide carousel script. For each slide: Slide N — Headline + 1-2 line body. End with a CTA slide. Markdown.",
+  youtube: "You are a YouTube growth expert. Produce: 5 click-worthy titles, 1 SEO description (~200 words with timestamps placeholders), 20 tags, 3 pinned-comment ideas. Markdown.",
+  tiktok: "You are a short-form video writer. Produce 8 TikTok/Reels scripts of 15-30s each: HOOK (3s) / BODY / CTA, plus on-screen text and 5 trending hashtags per script. Markdown.",
+  objections: "You are a sales enablement coach. List the 8 most common buyer objections for this product, and for each give a concise rebuttal (2-3 sentences) and a follow-up question. Markdown.",
+  promo: "You are a promo copywriter. Produce a discount/promo announcement pack: 1 hero headline, 3 banner variants, 1 email (subject+body), 1 SMS (<=160 chars), 1 social post, 1 urgency line. Markdown.",
+  referral: "You are a growth marketer. Produce referral-program copy: program name, 1 hero headline, 3-bullet how-it-works, 1 referrer email, 1 referred-friend email, 1 social share template. Markdown.",
+  survey: "You are a research lead. Produce a customer survey: 1 intro paragraph, 1 NPS question, 3 CSAT questions, 5 open-ended discovery questions, 2 demographic questions. Markdown.",
+  faq: "You are a website copywriter. Write 12 high-converting FAQs covering pricing, refunds, security, onboarding, support, integrations, and objections. Question + 2-4 sentence answer. Markdown.",
+  affiliate: "You are an affiliate program manager. Produce affiliate-program copy: program pitch (150 words), commission structure suggestions (3 tiers), 1 recruiter email, 1 welcome email, 5 swipe-file social posts affiliates can reuse. Markdown.",
+  event: "You are an event marketer. Produce event invitation copy: 1 hero invite (date/venue placeholders), 2 email invites (save-the-date + RSVP reminder), 1 LinkedIn post, 1 Twitter post, 1 calendar event description. Markdown.",
+};
+
+const MarketingToolInput = z.object({
+  tool: z.enum(MARKETING_TOOL_KEYS),
+  product: z.string().trim().min(2).max(400),
+  audience: z.string().trim().max(200).optional().default(""),
+  extra: z.string().trim().max(800).optional().default(""),
+});
+
+export type MarketingToolResult = { tool: MarketingToolKey; markdown: string; usage: UsageSnapshot };
+
+export const generateMarketingTool = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => MarketingToolInput.parse(input))
+  .handler(async ({ data, context }): Promise<MarketingToolResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `${TOOL_SYSTEM[data.tool]}\n\nReturn clean markdown only (no JSON, no code fences around the whole answer). Keep it tight, scannable, and on-brand.`;
+    const user = `Product / service: ${data.product}
+Audience: ${data.audience || "general"}
+Extra context: ${data.extra || "(none)"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user, false);
+    const usage = await recordUsage(supabase, userId, 2, { mode: `tool:${data.tool}` });
+    return { tool: data.tool, markdown: clip(content, 12000), usage };
+  });
