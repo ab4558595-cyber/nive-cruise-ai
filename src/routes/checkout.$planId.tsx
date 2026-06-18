@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, ShieldCheck, Check } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Check, BadgeCheck } from "lucide-react";
 import { getPlan } from "@/lib/plans";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { supabase } from "@/integrations/supabase/client";
