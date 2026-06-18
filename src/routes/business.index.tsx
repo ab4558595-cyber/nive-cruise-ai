@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Database, Megaphone, Shield, Zap } from "lucide-react";
+import { Database, Megaphone, MessageSquare, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 
@@ -144,6 +144,17 @@ function Business() {
           <MiniCard icon={<Megaphone className="h-4 w-4" />} title="One brand, every channel" body="Define your brand voice once. Reuse it across ads, email, social, and product copy." />
         </div>
       </section>
+
+      {/* Feedback button */}
+      <a
+        href="https://docs.google.com/forms/d/e/1FAIpQLSeydBaE7sbnuuJuTvVep3P3nAVyz6nIPwlt6b7DV8BDT_aILQ/viewform?usp=publish-editor"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-[#635bff] px-4 py-2.5 text-[14px] font-medium text-white shadow-lg transition-all hover:bg-[#5048d6] hover:shadow-xl"
+      >
+        <MessageSquare className="h-4 w-4" />
+        Feedback
+      </a>
     </div>
   );
 }
