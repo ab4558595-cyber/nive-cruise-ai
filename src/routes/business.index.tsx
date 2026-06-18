@@ -40,6 +40,7 @@ function Business() {
               <Link to="/business/marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</Link>
               <Link to="/business/usage" className="transition-colors hover:text-[#635bff]">Usage</Link>
               <Link to="/business/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
+              <Link to="/founder" className="transition-colors hover:text-[#635bff]">Founder</Link>
             </nav>
           </div>
 
