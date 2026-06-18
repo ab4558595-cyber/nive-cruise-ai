@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Database, Download, Sparkles, Loader2, Plus, Trash2, Settings2, Network, Package,
+  Wand2, Upload, Save, Activity, FolderOpen, X,
 } from "lucide-react";
 import JSZip from "jszip";
 import { Ribbon } from "@/components/Ribbon";
@@ -9,6 +10,11 @@ import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
 import { useServerFn } from "@tanstack/react-start";
 import { consumeBusinessUsage } from "@/lib/businessUsage.functions";
+import {
+  generateAISchema, generateTimeSeries,
+  saveSchema, listSavedSchemas, deleteSavedSchema,
+  type SavedSchema, type TimeSeriesResult,
+} from "@/lib/synthetic-advanced.functions";
 
 export const Route = createFileRoute("/business/synthetic-data")({
   head: () => ({
