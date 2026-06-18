@@ -1818,3 +1818,72 @@ function Label({ children, className = "" }: { children: React.ReactNode; classN
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="mt-6 flex h-72 items-center justify-center rounded-lg border border-dashed border-[#e3e8ee] text-[13.5px] text-[#697386]">{children}</div>;
 }
+
+// ============ Generic markdown ToolPanel (powers 20 lightweight features) ============
+
+function ToolPanel({ tool, label, usage, setUsage }: PanelProps & { tool: MarketingToolKey; label: string }) {
+  const gen = useServerFn(generateMarketingTool);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [extra, setExtra] = useState("");
+  const [markdown, setMarkdown] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product or service first.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { tool, product: product.trim(), audience: audience.trim(), extra: extra.trim() } });
+      setMarkdown(r.markdown); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product / service</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 400))} rows={3}
+          placeholder="What are you marketing?"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Audience (optional)</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Extra context (optional)</Label>
+        <textarea value={extra} onChange={(e) => setExtra(e.target.value.slice(0, 800))} rows={3}
+          placeholder="Goals, constraints, must-mention details…"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <GenerateButton loading={loading} onClick={run}>Generate {label.toLowerCase()} (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold">{label}</h2>
+          {markdown && (
+            <div className="flex gap-2">
+              <button type="button" onClick={async () => {
+                try { await navigator.clipboard.writeText(markdown); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch {}
+              }} className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}{copied ? "Copied" : "Copy"}
+              </button>
+              <button type="button" onClick={() => downloadText(`${tool}-${Date.now()}.md`, markdown, "text/markdown")}
+                className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                <Download className="h-3 w-3" /> .md
+              </button>
+            </div>
+          )}
+        </div>
+        {!markdown ? <Empty>Fill in the form to generate.</Empty> : (
+          <pre className="mt-5 max-h-[640px] overflow-auto whitespace-pre-wrap rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-4 font-sans text-[13.5px] leading-relaxed text-[#3c4257]">{markdown}</pre>
+        )}
+      </Card>
+    </div>
+  );
+}
