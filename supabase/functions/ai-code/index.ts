@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
               "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
               "X-Title": "Nive AI",
             },
-            body: JSON.stringify({ model, messages: fullMessages, stream: true }),
+            body: JSON.stringify({ model, messages: fullMessages, stream: true, max_tokens: 4096 }),
           });
           if (!orResp.ok) {
             const errText = await orResp.text();
