@@ -868,7 +868,7 @@ function SyntheticDataPage() {
               </div>
             </div>
           </>
-        ) : (
+        ) : mode === "relational" ? (
           // Relational mode
           <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
             <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
