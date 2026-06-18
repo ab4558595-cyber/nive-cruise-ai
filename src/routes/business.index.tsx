@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
