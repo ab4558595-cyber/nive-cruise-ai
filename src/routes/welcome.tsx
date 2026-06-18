@@ -142,92 +142,13 @@ function Welcome() {
                 <Building2 className="h-4 w-4" /> For Business →
               </Link>
             </div>
-
-
-            {/* Trust strip */}
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px] text-[#425466]">
-              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#22c55e]" /> SOC 2-ready infrastructure</span>
-              <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-[#635bff]" /> Encrypted in transit & at rest</span>
-              <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-[#0a2540]" /> 12,000+ builders</span>
-              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-[#f59e0b] text-[#f59e0b]" /> 4.9/5 average rating</span>
-            </div>
-
-            {/* Compliance badges */}
-            <div className="mt-6">
-              <img
-                src={complianceBadges}
-                alt="SOC 2 Type II and GDPR compliance badges"
-                className="h-16 w-auto sm:h-20"
-              />
-            </div>
           </div>
         </section>
 
       </div>
 
-      {/* Trust band */}
-      <section className="border-y border-[#0a2540]/8 bg-[#f6f9fc]">
-        <div className="mx-auto max-w-[1280px] px-6 py-10 sm:px-10">
-          <p className="mb-5 text-center text-[12px] font-semibold uppercase tracking-[0.18em] text-[#425466]">
-            Trusted by teams shipping production code
-          </p>
-          <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
-            <TrustStat value="1.6M+" label="Lines shipped" />
-            <TrustStat value="12k+" label="Active builders" />
-            <TrustStat value="99.95%" label="Uptime SLA" />
-            <TrustStat value="< 200ms" label="Median response" />
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="mx-auto max-w-[1280px] px-6 py-20 sm:px-10">
-        <div className="mb-10 max-w-[760px]">
-          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">What builders say</p>
-          <h2 className="text-[30px] font-bold tracking-[-0.02em] text-[#0a2540] sm:text-[40px]">Loved by engineers and founders</h2>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          <Testimonial
-            quote="Nive shipped a Sentry fix to production before our on-call engineer woke up. It just works."
-            name="Priya S."
-            role="CTO, Fintech startup"
-          />
-          <Testimonial
-            quote="We modernized a 15-year-old Java service in a weekend. The test coverage report alone sold us."
-            name="Marcus L."
-            role="Staff Engineer, Logistics"
-          />
-          <Testimonial
-            quote="The social manager + dev tools combo is wild — one platform for the whole launch."
-            name="Aisha K."
-            role="Indie founder"
-          />
-        </div>
-      </section>
-
       {/* Free try AI demo (no signup) */}
       <TryAiDemo />
-
-      {/* Guarantees */}
-      <section className="mx-auto max-w-[1280px] px-6 pb-4 sm:px-10">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <GuaranteeCard
-            icon={BadgeCheck}
-            title="Affordable plans"
-            body="Starter from ₹149/month. Pay securely via UPI — no card required."
-          />
-          <GuaranteeCard
-            icon={RefreshCw}
-            title="Cancel anytime"
-            body="Month-to-month. Downgrade or cancel from your dashboard in one click."
-          />
-          <GuaranteeCard
-            icon={HeartHandshake}
-            title="Human support"
-            body="Real engineers reply within hours, not days. Email and live chat included."
-          />
-        </div>
-      </section>
 
 
 
