@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Database, Download, Sparkles, Loader2, Plus, Trash2, Settings2, Network, Package,
+  Wand2, Upload, Save, Activity, FolderOpen, X,
 } from "lucide-react";
 import JSZip from "jszip";
 import { Ribbon } from "@/components/Ribbon";
@@ -9,6 +10,11 @@ import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
 import { useServerFn } from "@tanstack/react-start";
 import { consumeBusinessUsage } from "@/lib/businessUsage.functions";
+import {
+  generateAISchema, generateTimeSeries,
+  saveSchema, listSavedSchemas, deleteSavedSchema,
+  type SavedSchema, type TimeSeriesResult,
+} from "@/lib/synthetic-advanced.functions";
 
 export const Route = createFileRoute("/business/synthetic-data")({
   head: () => ({
@@ -513,7 +519,7 @@ function SyntheticDataPage() {
   const consume = useServerFn(consumeBusinessUsage);
   const { usage, setUsage } = useUsage("synthetic");
 
-  const [mode, setMode] = useState<"single" | "relational">("single");
+  const [mode, setMode] = useState<"single" | "relational" | "timeseries">("single");
   const [locale, setLocale] = useState<Locale>("india");
 
   // Single table state
@@ -528,8 +534,94 @@ function SyntheticDataPage() {
   const [relSize, setRelSize] = useState(80);
   const [relTables, setRelTables] = useState<Record<string, Record<string, any>[]>>({});
 
+  // Time-series state
+  const [tsUsers, setTsUsers] = useState(200);
+  const [tsDays, setTsDays] = useState(30);
+  const [tsEventTypes, setTsEventTypes] = useState("page_view, signup, activate, subscribe");
+  const [tsFunnel, setTsFunnel] = useState(true);
+  const [tsResult, setTsResult] = useState<TimeSeriesResult | null>(null);
+  const tsGen = useServerFn(generateTimeSeries);
+
+  // Advanced modals + saved
+  const [aiOpen, setAiOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const aiGen = useServerFn(generateAISchema);
+  const saveFn = useServerFn(saveSchema);
+  const listFn = useServerFn(listSavedSchemas);
+  const delFn = useServerFn(deleteSavedSchema);
+  const [savedList, setSavedList] = useState<SavedSchema[]>([]);
+
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!savedOpen) return;
+    listFn().then(setSavedList).catch(() => {});
+  }, [savedOpen, listFn]);
+
+  const handleGenerateTimeSeries = async () => {
+    setError(null);
+    const eventTypes = tsEventTypes.split(",").map((s) => s.trim()).filter(Boolean);
+    if (eventTypes.length < 2) { setError("At least 2 event types."); return; }
+    if (usage && usage.remaining < 2) { setError(`Need 2 credits, have ${usage.remaining}.`); return; }
+    setGenerating(true);
+    try {
+      const r = await tsGen({ data: { entity: "user", user_count: tsUsers, days: tsDays, events_per_user_max: 8, event_types: eventTypes, funnel: tsFunnel, seed } });
+      setTsResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setGenerating(false); }
+  };
+
+  const handleAIDescribe = async (description: string) => {
+    setError(null);
+    if (usage && usage.remaining < 2) throw new Error(`Need 2 credits, have ${usage.remaining}.`);
+    const r = await aiGen({ data: { description } });
+    setUsage(r.usage);
+    setFields(r.fields.map((f) => ({ name: f.name, type: f.type as FieldType, config: f.config as any })));
+    return r;
+  };
+
+  const handleSaveCurrent = async () => {
+    setError(null);
+    const name = saveName.trim() || `schema_${Date.now()}`;
+    try {
+      if (mode === "single") {
+        await saveFn({ data: { name, kind: "tabular", schema_json: { fields, locale, count, seed } } });
+      } else if (mode === "relational") {
+        await saveFn({ data: { name, kind: "relational", schema_json: { blueprintId, relSize, locale, seed } } });
+      } else {
+        await saveFn({ data: { name, kind: "timeseries", schema_json: { tsUsers, tsDays, tsEventTypes, tsFunnel, seed } } });
+      }
+      setSaveName("");
+      if (savedOpen) listFn().then(setSavedList).catch(() => {});
+    } catch (e) { setError(e instanceof Error ? e.message : "Save failed"); }
+  };
+
+  const loadSaved = (s: SavedSchema) => {
+    const j = s.schema_json as any;
+    if (s.kind === "tabular" && Array.isArray(j.fields)) {
+      setMode("single"); setFields(j.fields); if (j.locale) setLocale(j.locale);
+      if (j.count) setCount(j.count); if (j.seed) setSeed(j.seed);
+    } else if (s.kind === "relational") {
+      setMode("relational"); if (j.blueprintId) setBlueprintId(j.blueprintId);
+      if (j.relSize) setRelSize(j.relSize); if (j.locale) setLocale(j.locale); if (j.seed) setSeed(j.seed);
+    } else if (s.kind === "timeseries") {
+      setMode("timeseries");
+      if (j.tsUsers) setTsUsers(j.tsUsers); if (j.tsDays) setTsDays(j.tsDays);
+      if (j.tsEventTypes) setTsEventTypes(j.tsEventTypes);
+      if (typeof j.tsFunnel === "boolean") setTsFunnel(j.tsFunnel);
+      if (j.seed) setSeed(j.seed);
+    }
+    setSavedOpen(false);
+  };
+
+  const handleImport = (raw: string, kind: "csv" | "sql") => {
+    setError(null);
+    const newFields = parseSchemaImport(raw, kind);
+    if (!newFields.length) { setError("Could not detect any fields."); return; }
+    setFields(newFields); setMode("single"); setImportOpen(false);
+  };
 
   const previewRows = useMemo(() => rows.slice(0, 25), [rows]);
   const blueprint = useMemo(() => BLUEPRINTS.find((b) => b.id === blueprintId)!, [blueprintId]);
@@ -631,7 +723,10 @@ function SyntheticDataPage() {
               <Package className="h-3.5 w-3.5" /> Single table
             </button>
             <button onClick={() => setMode("relational")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition-all ${mode === "relational" ? "bg-white text-[#635bff] shadow-sm" : "text-[#697386] hover:text-[#0a2540]"}`}>
-              <Network className="h-3.5 w-3.5" /> Relational <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2 credits</span>
+              <Network className="h-3.5 w-3.5" /> Relational <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
+            </button>
+            <button onClick={() => setMode("timeseries")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition-all ${mode === "timeseries" ? "bg-white text-[#635bff] shadow-sm" : "text-[#697386] hover:text-[#0a2540]"}`}>
+              <Activity className="h-3.5 w-3.5" /> Time-series <span className="ml-1 rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
             </button>
           </div>
           <div className="ml-2 flex items-center gap-2">
@@ -640,6 +735,22 @@ function SyntheticDataPage() {
               <option value="india">India</option><option value="us">United States</option>
               <option value="eu">Europe</option><option value="global">Global</option>
             </select>
+          </div>
+          <div className="ml-auto flex flex-wrap gap-1.5">
+            <button onClick={() => setAiOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <Wand2 className="h-3.5 w-3.5" /> AI schema <span className="rounded-sm bg-[#635bff]/10 px-1 text-[10px] text-[#635bff]">2c</span>
+            </button>
+            <button onClick={() => setImportOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <Upload className="h-3.5 w-3.5" /> Import CSV/SQL
+            </button>
+            <button onClick={() => setSavedOpen(true)} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff]">
+              <FolderOpen className="h-3.5 w-3.5" /> Saved
+            </button>
+            <input value={saveName} onChange={(e) => setSaveName(e.target.value.slice(0, 80))} placeholder="schema name"
+              className="rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[12px] outline-none focus:border-[#635bff]" />
+            <button onClick={handleSaveCurrent} className="inline-flex items-center gap-1.5 rounded-md bg-[#0a2540] px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-[#1a3550]">
+              <Save className="h-3.5 w-3.5" /> Save
+            </button>
           </div>
         </div>
 
@@ -757,7 +868,7 @@ function SyntheticDataPage() {
               </div>
             </div>
           </>
-        ) : (
+        ) : mode === "relational" ? (
           // Relational mode
           <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
             <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
@@ -853,8 +964,94 @@ function SyntheticDataPage() {
               </div>
             </div>
           </div>
+        ) : (
+          // Time-series mode
+          <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+            <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
+              <h2 className="text-[16px] font-semibold">Event stream</h2>
+              <p className="mt-1 text-[12px] text-[#697386]">Generates session-grouped events with funnel drop-off.</p>
+              <div className="mt-4 space-y-3">
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Users (10–2000)</span>
+                  <input type="number" min={10} max={2000} value={tsUsers} onChange={(e) => setTsUsers(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Days back (1–180)</span>
+                  <input type="number" min={1} max={180} value={tsDays} onChange={(e) => setTsDays(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Event types (comma-separated, in funnel order)</span>
+                  <input value={tsEventTypes} onChange={(e) => setTsEventTypes(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+                <label className="flex items-center gap-2 text-[13px] text-[#0a2540]">
+                  <input type="checkbox" checked={tsFunnel} onChange={(e) => setTsFunnel(e.target.checked)} />
+                  Apply funnel drop-off at each step
+                </label>
+                <label className="block">
+                  <span className="text-[12px] font-medium text-[#697386]">Seed</span>
+                  <input type="number" value={seed} onChange={(e) => setSeed(Number(e.target.value))}
+                    className="mt-1 w-full rounded-md border border-[#e3e8ee] bg-white px-2.5 py-1.5 text-[13px] outline-none focus:border-[#635bff]" />
+                </label>
+              </div>
+              <button onClick={handleGenerateTimeSeries} disabled={generating}
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] hover:bg-[#5048d6] disabled:opacity-60">
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+                Generate event stream (2 credits)
+              </button>
+              {error && <p className="mt-3 rounded-md bg-[#fff1f0] px-3 py-2 text-[12.5px] text-[#c0392b]">{error}</p>}
+            </div>
+            <div className="rounded-2xl bg-white p-6 shadow-[0_15px_50px_rgba(50,50,93,0.08)] ring-1 ring-[#e3e8ee]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-[16px] font-semibold">Events</h2>
+                  <p className="mt-0.5 text-[12px] text-[#697386]">
+                    {tsResult ? `${tsResult.summary.total_events} events from ${tsResult.summary.user_count} users over ${tsResult.summary.days} days` : "Generate an event stream to see preview."}
+                  </p>
+                </div>
+                <div className="flex gap-1.5">
+                  <ExportBtn label="CSV" disabled={!tsResult} onClick={() => tsResult && downloadBlob(`events-${Date.now()}.csv`, toCSV(tsResult.events.map((e) => ({ ...e, properties: JSON.stringify(e.properties) }))), "text/csv")} />
+                  <ExportBtn label="NDJSON" disabled={!tsResult} onClick={() => tsResult && downloadBlob(`events-${Date.now()}.ndjson`, toNDJSON(tsResult.events as any), "application/x-ndjson")} />
+                </div>
+              </div>
+              {tsResult && (
+                <div className="mt-4">
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {Object.entries(tsResult.summary.by_type).map(([t, n]) => (
+                      <span key={t} className="rounded-md bg-[#f6f9fc] px-2 py-1 text-[11px] font-mono text-[#425466] ring-1 ring-[#e3e8ee]">{t}: <b className="text-[#635bff]">{n}</b></span>
+                    ))}
+                  </div>
+                  <div className="overflow-auto rounded-lg border border-[#e3e8ee]">
+                    <table className="w-full text-left text-[12px]">
+                      <thead className="bg-[#f6f9fc] text-[10.5px] uppercase text-[#697386]">
+                        <tr><th className="px-2.5 py-1.5">event_id</th><th>user_id</th><th>event_type</th><th>occurred_at</th><th>session_id</th></tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#eef1f5]">
+                        {tsResult.events.slice(0, 30).map((e) => (
+                          <tr key={e.event_id} className="text-[#3c4257]">
+                            <td className="whitespace-nowrap px-2.5 py-1.5 font-mono">{e.event_id}</td>
+                            <td className="px-2.5 py-1.5">{e.user_id}</td>
+                            <td className="px-2.5 py-1.5 font-medium text-[#0a2540]">{e.event_type}</td>
+                            <td className="whitespace-nowrap px-2.5 py-1.5">{e.occurred_at}</td>
+                            <td className="whitespace-nowrap px-2.5 py-1.5 font-mono text-[11px] text-[#697386]">{e.session_id}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </main>
+
+      {aiOpen && <AIDescribeModal onClose={() => setAiOpen(false)} onApply={handleAIDescribe} />}
+      {importOpen && <ImportModal onClose={() => setImportOpen(false)} onApply={handleImport} />}
+      {savedOpen && <SavedSchemasModal items={savedList} onClose={() => setSavedOpen(false)}
+        onLoad={loadSaved} onDelete={async (id: string) => { await delFn({ data: { id } }); listFn().then(setSavedList).catch(() => {}); }} />}
 
       {/* Field config modal */}
       {configIdx !== null && (
@@ -934,3 +1131,155 @@ function FieldConfigModal({ field, onClose, onSave }: {
 
 // Silence unused warning (kept for parity with field type list ordering)
 void FIELD_TYPES_FLAT;
+
+// ============ Schema import parser ============
+
+function inferFieldType(name: string): FieldType {
+  const n = name.toLowerCase();
+  if (n === "id" || n.endsWith("_id")) return "id";
+  if (n.includes("uuid")) return "uuid";
+  if (n.includes("email")) return "email";
+  if (n.includes("phone")) return "phone";
+  if (n.includes("first")) return "first_name";
+  if (n.includes("last")) return "last_name";
+  if (n === "name" || n.includes("full_name")) return "full_name";
+  if (n.includes("user")) return "username";
+  if (n.includes("city")) return "city";
+  if (n.includes("state")) return "state";
+  if (n.includes("country")) return "country";
+  if (n.includes("zip") || n.includes("postal")) return "zip";
+  if (n.includes("street") || n.includes("address")) return "street";
+  if (n.includes("company")) return "company";
+  if (n.includes("job") || n.includes("title")) return "job_title";
+  if (n.includes("age")) return "age";
+  if (n.includes("rating")) return "rating_1_5";
+  if (n.includes("percent")) return "percent";
+  if (n.includes("price") || n.includes("amount") || n.includes("total")) return "amount";
+  if (n.includes("status")) return "status";
+  if (n.includes("priority")) return "priority";
+  if (n.includes("plan")) return "plan_name";
+  if (n.includes("product") || n.includes("sku")) return "product";
+  if (n.includes("active") || n.startsWith("is_") || n.startsWith("has_")) return "boolean";
+  if (n.includes("url") || n.includes("link")) return "url";
+  if (n.includes("ip")) return "ipv4";
+  if (n.endsWith("_at") || n.includes("timestamp") || n.includes("datetime")) return "iso_datetime";
+  if (n.includes("date")) return "date";
+  return "paragraph";
+}
+
+function parseSchemaImport(raw: string, kind: "csv" | "sql"): Field[] {
+  const text = raw.trim();
+  if (!text) return [];
+  if (kind === "csv") {
+    const header = text.split(/\r?\n/)[0];
+    return header.split(",").map((c) => c.trim().replace(/^"|"$/g, "")).filter(Boolean)
+      .slice(0, 24).map((name) => {
+        const safe = name.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 40) || "field";
+        return { name: safe, type: inferFieldType(safe) };
+      });
+  }
+  // SQL DDL: extract column names from CREATE TABLE (...)
+  const m = text.match(/create\s+table[^(]*\(([\s\S]+?)\)\s*;?/i);
+  if (!m) return [];
+  return m[1].split(",").map((line) => line.trim()).filter(Boolean)
+    .filter((line) => !/^(primary|foreign|unique|constraint|check)\b/i.test(line))
+    .slice(0, 24).map((line) => {
+      const name = (line.split(/\s+/)[0] || "").replace(/[`"\[\]]/g, "").replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 40);
+      return name ? { name, type: inferFieldType(name) } as Field : null;
+    }).filter((f): f is Field => f !== null);
+}
+
+// ============ AI / Import / Saved modals ============
+
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2540]/50 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+        <div className="flex items-center justify-between"><h3 className="text-[16px] font-bold text-[#0a2540]">{title}</h3>
+          <button onClick={onClose} className="rounded-md p-1 text-[#697386] hover:bg-[#f6f9fc]"><X className="h-4 w-4" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AIDescribeModal({ onClose, onApply }: { onClose: () => void; onApply: (d: string) => Promise<any> }) {
+  const [desc, setDesc] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const run = async () => {
+    if (desc.trim().length < 8) { setErr("Describe in at least 8 characters."); return; }
+    setLoading(true); setErr(null);
+    try { await onApply(desc.trim()); onClose(); }
+    catch (e) { setErr(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <ModalShell title="Describe your dataset" onClose={onClose}>
+      <p className="mt-1 text-[12px] text-[#697386]">AI builds a schema you can edit. Costs 2 credits.</p>
+      <textarea value={desc} onChange={(e) => setDesc(e.target.value.slice(0, 600))} rows={5}
+        placeholder="e.g. SaaS customers with company, plan, MRR in USD, churned flag, signup date"
+        className="mt-3 w-full resize-none rounded-md border border-[#e3e8ee] px-3 py-2 text-[13.5px] outline-none focus:border-[#635bff]" />
+      {err && <p className="mt-2 rounded-md bg-[#fff1f0] px-3 py-2 text-[12.5px] text-[#c0392b]">{err}</p>}
+      <div className="mt-4 flex justify-end gap-2">
+        <button onClick={onClose} className="rounded-md px-3 py-1.5 text-[13px] font-medium text-[#697386] hover:bg-[#f6f9fc]">Cancel</button>
+        <button onClick={run} disabled={loading} className="inline-flex items-center gap-1.5 rounded-md bg-[#635bff] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#5048d6] disabled:opacity-60">
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />} Build schema
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function ImportModal({ onClose, onApply }: { onClose: () => void; onApply: (raw: string, kind: "csv" | "sql") => void }) {
+  const [kind, setKind] = useState<"csv" | "sql">("csv");
+  const [raw, setRaw] = useState("");
+  return (
+    <ModalShell title="Import schema" onClose={onClose}>
+      <div className="mt-2 flex gap-1.5">
+        {(["csv","sql"] as const).map((k) => (
+          <button key={k} onClick={() => setKind(k)} className={`rounded-md px-3 py-1.5 text-[12.5px] font-semibold ${kind === k ? "bg-[#635bff] text-white" : "bg-[#f6f9fc] text-[#0a2540]"}`}>
+            {k === "csv" ? "CSV header" : "SQL DDL"}
+          </button>
+        ))}
+      </div>
+      <textarea value={raw} onChange={(e) => setRaw(e.target.value)} rows={8}
+        placeholder={kind === "csv" ? "id,name,email,city,signup_date" : "CREATE TABLE users (id INT, email TEXT, created_at TIMESTAMP);"}
+        className="mt-3 w-full resize-none rounded-md border border-[#e3e8ee] px-3 py-2 font-mono text-[12px] outline-none focus:border-[#635bff]" />
+      <p className="mt-2 text-[11.5px] text-[#697386]">Field types are inferred from column names — you can edit them after.</p>
+      <div className="mt-4 flex justify-end gap-2">
+        <button onClick={onClose} className="rounded-md px-3 py-1.5 text-[13px] font-medium text-[#697386] hover:bg-[#f6f9fc]">Cancel</button>
+        <button onClick={() => onApply(raw, kind)} className="inline-flex items-center gap-1.5 rounded-md bg-[#635bff] px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-[#5048d6]">
+          <Upload className="h-3.5 w-3.5" /> Import
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+function SavedSchemasModal({ items, onClose, onLoad, onDelete }: {
+  items: SavedSchema[]; onClose: () => void; onLoad: (s: SavedSchema) => void; onDelete: (id: string) => void;
+}) {
+  return (
+    <ModalShell title="Saved schemas" onClose={onClose}>
+      {items.length === 0 ? (
+        <p className="mt-4 text-[13px] text-[#697386]">No saved schemas yet. Save one with the button above.</p>
+      ) : (
+        <ul className="mt-3 max-h-[400px] space-y-2 overflow-auto">
+          {items.map((s) => (
+            <li key={s.id} className="flex items-center justify-between rounded-md border border-[#e3e8ee] bg-white p-3">
+              <div className="min-w-0">
+                <p className="truncate text-[13.5px] font-semibold text-[#0a2540]">{s.name}</p>
+                <p className="text-[11.5px] text-[#697386]">{s.kind} · {new Date(s.updated_at).toLocaleDateString()}</p>
+              </div>
+              <div className="flex gap-1.5">
+                <button onClick={() => onLoad(s)} className="rounded-md bg-[#635bff] px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-[#5048d6]">Load</button>
+                <button onClick={() => onDelete(s.id)} className="rounded-md p-1.5 text-[#697386] hover:text-[#c0392b]"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ModalShell>
+  );
+}
