@@ -8,6 +8,7 @@ import JSZip from "jszip";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import { useServerFn } from "@tanstack/react-start";
 import { consumeBusinessUsage } from "@/lib/businessUsage.functions";
 import {
