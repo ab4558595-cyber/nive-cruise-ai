@@ -21,8 +21,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
-import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
-import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
 import { Route as BusinessUsageRouteImport } from './routes/business.usage'
 import { Route as BusinessSyntheticDataRouteImport } from './routes/business.synthetic-data'
 import { Route as BusinessPricingRouteImport } from './routes/business.pricing'
@@ -32,7 +30,6 @@ import { Route as ApiPublicApprovePaymentRouteImport } from './routes/api/public
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay/webhook'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -94,16 +91,6 @@ const BusinessIndexRoute = BusinessIndexRouteImport.update({
   path: '/business/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
-  id: '/checkout/success',
-  path: '/checkout/success',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutPlanIdRoute = CheckoutPlanIdRouteImport.update({
-  id: '/checkout/$planId',
-  path: '/checkout/$planId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BusinessUsageRoute = BusinessUsageRouteImport.update({
   id: '/business/usage',
   path: '/business/usage',
@@ -150,12 +137,6 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicRazorpayWebhookRoute =
-  ApiPublicRazorpayWebhookRouteImport.update({
-    id: '/api/public/razorpay/webhook',
-    path: '/api/public/razorpay/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,12 +154,9 @@ export interface FileRoutesByFullPath {
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
-  '/checkout/$planId': typeof CheckoutPlanIdRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
-  '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -199,12 +177,9 @@ export interface FileRoutesByTo {
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
-  '/checkout/$planId': typeof CheckoutPlanIdRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
   '/business': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
-  '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -226,12 +201,9 @@ export interface FileRoutesById {
   '/business/pricing': typeof BusinessPricingRoute
   '/business/synthetic-data': typeof BusinessSyntheticDataRoute
   '/business/usage': typeof BusinessUsageRoute
-  '/checkout/$planId': typeof CheckoutPlanIdRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
   '/business/': typeof BusinessIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
-  '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -254,12 +226,9 @@ export interface FileRouteTypes {
     | '/business/pricing'
     | '/business/synthetic-data'
     | '/business/usage'
-    | '/checkout/$planId'
-    | '/checkout/success'
     | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
-    | '/api/public/razorpay/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -280,12 +249,9 @@ export interface FileRouteTypes {
     | '/business/pricing'
     | '/business/synthetic-data'
     | '/business/usage'
-    | '/checkout/$planId'
-    | '/checkout/success'
     | '/business'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
-    | '/api/public/razorpay/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -306,12 +272,9 @@ export interface FileRouteTypes {
     | '/business/pricing'
     | '/business/synthetic-data'
     | '/business/usage'
-    | '/checkout/$planId'
-    | '/checkout/success'
     | '/business/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
-    | '/api/public/razorpay/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -333,12 +296,9 @@ export interface RootRouteChildren {
   BusinessPricingRoute: typeof BusinessPricingRoute
   BusinessSyntheticDataRoute: typeof BusinessSyntheticDataRoute
   BusinessUsageRoute: typeof BusinessUsageRoute
-  CheckoutPlanIdRoute: typeof CheckoutPlanIdRoute
-  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   ApiPublicApprovePaymentRoute: typeof ApiPublicApprovePaymentRoute
   ApiPublicTryAiRoute: typeof ApiPublicTryAiRoute
-  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -430,20 +390,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/success': {
-      id: '/checkout/success'
-      path: '/checkout/success'
-      fullPath: '/checkout/success'
-      preLoaderRoute: typeof CheckoutSuccessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout/$planId': {
-      id: '/checkout/$planId'
-      path: '/checkout/$planId'
-      fullPath: '/checkout/$planId'
-      preLoaderRoute: typeof CheckoutPlanIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/business/usage': {
       id: '/business/usage'
       path: '/business/usage'
@@ -507,13 +453,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/razorpay/webhook': {
-      id: '/api/public/razorpay/webhook'
-      path: '/api/public/razorpay/webhook'
-      fullPath: '/api/public/razorpay/webhook'
-      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -533,12 +472,9 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessPricingRoute: BusinessPricingRoute,
   BusinessSyntheticDataRoute: BusinessSyntheticDataRoute,
   BusinessUsageRoute: BusinessUsageRoute,
-  CheckoutPlanIdRoute: CheckoutPlanIdRoute,
-  CheckoutSuccessRoute: CheckoutSuccessRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   ApiPublicApprovePaymentRoute: ApiPublicApprovePaymentRoute,
   ApiPublicTryAiRoute: ApiPublicTryAiRoute,
-  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

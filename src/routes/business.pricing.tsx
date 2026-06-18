@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ArrowLeft, ShieldCheck, Zap, Database, Megaphone, CreditCard, RefreshCcw, Quote, Sparkles } from "lucide-react";
 import { plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
 import { LegalFooter } from "@/components/LegalFooter";
 
 const BUSINESS_PLANS = plansForProduct("business");
@@ -44,7 +44,7 @@ function BusinessPricing() {
       className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
       style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
     >
-      <PaymentTestModeBanner />
+      
       <Ribbon />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
@@ -125,15 +125,14 @@ function BusinessPricing() {
                   Start free pilot
                 </Link>
               ) : (
-                <Link
-                  to="/checkout/$planId"
-                  params={{ planId: plan.id }}
+                <a
+                  href={`mailto:bansal.monikaji1982@gmail.com?subject=${encodeURIComponent(`Request: ${plan.name} business plan`)}`}
                   className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
                     plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
                   }`}
                 >
-                  Choose {plan.name}
-                </Link>
+                  Contact sales
+                </a>
               )}
             </div>
           ))}
@@ -186,8 +185,8 @@ function BusinessPricing() {
 
         {/* Trust strip */}
         <div className="mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 rounded-xl bg-[#f6f9fc] px-6 py-4 text-[13px] text-[#425466] ring-1 ring-[#e3e8ee]">
-          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Secure checkout via Razorpay</span>
-          <span className="inline-flex items-center gap-2"><CreditCard className="h-4 w-4 text-[#635bff]" /> UPI, cards & wallets accepted</span>
+          <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#635bff]" /> Invoice-based onboarding</span>
+          <span className="inline-flex items-center gap-2"><CreditCard className="h-4 w-4 text-[#635bff]" /> Bank transfer accepted</span>
           <span className="inline-flex items-center gap-2"><RefreshCcw className="h-4 w-4 text-[#635bff]" /> Cancel anytime · 14-day refund</span>
         </div>
 
