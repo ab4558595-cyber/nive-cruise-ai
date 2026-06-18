@@ -68,7 +68,7 @@ function FounderPage() {
               Explore Nive AI <span aria-hidden>›</span>
             </Link>
             <Link
-              to="/pricing"
+              to="/business/pricing"
               className="inline-flex items-center gap-1.5 rounded-full border border-[#0a2540]/10 bg-white px-5 py-3 text-[15px] font-medium text-[#0a2540] transition-colors hover:border-[#635bff]/30 hover:text-[#635bff]"
             >
               See pricing
