@@ -8,6 +8,7 @@ import JSZip from "jszip";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import { useServerFn } from "@tanstack/react-start";
 import { consumeBusinessUsage } from "@/lib/businessUsage.functions";
 import {
@@ -695,6 +696,7 @@ function SyntheticDataPage() {
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
         <div className="flex items-center gap-3">
+          <CurrentPlanBadge className="hidden sm:inline-flex" />
           <UsageBadge usage={usage} onTopupSuccess={(u) => { setUsage(u); setError(null); }} />
           <Link to="/business" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
             <ArrowLeft className="h-4 w-4" /> Back
