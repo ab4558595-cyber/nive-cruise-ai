@@ -169,6 +169,7 @@ function MarketingPage() {
           })}
         </div>
 
+        {mode === "megapack" && <MegaPackPanel usage={usage} setUsage={setUsage} />}
         {mode === "quick" && <QuickPanel usage={usage} setUsage={setUsage} />}
         {mode === "campaign" && <CampaignPanel usage={usage} setUsage={setUsage} />}
         {mode === "blog" && <BlogPanel usage={usage} setUsage={setUsage} />}
