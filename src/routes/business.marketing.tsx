@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check, FileText, Compass,
-  Image as ImageIcon, Layout, Palette, X, Plus, Trash2,
+  Image as ImageIcon, Layout, Palette, X, Plus, Trash2, Search, Mail, Target, Globe,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
@@ -11,17 +11,19 @@ import { useUsage, UsageBadge } from "@/components/UsageBadge";
 import {
   generateMarketing, generateCampaign, generateBlog, generateStrategy, generateHeroWireframe,
   getBrandProfile, saveBrandProfile,
+  generateCompetitor, generateEmailDrip, generateAdPack, generateLandingHtml,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
+  type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
 } from "@/lib/marketing.functions";
 
 export const Route = createFileRoute("/business/marketing")({
   head: () => ({
     meta: [
       { title: "AI Marketing Suite — Nive AI for Business" },
-      { name: "description", content: "Quick copy, full campaign packs, SEO blog posts, 30-day strategy, and AI hero images + landing wireframes. Save your brand voice once." },
+      { name: "description", content: "9 modes: quick copy, campaigns, SEO blog, 30-day strategy, hero+wireframe, competitor research, email drip, ad pack, landing-page HTML." },
       { property: "og:title", content: "AI Marketing Suite — Nive AI" },
-      { property: "og:description", content: "Five marketing modes powered by AI, tuned to your brand voice." },
+      { property: "og:description", content: "Nine marketing modes powered by AI, tuned to your brand voice." },
     ],
     links: [{ rel: "canonical", href: "/business/marketing" }],
   }),
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/business/marketing")({
   ),
 });
 
-type Mode = "quick" | "campaign" | "blog" | "strategy" | "hero";
+type Mode = "quick" | "campaign" | "blog" | "strategy" | "hero" | "competitor" | "drip" | "adpack" | "landing";
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
@@ -40,6 +42,10 @@ const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "blog", label: "SEO blog", icon: FileText, credits: 3 },
   { id: "strategy", label: "30-day strategy", icon: Compass, credits: 2 },
   { id: "hero", label: "Hero + wireframe", icon: Layout, credits: 2 },
+  { id: "competitor", label: "Competitor + SEO", icon: Search, credits: 3 },
+  { id: "drip", label: "Email drip (5)", icon: Mail, credits: 3 },
+  { id: "adpack", label: "Ad pack", icon: Target, credits: 3 },
+  { id: "landing", label: "Landing HTML", icon: Globe, credits: 3 },
 ];
 
 const TONES = ["professional","friendly","bold","playful","luxurious","minimal","urgent"] as const;
