@@ -53,7 +53,7 @@ function Privacy() {
             <li><strong>Usage & telemetry:</strong> features used, prompt counts, model selections, error logs.</li>
             <li><strong>Device & technical data:</strong> IP address, browser type, device type, OS, referrer URL.</li>
             <li><strong>Support data:</strong> messages you send to support and our responses.</li>
-            <li><strong>Payment data:</strong> processed by Razorpay (see "Sharing" below); we receive a payment ID, payment status, and minimal metadata — we do <em>not</em> store full card numbers, CVVs, or UPI PINs.</li>
+            <li><strong>Payment data:</strong> if you contact us to purchase a plan, we receive a payment reference and minimal metadata — we do <em>not</em> store full card numbers, CVVs, or UPI PINs.</li>
           </ul>
         </Section>
 
