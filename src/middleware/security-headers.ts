@@ -15,13 +15,14 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
     "default-src 'self'",
     "base-uri 'self'",
     "frame-ancestors 'none'",
-    "form-action 'self'",
+    "form-action 'self' https://api.razorpay.com https://*.razorpay.com",
     "img-src 'self' data: blob: https:",
-    "font-src 'self' data: https://fonts.gstatic.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+    "font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.razorpay.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com",
     "connect-src 'self' https: wss:",
-    "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com",
+    "frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://*.razorpay.in https://*.upi.com",
+    "child-src 'self' https://*.razorpay.com",
     "object-src 'none'",
     "worker-src 'self' blob:",
     "upgrade-insecure-requests",
@@ -33,9 +34,10 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
     "X-Frame-Options": "DENY",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(self), geolocation=()",
-    "Cross-Origin-Opener-Policy": "same-origin",
+    "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), payment=(self \"https://checkout.razorpay.com\")",
+    "Cross-Origin-Opener-Policy": "unsafe-none",
   });
+
 
   return result;
 });
