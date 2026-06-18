@@ -230,27 +230,6 @@ function Welcome() {
   );
 }
 
-function GuaranteeCard({
-  icon: Icon,
-  title,
-  body,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="flex gap-4 rounded-2xl border border-[#0a2540]/8 bg-white p-5">
-      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#635bff]/10 text-[#635bff]">
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0">
-        <h3 className="text-[15px] font-semibold text-[#0a2540]">{title}</h3>
-        <p className="mt-1 text-[14px] leading-relaxed text-[#425466]">{body}</p>
-      </div>
-    </div>
-  );
-}
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   return (
