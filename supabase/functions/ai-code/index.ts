@@ -145,55 +145,13 @@ Deno.serve(async (req) => {
     const presetKey = typeof preset === "string" && PRESET_PROMPTS[preset] !== undefined ? preset : "default";
     const presetExtras = PRESET_PROMPTS[presetKey];
 
-    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     const systemMessage = { role: "system", content: BASE_PROMPT + planExtras + presetExtras };
     const fullMessages = [systemMessage, ...messages];
 
-    // Try OpenRouter first (free models), fall back to Lovable AI
+    // Provider chain: Lovable AI first, then ApiFreeLLM as fallback.
     let response: Response | null = null;
     let usedProvider = "lovable";
     let usedModel = cfg.model;
-
-    // Peek SSE first chunk to detect in-stream errors (OpenRouter returns 200 + error event when free limits hit).
-    async function validateStream(resp: Response): Promise<Response | null> {
-      if (!resp.body) return null;
-      const reader = resp.body.getReader();
-      const { value, done } = await reader.read();
-      if (done || !value) {
-        try { reader.releaseLock(); } catch { /* ignore */ }
-        return null;
-      }
-      const firstText = new TextDecoder().decode(value);
-      const lower = firstText.toLowerCase();
-      const looksLikeError =
-        /"error"\s*:/.test(firstText) &&
-        (lower.includes("rate") || lower.includes("limit") || lower.includes("quota") ||
-         lower.includes("exceed") || lower.includes("insufficient") || lower.includes("unauthorized") ||
-         /"code"\s*:\s*(?:4\d\d|5\d\d)/.test(firstText));
-      if (looksLikeError) {
-        console.error("Stream-level error detected:", firstText.slice(0, 300));
-        try { await reader.cancel(); } catch { /* ignore */ }
-        return null;
-      }
-      const rebuilt = new ReadableStream({
-        async start(controller) {
-          controller.enqueue(value);
-          try {
-            while (true) {
-              const r = await reader.read();
-              if (r.done) break;
-              controller.enqueue(r.value);
-            }
-          } catch (e) {
-            controller.error(e);
-            return;
-          }
-          controller.close();
-        },
-        cancel(reason) { return reader.cancel(reason); },
-      });
-      return new Response(rebuilt, { status: resp.status, headers: resp.headers });
-    }
 
     async function tryApiFreeLLM(): Promise<Response | null> {
       const key = Deno.env.get("APIFREELLM_API_KEY");
@@ -230,41 +188,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 1) OpenRouter free models
-    if (OPENROUTER_API_KEY) {
-      try {
-        for (const model of cfg.orModels) {
-          const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-              "Content-Type": "application/json",
-              "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
-              "X-Title": "Nive AI",
-            },
-            body: JSON.stringify({ model, messages: fullMessages, stream: true, max_tokens: 4096 }),
-          });
-          if (!orResp.ok) {
-            const errText = await orResp.text();
-            console.error(`OpenRouter model ${model} HTTP failed:`, orResp.status, errText.slice(0, 300));
-            continue;
-          }
-          const validated = await validateStream(orResp);
-          if (validated) {
-            response = validated;
-            usedProvider = "openrouter";
-            usedModel = model;
-            break;
-          }
-          console.error(`OpenRouter ${model} in-stream error, trying next.`);
-        }
-      } catch (e) {
-        console.error("OpenRouter threw, falling back:", e);
-      }
-    }
+    // 1) Lovable AI Gateway
+    response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
+    });
 
-    // 2) ApiFreeLLM (preferred free fallback when OpenRouter is exhausted)
-    if (!response) {
+    // 2) Fallback: ApiFreeLLM if Lovable failed
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      console.error("Lovable AI failed, trying ApiFreeLLM:", response.status, errText.slice(0, 300));
       const af = await tryApiFreeLLM();
       if (af) {
         response = af;
@@ -273,31 +210,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3) Lovable AI Gateway (paid credits) as last resort
-    if (!response) {
-      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
-      });
-    }
-
-    // 4) If Lovable also failed, try ApiFreeLLM one more time as ultimate safety net
-    if ((!response || !response.ok) && Deno.env.get("APIFREELLM_API_KEY")) {
-      if (response) {
-        const errText = await response.text().catch(() => "");
-        console.error("Lovable AI failed, retrying ApiFreeLLM:", response.status, errText.slice(0, 300));
-      }
-      const af = await tryApiFreeLLM();
-      if (af) {
-        response = af;
-        usedProvider = "apifreellm";
-        usedModel = "apifreellm";
-      }
-    }
 
     if (!response || !response.ok) {
       const status = response?.status ?? 500;
