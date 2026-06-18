@@ -79,7 +79,7 @@ function Checkout() {
           setStatus("processing");
           try {
             await verify({ data: { ...response, planId: plan.id } });
-            navigate({ to: "/checkout/success" });
+            navigate({ to: "/checkout/success", search: { plan: plan.id } });
           } catch (e) {
             setStatus("error");
             setError(e instanceof Error ? e.message : "Verification failed");
