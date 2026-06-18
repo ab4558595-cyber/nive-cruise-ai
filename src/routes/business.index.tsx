@@ -118,10 +118,10 @@ function Business() {
             title="Realistic data, zero privacy risk."
             body="Generate schema-aware tabular datasets that mirror the statistical shape of your real data — without exposing a single real record. Use it for testing, demos, ML training, and compliance-friendly sharing."
             bullets={[
-              "Tabular, time-series, and JSON schemas",
-              "PII scrubbing & differential-privacy modes",
-              "Export to CSV, JSON, or Parquet",
-              "Bias and distribution reports",
+              "32+ field types across 4 locales (India / US / EU / Global)",
+              "Up to 5,000 rows per run, custom schema builder",
+              "Relational blueprints with foreign keys (SaaS, E-com, support…)",
+              "Export to CSV, JSON, NDJSON, SQL INSERT, or Markdown",
             ]}
           />
           <FeatureCard
@@ -131,12 +131,12 @@ function Business() {
             icon={<Megaphone className="h-5 w-5" />}
             eyebrow="AI Marketing Generation"
             title="Campaigns that sound like your brand."
-            body="Lock in your tone of voice once, then produce ad headlines, landing copy, email sequences, and social posts in seconds — tuned per channel and audience."
+            body="Lock in your brand voice once, then run full campaign packs, SEO blogs, 30-day strategies, and AI hero images — all tuned to your audience and channels."
             bullets={[
-              "Brand voice & tone presets",
-              "Ad / email / social variants",
-              "Multilingual output",
-              "Campaign briefs → full asset packs",
+              "Quick copy, full campaign pack, SEO blog writer",
+              "30-day go-to-market strategy + KPI plan",
+              "AI hero image + landing wireframe generator",
+              "Persistent brand voice memory across every run",
             ]}
           />
         </div>
