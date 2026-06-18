@@ -42,7 +42,11 @@ export const Route = createFileRoute("/business/marketing")({
   ),
 });
 
-type Mode = "quick" | "campaign" | "blog" | "strategy" | "hero" | "competitor" | "drip" | "adpack" | "landing";
+type Mode =
+  | "quick" | "campaign" | "blog" | "strategy" | "hero"
+  | "competitor" | "drip" | "adpack" | "landing"
+  | "calendar" | "video" | "press" | "outreach" | "voice"
+  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy";
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
@@ -54,7 +58,18 @@ const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "drip", label: "Email drip (5)", icon: Mail, credits: 3 },
   { id: "adpack", label: "Ad pack", icon: Target, credits: 3 },
   { id: "landing", label: "Landing HTML", icon: Globe, credits: 3 },
+  { id: "calendar", label: "Social calendar", icon: Calendar, credits: 3 },
+  { id: "video", label: "Video script", icon: Video, credits: 2 },
+  { id: "press", label: "Press release", icon: Newspaper, credits: 2 },
+  { id: "outreach", label: "Cold outreach", icon: Send, credits: 3 },
+  { id: "voice", label: "Brand voice", icon: MessageSquare, credits: 2 },
+  { id: "personas", label: "Personas", icon: Users, credits: 2 },
+  { id: "abtest", label: "A/B variants", icon: FlaskConical, credits: 1 },
+  { id: "seometa", label: "SEO meta pack", icon: Code2, credits: 2 },
+  { id: "pricing", label: "Pricing copy", icon: Tags, credits: 2 },
+  { id: "casestudy", label: "Case study", icon: BookOpen, credits: 3 },
 ];
+
 
 const TONES = ["professional","friendly","bold","playful","luxurious","minimal","urgent"] as const;
 const CHANNELS = [
