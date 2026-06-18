@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Database, Megaphone, History as HistoryIcon, Loader2 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import {
   getBusinessUsageHistory,
