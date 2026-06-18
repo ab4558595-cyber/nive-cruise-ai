@@ -70,7 +70,7 @@ function Checkout() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: "Nive AI",
+        name: "Razorpay trusted business",
         description: `${order.planName} plan — 30 days`,
         order_id: order.orderId,
         prefill: { email: order.userEmail },
