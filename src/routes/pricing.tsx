@@ -118,15 +118,14 @@ function Pricing() {
                   Use free
                 </Link>
               ) : (
-                <Link
-                  to="/checkout/$planId"
-                  params={{ planId: plan.id }}
+                <a
+                  href={`mailto:bansal.monikaji1982@gmail.com?subject=${encodeURIComponent(`Request: ${plan.name} plan`)}`}
                   className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
                     plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
                   }`}
                 >
-                  Choose {plan.name}
-                </Link>
+                  Contact sales
+                </a>
               )}
             </div>
           ))}
