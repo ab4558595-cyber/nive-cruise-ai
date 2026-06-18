@@ -10,33 +10,56 @@ import {
 
 // ---------- Shared helpers ----------
 
-async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("OpenRouter API key not configured");
-
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://nive-ai.co.in",
-      "X-Title": "Nive AI for Business",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      ...(json ? { response_format: { type: "json_object" } } : {}),
-    }),
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`OpenRouter error ${res.status}: ${txt.slice(0, 200)}`);
+async function callApiFreeLLM(systemPrompt: string, userPrompt: string): Promise<string> {
+  const key = process.env.APIFREELLM_API_KEY;
+  if (!key) return "";
+  try {
+    const res = await fetch("https://apifreellm.com/api/v1/chat", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
+    });
+    if (!res.ok) return "";
+    const data: any = await res.json();
+    return (
+      data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? ""
+    );
+  } catch {
+    return "";
   }
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return data.choices?.[0]?.message?.content ?? "";
+}
+
+async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
+  // Primary: Lovable AI Gateway. Fallback: ApiFreeLLM.
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (apiKey) {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        max_tokens: 4096,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        ...(json ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      if (content) return content;
+    } else {
+      console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+    }
+  }
+  const fb = await callApiFreeLLM(systemPrompt, userPrompt);
+  if (!fb) throw new Error("AI provider unavailable");
+  return fb;
 }
 
 function parseJsonLoose<T = any>(s: string): T {
