@@ -19,47 +19,104 @@ async function callApiFreeLLM(systemPrompt: string, userPrompt: string): Promise
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
     });
-    if (!res.ok) return "";
+    if (!res.ok) {
+      console.error("ApiFreeLLM failed:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      return "";
+    }
     const data: any = await res.json();
     return (
       data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? ""
     );
-  } catch {
+  } catch (e) {
+    console.error("ApiFreeLLM threw:", e);
     return "";
   }
 }
 
-async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  // Primary: Lovable AI Gateway. Fallback: ApiFreeLLM.
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (apiKey) {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        max_tokens: 4096,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        ...(json ? { response_format: { type: "json_object" } } : {}),
-      }),
-    });
-    if (res.ok) {
+async function callOpenRouterFallback(
+  systemPrompt: string,
+  userPrompt: string,
+  json: boolean,
+): Promise<string> {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return "";
+  const models = [
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+  ];
+  for (const model of models) {
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://nive-ai.co.in",
+          "X-Title": "Nive AI Marketing",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 4096,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          ...(json ? { response_format: { type: "json_object" } } : {}),
+        }),
+      });
+      if (!res.ok) {
+        console.error(`OpenRouter ${model} failed:`, res.status, (await res.text().catch(() => "")).slice(0, 200));
+        continue;
+      }
       const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
       const content = data.choices?.[0]?.message?.content ?? "";
       if (content) return content;
-    } else {
-      console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+    } catch (e) {
+      console.error(`OpenRouter ${model} threw:`, e);
     }
   }
+  return "";
+}
+
+async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
+  // Primary: Lovable AI Gateway. Fallbacks: OpenRouter (free) → ApiFreeLLM.
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (apiKey) {
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          max_tokens: 4096,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          ...(json ? { response_format: { type: "json_object" } } : {}),
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const content = data.choices?.[0]?.message?.content ?? "";
+        if (content) return content;
+        console.error("Lovable AI returned empty content, trying fallback.");
+      } else {
+        console.error("Lovable AI failed, trying fallback:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      }
+    } catch (e) {
+      console.error("Lovable AI threw, trying fallback:", e);
+    }
+  }
+  const or = await callOpenRouterFallback(systemPrompt, userPrompt, json);
+  if (or) return or;
   const fb = await callApiFreeLLM(systemPrompt, userPrompt);
-  if (!fb) throw new Error("AI provider unavailable");
-  return fb;
+  if (fb) return fb;
+  throw new Error("All AI providers are unavailable right now. Please try again in a moment.");
 }
 
 function parseJsonLoose<T = any>(s: string): T {
