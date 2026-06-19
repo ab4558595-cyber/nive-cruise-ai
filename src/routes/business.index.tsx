@@ -16,6 +16,8 @@ export const Route = createFileRoute("/business/")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Nive AI for Business — AI tools for marketing & synthetic data" },
       { name: "twitter:description", content: "All-in-one AI for business: synthetic datasets, marketing campaigns, SEO, email drips & GTM strategy." },
+    ],
+    links: [{ rel: "canonical", href: "https://nive-ai.co.in/business" }],
   }),
   component: () => <Business />,
 });
