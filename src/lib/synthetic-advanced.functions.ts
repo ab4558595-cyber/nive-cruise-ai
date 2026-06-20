@@ -54,6 +54,8 @@ async function recordSyntheticUsage(
   };
 }
 
+const HF_PROXY_URL = "https://4idn-my-lovable-api.hf.space";
+
 async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise<any> {
   const parseLoose = (content: string) => {
     try { return JSON.parse(content); } catch {
@@ -63,6 +65,33 @@ async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise
     }
   };
 
+  // Primary: HF proxy
+  try {
+    const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (res.ok) {
+      const data: any = await res.json();
+      const content =
+        data?.choices?.[0]?.message?.content ??
+        data?.response ?? data?.content ?? data?.message ?? "";
+      if (content) return parseLoose(content);
+    } else {
+      console.error("HF proxy failed, falling back to Lovable AI:", res.status);
+    }
+  } catch (e) {
+    console.error("HF proxy threw, falling back to Lovable AI:", e);
+  }
+
+  // Fallback: Lovable AI Gateway
   const apiKey = process.env.LOVABLE_API_KEY;
   if (apiKey) {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -87,6 +116,7 @@ async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise
     }
   }
 
+  // Last resort: ApiFreeLLM
   const fbKey = process.env.APIFREELLM_API_KEY;
   if (!fbKey) throw new Error("AI not configured");
   const res = await fetch("https://apifreellm.com/api/v1/chat", {
