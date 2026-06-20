@@ -79,8 +79,53 @@ async function callOpenRouterFallback(
   return "";
 }
 
+const HF_PROXY_URL = "https://4idn-my-lovable-api.hf.space";
+
+async function callHfProxy(
+  systemPrompt: string,
+  userPrompt: string,
+  json: boolean,
+): Promise<string> {
+  try {
+    const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        ...(json ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+    if (!res.ok) {
+      console.error("HF proxy failed:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      return "";
+    }
+    const data = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+      response?: string;
+      content?: string;
+      message?: string;
+    };
+    return (
+      data.choices?.[0]?.message?.content ??
+      data.response ??
+      data.content ??
+      data.message ??
+      ""
+    );
+  } catch (e) {
+    console.error("HF proxy threw:", e);
+    return "";
+  }
+}
+
 async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  // Primary: Lovable AI Gateway. Fallbacks: OpenRouter (free) → ApiFreeLLM.
+  // Primary: HF proxy. Fallbacks: Lovable AI Gateway → OpenRouter (free) → ApiFreeLLM.
+  const hf = await callHfProxy(systemPrompt, userPrompt, json);
+  if (hf) return hf;
+
   const apiKey = process.env.LOVABLE_API_KEY;
   if (apiKey) {
     try {
