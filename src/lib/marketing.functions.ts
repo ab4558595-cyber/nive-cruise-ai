@@ -10,169 +10,86 @@ import {
 
 // ---------- Shared helpers ----------
 
-async function callApiFreeLLM(systemPrompt: string, userPrompt: string): Promise<string> {
-  const key = process.env.APIFREELLM_API_KEY;
-  if (!key) return "";
-  try {
-    const res = await fetch("https://apifreellm.com/api/v1/chat", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
-    });
-    if (!res.ok) {
-      console.error("ApiFreeLLM failed:", res.status, (await res.text().catch(() => "")).slice(0, 200));
-      return "";
-    }
-    const data: any = await res.json();
-    return (
-      data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? ""
-    );
-  } catch (e) {
-    console.error("ApiFreeLLM threw:", e);
-    return "";
-  }
-}
-
-async function callOpenRouterFallback(
-  systemPrompt: string,
-  userPrompt: string,
-  json: boolean,
-): Promise<string> {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return "";
-  const models = [
-    "google/gemini-2.0-flash-exp:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "qwen/qwen-2.5-72b-instruct:free",
-  ];
-  for (const model of models) {
-    try {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${key}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://nive-ai.co.in",
-          "X-Title": "Nive AI Marketing",
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: 4096,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          ...(json ? { response_format: { type: "json_object" } } : {}),
-        }),
-      });
-      if (!res.ok) {
-        console.error(`OpenRouter ${model} failed:`, res.status, (await res.text().catch(() => "")).slice(0, 200));
-        continue;
-      }
-      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-      const content = data.choices?.[0]?.message?.content ?? "";
-      if (content) return content;
-    } catch (e) {
-      console.error(`OpenRouter ${model} threw:`, e);
-    }
-  }
-  return "";
-}
-
 const HF_PROXY_URL = "https://4idn-my-lovable-api.hf.space";
 
-async function callHfProxy(
-  systemPrompt: string,
-  userPrompt: string,
-  json: boolean,
-): Promise<string> {
-  try {
-    const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        ...(json ? { response_format: { type: "json_object" } } : {}),
-      }),
-    });
-    if (!res.ok) {
-      console.error("HF proxy failed:", res.status, (await res.text().catch(() => "")).slice(0, 200));
-      return "";
-    }
-    const data = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-      response?: string;
-      content?: string;
-      message?: string;
-    };
-    return (
-      data.choices?.[0]?.message?.content ??
-      data.response ??
-      data.content ??
-      data.message ??
-      ""
-    );
-  } catch (e) {
-    console.error("HF proxy threw:", e);
-    return "";
-  }
-}
+/**
+ * Sole AI provider: HF proxy at 4idn-my-lovable-api.hf.space.
+ *
+ * Important: do NOT send `response_format: { type: "json_object" }` — that
+ * makes the upstream NVIDIA model exceed the proxy's 30s read timeout and
+ * return HTTP 500. Instead, ask for JSON explicitly in the system prompt
+ * (every caller's prompt already says "JSON only").
+ *
+ * The upstream is a reasoning model: when it does emit a final answer it
+ * lands in `content`, but if `content` is empty we fall back to the
+ * `reasoning` / `reasoning_content` field and let `parseJsonLoose` extract
+ * the JSON object from it. One automatic retry covers transient 5xx blips.
+ */
+async function callHfProxy(systemPrompt: string, userPrompt: string): Promise<string> {
+  const body = JSON.stringify({
+    max_tokens: 4096,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+  });
 
-async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  // Order: HF proxy (primary) → Lovable AI Gateway → OpenRouter (free) → ApiFreeLLM.
-  const hf = await callHfProxy(systemPrompt, userPrompt, json);
-  if (hf) return hf;
-
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (apiKey) {
+  let lastErr = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          max_tokens: 4096,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          ...(json ? { response_format: { type: "json_object" } } : {}),
-        }),
+        headers: { "Content-Type": "application/json" },
+        body,
       });
-      if (res.ok) {
-        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-        const content = data.choices?.[0]?.message?.content ?? "";
-        if (content) return content;
-        console.error("Lovable AI returned empty content, trying fallback.");
-      } else {
-        console.error("Lovable AI failed, trying fallback:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      if (!res.ok) {
+        lastErr = `HF proxy ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`;
+        console.error(lastErr);
+        continue;
       }
+      const data: any = await res.json();
+      const msg = data?.choices?.[0]?.message ?? {};
+      const content: string =
+        msg.content ||
+        msg.reasoning_content ||
+        msg.reasoning ||
+        data?.response ||
+        data?.content ||
+        data?.message ||
+        "";
+      if (content) return content;
+      lastErr = "HF proxy returned empty content";
+      console.error(lastErr);
     } catch (e) {
-      console.error("Lovable AI threw, trying fallback:", e);
+      lastErr = `HF proxy threw: ${e instanceof Error ? e.message : String(e)}`;
+      console.error(lastErr);
     }
   }
-  const or = await callOpenRouterFallback(systemPrompt, userPrompt, json);
-  if (or) return or;
-  const fb = await callApiFreeLLM(systemPrompt, userPrompt);
-  if (fb) return fb;
-  throw new Error("All AI providers are unavailable right now. Please try again in a moment.");
+  throw new Error(
+    "AI provider is temporarily unavailable. Please try again in a moment.",
+  );
 }
+
+// Back-compat alias for the rest of this file.
+const callOpenRouter = async (system: string, user: string, _json = true) =>
+  callHfProxy(system, user);
 
 function parseJsonLoose<T = any>(s: string): T {
   try {
     return JSON.parse(s) as T;
   } catch {
-    const m = s.match(/\{[\s\S]*\}/);
-    if (m) return JSON.parse(m[0]) as T;
-    throw new Error("Model returned invalid JSON");
+    // Strip markdown fences if present, then grab the first {...} block.
+    const cleaned = s.replace(/```(?:json)?/gi, "").replace(/```/g, "");
+    try {
+      return JSON.parse(cleaned) as T;
+    } catch {
+      const m = cleaned.match(/\{[\s\S]*\}/);
+      if (m) return JSON.parse(m[0]) as T;
+      throw new Error("Model returned invalid JSON");
+    }
   }
 }
+
 
 async function recordUsage(
   supabase: any,
