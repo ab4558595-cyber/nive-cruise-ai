@@ -57,81 +57,54 @@ async function recordSyntheticUsage(
 const HF_PROXY_URL = "https://4idn-my-lovable-api.hf.space";
 
 async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise<any> {
-  const parseLoose = (content: string) => {
-    try { return JSON.parse(content); } catch {
-      const m = content.match(/\{[\s\S]*\}/);
-      if (m) return JSON.parse(m[0]);
-      throw new Error("AI returned invalid JSON");
-    }
+  const parseLoose = (s: string) => {
+    try { return JSON.parse(s); } catch {}
+    const cleaned = s.replace(/```(?:json)?/gi, "").replace(/```/g, "");
+    try { return JSON.parse(cleaned); } catch {}
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+    throw new Error("AI returned invalid JSON");
   };
 
-  // Primary: HF proxy
-  try {
-    const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.ok) {
-      const data: any = await res.json();
-      const content =
-        data?.choices?.[0]?.message?.content ??
-        data?.response ?? data?.content ?? data?.message ?? "";
-      if (content) return parseLoose(content);
-    } else {
-      console.error("HF proxy failed, falling back to Lovable AI:", res.status);
-    }
-  } catch (e) {
-    console.error("HF proxy threw, falling back to Lovable AI:", e);
-  }
-
-  // Fallback: Lovable AI Gateway
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (apiKey) {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        max_tokens: 4096,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.ok) {
-      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-      const content = data.choices?.[0]?.message?.content ?? "";
-      if (content) return parseLoose(content);
-    } else {
-      console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status);
-    }
-  }
-
-
-
-  // Last resort: ApiFreeLLM
-  const fbKey = process.env.APIFREELLM_API_KEY;
-  if (!fbKey) throw new Error("AI not configured");
-  const res = await fetch("https://apifreellm.com/api/v1/chat", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${fbKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
+  // Sole provider: HF proxy. We do NOT send response_format json_object —
+  // it makes the upstream NVIDIA model exceed the proxy's 30s read timeout.
+  // The system prompt already requires strict JSON output.
+  const body = JSON.stringify({
+    max_tokens: 4096,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
   });
-  if (!res.ok) throw new Error(`AI error ${res.status}`);
-  const data: any = await res.json();
-  const content =
-    data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? "";
-  return parseLoose(content);
+
+  let lastErr = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (!res.ok) {
+        lastErr = `HF proxy ${res.status}`;
+        console.error(lastErr, (await res.text().catch(() => "")).slice(0, 200));
+        continue;
+      }
+      const data: any = await res.json();
+      const msg = data?.choices?.[0]?.message ?? {};
+      const content: string =
+        msg.content || msg.reasoning_content || msg.reasoning ||
+        data?.response || data?.content || data?.message || "";
+      if (content) return parseLoose(content);
+      lastErr = "HF proxy returned empty content";
+    } catch (e) {
+      lastErr = `HF proxy threw: ${e instanceof Error ? e.message : String(e)}`;
+      console.error(lastErr);
+    }
+  }
+  throw new Error("AI provider is temporarily unavailable. Please try again in a moment.");
 }
+
 
 // ---------- AI-described schema ----------
 
