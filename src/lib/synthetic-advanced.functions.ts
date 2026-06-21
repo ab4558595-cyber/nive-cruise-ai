@@ -65,9 +65,33 @@ async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise
     }
   };
 
-  // Primary: Lovable AI Gateway. The HF proxy is intentionally skipped for
-  // JSON tasks — its upstream reasoning model times out on response_format
-  // json_object and puts the answer in `reasoning_content` with empty `content`.
+  // Primary: HF proxy
+  try {
+    const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (res.ok) {
+      const data: any = await res.json();
+      const content =
+        data?.choices?.[0]?.message?.content ??
+        data?.response ?? data?.content ?? data?.message ?? "";
+      if (content) return parseLoose(content);
+    } else {
+      console.error("HF proxy failed, falling back to Lovable AI:", res.status);
+    }
+  } catch (e) {
+    console.error("HF proxy threw, falling back to Lovable AI:", e);
+  }
+
+  // Fallback: Lovable AI Gateway
   const apiKey = process.env.LOVABLE_API_KEY;
   if (apiKey) {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -91,6 +115,7 @@ async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise
       console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status);
     }
   }
+
 
 
   // Last resort: ApiFreeLLM
