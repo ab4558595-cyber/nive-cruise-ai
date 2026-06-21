@@ -122,10 +122,11 @@ async function callHfProxy(
 }
 
 async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  // Primary: HF proxy. Fallbacks: Lovable AI Gateway → OpenRouter (free) → ApiFreeLLM.
-  const hf = await callHfProxy(systemPrompt, userPrompt, json);
-  if (hf) return hf;
-
+  // For JSON-shaped tasks we skip the HF proxy entirely: its upstream is a
+  // reasoning model that (a) times out (30s read limit) on response_format
+  // json_object and (b) emits the answer in `reasoning_content` with an empty
+  // `content`, so it can't serve our structured-output endpoints.
+  // Order: Lovable AI Gateway → OpenRouter (free) → HF proxy (text only) → ApiFreeLLM.
   const apiKey = process.env.LOVABLE_API_KEY;
   if (apiKey) {
     try {
@@ -159,6 +160,10 @@ async function callOpenRouter(systemPrompt: string, userPrompt: string, json = t
   }
   const or = await callOpenRouterFallback(systemPrompt, userPrompt, json);
   if (or) return or;
+  if (!json) {
+    const hf = await callHfProxy(systemPrompt, userPrompt, false);
+    if (hf) return hf;
+  }
   const fb = await callApiFreeLLM(systemPrompt, userPrompt);
   if (fb) return fb;
   throw new Error("All AI providers are unavailable right now. Please try again in a moment.");
