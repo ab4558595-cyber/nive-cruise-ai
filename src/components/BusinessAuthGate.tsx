@@ -38,11 +38,36 @@ export function BusinessAuthGate({ children }: { children: React.ReactNode }) {
         return;
       }
       const uid = data.session.user.id;
-      void uid;
-      // TEMP: plan restriction disabled for testing — any signed-in user passes.
-      if (active) setStatus("ready");
-      return;
 
+      // Admin bypass
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (roles) {
+        if (active) setStatus("ready");
+        return;
+      }
+
+      // Business plan check
+      const { data: plan } = await supabase
+        .from("user_plans")
+        .select("plan_id, expires_at, active")
+        .eq("user_id", uid)
+        .eq("active", true)
+        .gte("expires_at", new Date().toISOString())
+        .order("expires_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!active) return;
+      if (plan && BUSINESS_PLAN_IDS.includes(plan.plan_id)) {
+        setStatus("ready");
+      } else {
+        setStatus("no-plan");
+      }
     };
 
     evaluate();

@@ -18,11 +18,34 @@ const PLAN_MULTIPLIER: Record<string, number> = {
 /** Plans that include access to the Business suite (synthetic + marketing). */
 export const BUSINESS_PLAN_IDS = ["biz-growth", "biz-scale"] as const;
 
-export async function requireBusinessPlan(_supabase: any, _userId: string): Promise<string> {
-  // TEMP: plan restriction disabled for testing. Treat everyone as biz-scale.
-  return "biz-scale";
-}
+export async function requireBusinessPlan(supabase: any, userId: string): Promise<string> {
+  const { data: adminRow } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (adminRow) return "admin";
 
+  const { data: plan } = await supabase
+    .from("user_plans")
+    .select("plan_id, expires_at, active")
+    .eq("user_id", userId)
+    .eq("active", true)
+    .gte("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!plan || !BUSINESS_PLAN_IDS.includes(plan.plan_id)) {
+    const err: any = new Error(
+      "This tool is part of Nive AI for Business. Upgrade to Growth or Scale to unlock it.",
+    );
+    err.code = "BUSINESS_PLAN_REQUIRED";
+    throw err;
+  }
+  return plan.plan_id as string;
+}
 
 export type ToolKey = keyof typeof DAILY_LIMITS;
 
