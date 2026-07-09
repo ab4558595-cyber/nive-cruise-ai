@@ -1,43 +1,35 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Loader2, ShieldCheck, Check, BadgeCheck } from "lucide-react";
 import { getPlan } from "@/lib/plans";
-import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
-import { Ribbon } from "@/components/Ribbon";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (opts: Record<string, unknown>) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void };
   }
 }
 
 export const Route = createFileRoute("/checkout/$planId")({
-  head: ({ params }) => ({
+  head: () => ({
     meta: [
       { title: "Checkout — Nive AI" },
-      { name: "description", content: "Complete your Nive AI plan purchase securely with UPI, cards, wallets, or net banking via Razorpay." },
-      { property: "og:title", content: "Checkout — Nive AI" },
-      { property: "og:description", content: "Pay for your Nive AI plan and unlock instant access." },
-      { property: "og:url", content: `/checkout/${params.planId}` },
+      { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: `/checkout/${params.planId}` }],
   }),
   component: Checkout,
 });
 
-function loadRazorpayScript(): Promise<boolean> {
+function loadRazorpay(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (typeof window === "undefined") return resolve(false);
     if (window.Razorpay) return resolve(true);
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
   });
 }
 
@@ -45,28 +37,32 @@ function Checkout() {
   const { planId } = Route.useParams();
   const navigate = useNavigate();
   const plan = getPlan(planId);
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [userEmail, setUserEmail] = useState<string | undefined>();
-  const [status, setStatus] = useState<"idle" | "loading" | "verifying" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const createOrder = useServerFn(createRazorpayOrder);
-  const verifyPayment = useServerFn(verifyRazorpayPayment);
+  const verify = useServerFn(verifyRazorpayPayment);
+
+  const [status, setStatus] = useState<"idle" | "loading" | "processing" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setAuthed(!!data.session);
-      setUserEmail(data.session?.user.email ?? undefined);
-    });
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
   }, []);
 
+  if (!plan) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-20 text-center">
+        <h1 className="text-2xl font-bold">Unknown plan</h1>
+        <Link to="/business/pricing" className="mt-4 inline-block text-[#d97706] underline">Back to pricing</Link>
+      </div>
+    );
+  }
+
   const handlePay = async () => {
-    if (!plan) return;
+    setError(null);
     setStatus("loading");
-    setErrorMsg(null);
     try {
-      const scriptOk = await loadRazorpayScript();
-      if (!scriptOk) throw new Error("Could not load Razorpay. Check your internet connection.");
+      const ok = await loadRazorpay();
+      if (!ok) throw new Error("Could not load payment SDK. Check your network.");
 
       const order = await createOrder({ data: { planId: plan.id } });
 
@@ -77,163 +73,100 @@ function Checkout() {
         name: "Nive AI",
         description: `${order.planName} plan — 30 days`,
         order_id: order.orderId,
-        prefill: {
-          email: order.userEmail || userEmail || "",
-        },
-        theme: { color: "#635bff" },
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id: string;
-          razorpay_signature: string;
-        }) => {
-          setStatus("verifying");
+        prefill: { email: order.userEmail },
+        theme: { color: "#d97706" },
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          setStatus("processing");
           try {
-            await verifyPayment({
-              data: {
-                planId: plan.id,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              },
-            });
-            navigate({ to: "/checkout/success" });
-          } catch (e: any) {
+            await verify({ data: { ...response, planId: plan.id } });
+            navigate({ to: "/checkout/success", search: { plan: plan.id } });
+          } catch (e) {
             setStatus("error");
-            setErrorMsg(e?.message || "Payment captured but activation failed. Contact support.");
-            toast.error(e?.message || "Activation failed");
+            setError(e instanceof Error ? e.message : "Verification failed");
           }
         },
-        modal: {
-          ondismiss: () => {
-            setStatus("idle");
-          },
-        },
+        modal: { ondismiss: () => setStatus("idle") },
       });
-
-      rzp.on("payment.failed", (resp: any) => {
+      rzp.on("payment.failed", (resp: unknown) => {
+        console.error("payment failed", resp);
         setStatus("error");
-        setErrorMsg(resp?.error?.description || "Payment failed");
-        toast.error(resp?.error?.description || "Payment failed");
+        setError("Payment failed. Please try again.");
       });
-
       rzp.open();
-    } catch (e: any) {
-      console.error(e);
+    } catch (e) {
       setStatus("error");
-      setErrorMsg(e?.message || "Could not start checkout");
-      toast.error(e?.message || "Could not start checkout");
+      setError(e instanceof Error ? e.message : "Something went wrong");
     }
   };
 
-  if (!plan) {
-    return (
-      <div className="p-10 text-center">
-        Unknown plan.{" "}
-        <Link to="/pricing" className="text-primary underline">
-          Back to pricing
-        </Link>
-      </div>
-    );
-  }
-
-  if (authed === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <Loader2 className="h-6 w-6 animate-spin text-[#635bff]" />
-      </div>
-    );
-  }
-
-  if (authed === false) {
-    return (
-      <div
-        className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6"
-        style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-      >
-        <Ribbon />
-        <div className="relative z-10 rounded-2xl bg-white p-8 text-center shadow-[0_15px_50px_rgba(50,50,93,0.12),0_5px_15px_rgba(0,0,0,0.07)]">
-          <h1 className="mb-2 text-xl font-semibold text-[#0a2540]">Sign in to continue</h1>
-          <p className="mb-5 text-sm text-[#697386]">You need an account to purchase {plan.name}.</p>
-          <Link
-            to="/auth"
-            className="inline-flex items-center justify-center rounded-md bg-[#635bff] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#5048d6]"
-          >
-            Sign in / Sign up
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
-      style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
-    >
-      <Toaster richColors position="top-center" />
-      <Ribbon />
-
-      <header className="relative z-10 mx-auto flex max-w-[1180px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
-          nive
-        </Link>
-        <Link
-          to="/pricing"
-          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
-        >
+    <div className="min-h-screen bg-[#fffbeb] text-[#451a03]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <header className="mx-auto flex max-w-[880px] items-center justify-between px-6 py-5">
+        <Link to="/welcome" className="text-[22px] font-bold tracking-tight">nive</Link>
+        <Link to="/business/pricing" className="inline-flex items-center gap-1.5 text-[14px] text-[#451a03]/70 hover:text-[#d97706]">
           <ArrowLeft className="h-4 w-4" /> Back to pricing
         </Link>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-xl px-4 pb-16 pt-4 sm:px-6">
-        <div className="rounded-2xl bg-white p-7 shadow-[0_15px_50px_rgba(50,50,93,0.1),0_5px_15px_rgba(0,0,0,0.05)] sm:p-10">
-          <h1 className="text-[26px] font-bold tracking-tight text-[#0a2540]">Pay for {plan.name}</h1>
-          <p className="mt-1.5 text-[14px] text-[#697386]">
-            Unlock {plan.name} for {plan.period}.
-          </p>
+      <main className="mx-auto max-w-[560px] px-6 pb-24 pt-6">
+        <div className="rounded-2xl bg-white p-7 shadow-[0_15px_50px_rgba(50,50,93,0.1)] ring-1 ring-[#fde68a]">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#d97706]">Checkout</p>
+          <h1 className="mt-2 text-[28px] font-bold tracking-tight">{plan.name} plan</h1>
+          <p className="mt-1 text-[14px] text-[#92400e]">{plan.tagline}</p>
 
-          <div className="mt-6 rounded-xl border border-[#e3e8ee] bg-[#f6f9fc] p-5">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[14px] font-medium text-[#3c4257]">{plan.name} plan</span>
-              <span className="text-[28px] font-bold text-[#0a2540]">₹{plan.price}</span>
-            </div>
-            <p className="mt-1 text-[12px] text-[#697386]">
-              One-time payment. Access valid for {plan.period}.
-            </p>
+          <div className="my-6 flex items-baseline gap-2 border-b border-t border-[#fde68a] py-5">
+            <span className="text-[40px] font-bold">₹{plan.price}</span>
+            <span className="text-[14px] text-[#92400e]">/ {plan.period}</span>
           </div>
 
-          {errorMsg && (
-            <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-[13px] text-red-700">
-              {errorMsg}
+          <ul className="space-y-2 text-[14px]">
+            {plan.features.slice(0, 5).map((f) => (
+              <li key={f} className="flex items-start gap-2.5">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#d97706]" />
+                <span className="text-[#78350f]">{f}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-5 flex items-center justify-center gap-1.5">
+            <BadgeCheck className="h-4 w-4 text-blue-500" />
+            <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
+          </div>
+
+          <div className="mt-3 flex items-center justify-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 shadow-sm">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#d97706]" />
+              <span className="text-[11px] font-semibold tracking-wide text-[#78350f] uppercase">Razorpay trusted business</span>
             </div>
+          </div>
+
+          {authed === false ? (
+            <Link
+              to="/auth"
+              search={{ redirect: `/checkout/${plan.id}` }}
+              className="mt-7 inline-flex w-full items-center justify-center rounded-md bg-[#451a03] py-3 text-[15px] font-semibold text-white hover:bg-[#78350f]"
+            >
+              Sign in to continue
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePay}
+              disabled={status === "loading" || status === "processing" || authed === null}
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#d97706] py-3 text-[15px] font-semibold text-white shadow-[0_2px_6px_rgba(99,91,255,0.35)] transition-all hover:bg-[#b45309] disabled:opacity-60"
+            >
+              {(status === "loading" || status === "processing") && <Loader2 className="h-4 w-4 animate-spin" />}
+              {status === "processing" ? "Activating plan…" : status === "loading" ? "Opening…" : `Pay ₹${plan.price} securely`}
+            </button>
           )}
 
-          <button
-            type="button"
-            onClick={handlePay}
-            disabled={status === "loading" || status === "verifying"}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#635bff] py-3 text-[15px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.3)] transition-all hover:bg-[#5048d6] disabled:opacity-60"
-          >
-            {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" />}
-            {status === "verifying" && <Loader2 className="h-4 w-4 animate-spin" />}
-            {status === "loading"
-              ? "Opening secure checkout…"
-              : status === "verifying"
-                ? "Activating your plan…"
-                : `Pay ₹${plan.price}`}
-          </button>
+          {error && (
+            <p className="mt-3 rounded-md bg-[#fef2f2] px-3 py-2 text-[13px] text-[#c0392b]">{error}</p>
+          )}
 
-          <p className="mt-3 text-center text-[12px] text-[#697386]">
-            UPI · Cards · Wallets · Net banking
+          <p className="mt-5 flex items-center justify-center gap-1.5 text-[12px] text-[#92400e]">
+            <ShieldCheck className="h-3.5 w-3.5" /> Secured by Razorpay · Cards · UPI · Netbanking
           </p>
-
-          <div className="mt-6 flex items-center justify-center gap-2 border-t border-[#e3e8ee] pt-5 text-[12px] text-[#697386]">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#635bff]" />
-            <span>
-              Secure checkout — powered by{" "}
-              <span className="font-semibold text-[#0a2540]">Razorpay</span>
-            </span>
-          </div>
         </div>
       </main>
     </div>

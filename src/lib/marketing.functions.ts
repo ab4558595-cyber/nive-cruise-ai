@@ -10,33 +10,113 @@ import {
 
 // ---------- Shared helpers ----------
 
-async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("OpenRouter API key not configured");
-
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "HTTP-Referer": "https://nive-ai.co.in",
-      "X-Title": "Nive AI for Business",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      ...(json ? { response_format: { type: "json_object" } } : {}),
-    }),
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    throw new Error(`OpenRouter error ${res.status}: ${txt.slice(0, 200)}`);
+async function callApiFreeLLM(systemPrompt: string, userPrompt: string): Promise<string> {
+  const key = process.env.APIFREELLM_API_KEY;
+  if (!key) return "";
+  try {
+    const res = await fetch("https://apifreellm.com/api/v1/chat", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
+    });
+    if (!res.ok) {
+      console.error("ApiFreeLLM failed:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      return "";
+    }
+    const data: any = await res.json();
+    return (
+      data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? ""
+    );
+  } catch (e) {
+    console.error("ApiFreeLLM threw:", e);
+    return "";
   }
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return data.choices?.[0]?.message?.content ?? "";
+}
+
+async function callOpenRouterFallback(
+  systemPrompt: string,
+  userPrompt: string,
+  json: boolean,
+): Promise<string> {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return "";
+  const models = [
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+  ];
+  for (const model of models) {
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://nive-ai.co.in",
+          "X-Title": "Nive AI Marketing",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 4096,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          ...(json ? { response_format: { type: "json_object" } } : {}),
+        }),
+      });
+      if (!res.ok) {
+        console.error(`OpenRouter ${model} failed:`, res.status, (await res.text().catch(() => "")).slice(0, 200));
+        continue;
+      }
+      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      if (content) return content;
+    } catch (e) {
+      console.error(`OpenRouter ${model} threw:`, e);
+    }
+  }
+  return "";
+}
+
+async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
+  // Primary: Lovable AI Gateway. Fallbacks: OpenRouter (free) → ApiFreeLLM.
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (apiKey) {
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          max_tokens: 4096,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          ...(json ? { response_format: { type: "json_object" } } : {}),
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const content = data.choices?.[0]?.message?.content ?? "";
+        if (content) return content;
+        console.error("Lovable AI returned empty content, trying fallback.");
+      } else {
+        console.error("Lovable AI failed, trying fallback:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+      }
+    } catch (e) {
+      console.error("Lovable AI threw, trying fallback:", e);
+    }
+  }
+  const or = await callOpenRouterFallback(systemPrompt, userPrompt, json);
+  if (or) return or;
+  const fb = await callApiFreeLLM(systemPrompt, userPrompt);
+  if (fb) return fb;
+  throw new Error("All AI providers are unavailable right now. Please try again in a moment.");
 }
 
 function parseJsonLoose<T = any>(s: string): T {
@@ -986,6 +1066,810 @@ Style: ${data.style}${brandBlock(brand)}`;
     return {
       html: buildLandingHtml(data.product, data.primary_color, sections),
       sections,
+      usage,
+    };
+  });
+
+// =====================================================================
+// ====================== 10 NEW MODES (10–19) =========================
+// =====================================================================
+
+function clip(s: any, n: number) { return String(s ?? "").slice(0, n); }
+function arrMap<T>(v: any, n: number, fn: (x: any, i: number) => T): T[] {
+  return Array.isArray(v) ? v.slice(0, n).map(fn) : [];
+}
+
+// ---------- 10. Social Calendar (30-day) ----------
+
+const SocialCalendarInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  platforms: z.array(z.enum(["instagram","linkedin","x","tiktok","facebook"])).min(1).max(5),
+  tone: z.string().trim().max(40).default("friendly"),
+});
+
+export type SocialCalendarResult = {
+  days: { day: number; date_offset: number; platform: string; hook: string; caption: string; hashtags: string[]; best_time: string; cta: string }[];
+  usage: UsageSnapshot;
+};
+
+export const generateSocialCalendar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => SocialCalendarInput.parse(input))
+  .handler(async ({ data, context }): Promise<SocialCalendarResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior social-media strategist. Output strictly valid JSON:
+{ "days": [ {"day": 1..30, "date_offset": number, "platform": one of the chosen platforms, "hook": string (<=80 chars), "caption": string (60-280 chars), "hashtags": string[3..6], "best_time": e.g. "Tue 9:00 AM", "cta": string (<=24 chars) } ] }
+Return EXACTLY 30 entries. Rotate across the chosen platforms. JSON only.`;
+    const user = `Product: ${data.product}
+Audience: ${data.audience || "general"}
+Tone: ${data.tone}
+Platforms: ${data.platforms.join(", ")}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "social_calendar" });
+    return {
+      days: arrMap(p.days, 30, (d: any, i: number) => ({
+        day: Number(d.day) || i + 1,
+        date_offset: Number(d.date_offset ?? i),
+        platform: clip(d.platform, 20),
+        hook: clip(d.hook, 100),
+        caption: clip(d.caption, 320),
+        hashtags: Array.isArray(d.hashtags) ? d.hashtags.slice(0, 8).map((h: any) => clip(h, 40)) : [],
+        best_time: clip(d.best_time, 40),
+        cta: clip(d.cta, 40),
+      })),
+      usage,
+    };
+  });
+
+// ---------- 11. Video / Reels script ----------
+
+const VideoScriptInput = z.object({
+  topic: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  length: z.enum(["30s", "60s", "3min"]).default("60s"),
+  tone: z.string().trim().max(40).default("energetic"),
+});
+
+export type VideoScriptResult = {
+  length: string;
+  hook: string;
+  beats: { time: string; shot: string; voiceover: string; on_screen_text: string; b_roll: string }[];
+  thumbnail_concept: string;
+  cta: string;
+  usage: UsageSnapshot;
+};
+
+export const generateVideoScript = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => VideoScriptInput.parse(input))
+  .handler(async ({ data, context }): Promise<VideoScriptResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const beatCount = data.length === "30s" ? 5 : data.length === "60s" ? 8 : 16;
+    const system = `You are a senior short-form video writer. Output strictly valid JSON:
+{ "hook": string (<=80 chars, first 2 seconds), "beats": [ {"time": "0:00-0:03", "shot": string, "voiceover": string, "on_screen_text": string (<=40 chars), "b_roll": string} ] (EXACTLY ${beatCount} beats covering the full duration), "thumbnail_concept": string, "cta": string (<=24 chars) }
+JSON only.`;
+    const user = `Topic: ${data.topic}
+Audience: ${data.audience || "general"}
+Length: ${data.length}
+Tone: ${data.tone}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "video_script", length: data.length });
+    return {
+      length: data.length,
+      hook: clip(p.hook, 120),
+      beats: arrMap(p.beats, beatCount, (b: any) => ({
+        time: clip(b.time, 20),
+        shot: clip(b.shot, 200),
+        voiceover: clip(b.voiceover, 400),
+        on_screen_text: clip(b.on_screen_text, 60),
+        b_roll: clip(b.b_roll, 200),
+      })),
+      thumbnail_concept: clip(p.thumbnail_concept, 300),
+      cta: clip(p.cta, 40),
+      usage,
+    };
+  });
+
+// ---------- 12. Press release ----------
+
+const PressReleaseInput = z.object({
+  company: z.string().trim().min(2).max(120),
+  city: z.string().trim().max(80).optional().default(""),
+  announcement: z.string().trim().min(5).max(500),
+  spokesperson: z.string().trim().max(120).optional().default(""),
+  spokesperson_title: z.string().trim().max(120).optional().default(""),
+  contact_email: z.string().trim().max(120).optional().default(""),
+});
+
+export type PressReleaseResult = {
+  headline: string;
+  subhead: string;
+  dateline: string;
+  body_paragraphs: string[];
+  quote: { text: string; attribution: string };
+  boilerplate: string;
+  contact_block: string;
+  html: string;
+  usage: UsageSnapshot;
+};
+
+export const generatePressRelease = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => PressReleaseInput.parse(input))
+  .handler(async ({ data, context }): Promise<PressReleaseResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    const system = `You are a senior PR writer. Write a press release in AP style. Output strictly valid JSON:
+{ "headline": string (<=100 chars, title case), "subhead": string (<=160 chars), "body_paragraphs": string[4..6] (inverted pyramid, 5W1H in first paragraph), "quote_text": string (1-3 sentences), "boilerplate": string (1-2 sentences "About <company>") }
+JSON only.`;
+    const user = `Company: ${data.company}
+Announcement: ${data.announcement}
+Spokesperson: ${data.spokesperson || "CEO"} (${data.spokesperson_title || "Chief Executive"})${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "press_release" });
+    const dateline = `${(data.city || "REMOTE").toUpperCase()} — ${today}`;
+    const headline = clip(p.headline, 140);
+    const subhead = clip(p.subhead, 200);
+    const body = arrMap(p.body_paragraphs, 6, (s: any) => clip(s, 800));
+    const quoteText = clip(p.quote_text, 500);
+    const attribution = `${data.spokesperson || "Spokesperson"}, ${data.spokesperson_title || "Company representative"}`;
+    const boilerplate = clip(p.boilerplate, 500);
+    const contactBlock = data.contact_email ? `Media contact: ${data.contact_email}` : "";
+    const html = `<!doctype html><html><head><meta charset="utf-8"/><title>${escapeHtml(headline)}</title>
+<style>body{font:15px/1.6 Georgia,serif;max-width:680px;margin:40px auto;padding:0 20px;color:#222}h1{font-size:26px;line-height:1.2}h2{font-size:17px;color:#444;font-weight:normal;font-style:italic}.dateline{font-weight:bold}.quote{border-left:3px solid #635bff;padding-left:14px;margin:18px 0;font-style:italic;color:#333}.b{margin-top:30px;padding-top:18px;border-top:1px solid #ddd;color:#555;font-size:14px}</style></head><body>
+<p style="text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:#888">FOR IMMEDIATE RELEASE</p>
+<h1>${escapeHtml(headline)}</h1>
+<h2>${escapeHtml(subhead)}</h2>
+<p><span class="dateline">${escapeHtml(dateline)}</span> — ${escapeHtml(body[0] || "")}</p>
+${body.slice(1, -1).map((b) => `<p>${escapeHtml(b)}</p>`).join("\n")}
+<div class="quote">"${escapeHtml(quoteText)}"<br/><small>— ${escapeHtml(attribution)}</small></div>
+${body.length > 1 ? `<p>${escapeHtml(body[body.length - 1])}</p>` : ""}
+<div class="b"><strong>About ${escapeHtml(data.company)}</strong><br/>${escapeHtml(boilerplate)}${contactBlock ? `<br/><br/>${escapeHtml(contactBlock)}` : ""}</div>
+<p style="text-align:center;color:#999;margin-top:30px">###</p>
+</body></html>`;
+    return {
+      headline, subhead, dateline, body_paragraphs: body,
+      quote: { text: quoteText, attribution },
+      boilerplate, contact_block: contactBlock, html, usage,
+    };
+  });
+
+// ---------- 13. Cold outreach (email + LinkedIn) ----------
+
+const ColdOutreachInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  target_persona: z.string().trim().min(2).max(200),
+  value_prop: z.string().trim().min(2).max(300),
+  sender_name: z.string().trim().max(120).optional().default(""),
+});
+
+export type ColdOutreachResult = {
+  emails: { variant: string; subject: string; body: string }[];
+  follow_ups: { day_offset: number; subject: string; body: string }[];
+  linkedin: { connection_note: string; first_message: string; follow_up: string };
+  usage: UsageSnapshot;
+};
+
+export const generateColdOutreach = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => ColdOutreachInput.parse(input))
+  .handler(async ({ data, context }): Promise<ColdOutreachResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior B2B SDR copywriter. Output strictly valid JSON:
+{
+  "emails": [
+    {"variant": "A: pain-led" | "B: social-proof" | "C: question-led", "subject": string (<=50 chars, no spam-triggers), "body": string (60-130 words, single CTA, personalized opener placeholder {{first_name}})}
+  ] (exactly 3),
+  "follow_ups": [
+    {"day_offset": 3, "subject": string, "body": string (40-80 words)},
+    {"day_offset": 7, "subject": string, "body": string (40-80 words)}
+  ],
+  "linkedin": { "connection_note": string (<=300 chars), "first_message": string (<=600 chars), "follow_up": string (<=400 chars) }
+}
+JSON only.`;
+    const user = `Product: ${data.product}
+Target persona: ${data.target_persona}
+Value prop: ${data.value_prop}
+Sender: ${data.sender_name || "Sales rep"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "cold_outreach" });
+    return {
+      emails: arrMap(p.emails, 3, (e: any) => ({
+        variant: clip(e.variant, 40),
+        subject: clip(e.subject, 80),
+        body: clip(e.body, 2000),
+      })),
+      follow_ups: arrMap(p.follow_ups, 2, (e: any, i: number) => ({
+        day_offset: Number(e.day_offset) || (i === 0 ? 3 : 7),
+        subject: clip(e.subject, 80),
+        body: clip(e.body, 1500),
+      })),
+      linkedin: {
+        connection_note: clip(p.linkedin?.connection_note, 320),
+        first_message: clip(p.linkedin?.first_message, 700),
+        follow_up: clip(p.linkedin?.follow_up, 500),
+      },
+      usage,
+    };
+  });
+
+// ---------- 14. Brand voice guidelines ----------
+
+const BrandVoiceInput = z.object({
+  sample_or_description: z.string().trim().min(10).max(2000),
+});
+
+export type BrandVoiceResult = {
+  voice_summary: string;
+  attributes: string[];
+  do_words: string[];
+  dont_words: string[];
+  sample_rewrites: { before: string; after: string }[];
+  style_guide_markdown: string;
+  usage: UsageSnapshot;
+};
+
+export const generateBrandVoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => BrandVoiceInput.parse(input))
+  .handler(async ({ data, context }): Promise<BrandVoiceResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior brand strategist. Output strictly valid JSON:
+{
+  "voice_summary": string (2-3 sentences),
+  "attributes": string[5] (e.g. "Warm", "Direct"),
+  "do_words": string[10],
+  "dont_words": string[10],
+  "sample_rewrites": [ {"before": string, "after": string} ] (exactly 3),
+  "style_guide_markdown": string (a 300-500 word one-page style guide in Markdown)
+}
+JSON only.`;
+    const user = `Sample text or brand description:
+"""${data.sample_or_description}"""${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "brand_voice" });
+    return {
+      voice_summary: clip(p.voice_summary, 600),
+      attributes: arrMap(p.attributes, 6, (s: any) => clip(s, 40)),
+      do_words: arrMap(p.do_words, 15, (s: any) => clip(s, 40)),
+      dont_words: arrMap(p.dont_words, 15, (s: any) => clip(s, 40)),
+      sample_rewrites: arrMap(p.sample_rewrites, 4, (r: any) => ({ before: clip(r.before, 400), after: clip(r.after, 400) })),
+      style_guide_markdown: clip(p.style_guide_markdown, 6000),
+      usage,
+    };
+  });
+
+// ---------- 15. Personas ----------
+
+const PersonasInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience_hint: z.string().trim().max(300).optional().default(""),
+});
+
+export type PersonasResult = {
+  personas: {
+    name: string; role: string; age_range: string;
+    demographics: string;
+    jobs_to_be_done: string[];
+    pains: string[]; gains: string[];
+    channels: string[]; objections: string[];
+    quote: string;
+  }[];
+  usage: UsageSnapshot;
+};
+
+export const generatePersonas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => PersonasInput.parse(input))
+  .handler(async ({ data, context }): Promise<PersonasResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior product researcher. Output strictly valid JSON:
+{ "personas": [ {"name": string, "role": string, "age_range": string, "demographics": string, "jobs_to_be_done": string[3], "pains": string[3], "gains": string[3], "channels": string[4], "objections": string[3], "quote": string} ] (exactly 3 distinct personas) }
+JSON only.`;
+    const user = `Product: ${data.product}
+Audience hint: ${data.audience_hint || "infer from product"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "personas" });
+    return {
+      personas: arrMap(p.personas, 3, (x: any) => ({
+        name: clip(x.name, 80),
+        role: clip(x.role, 120),
+        age_range: clip(x.age_range, 40),
+        demographics: clip(x.demographics, 400),
+        jobs_to_be_done: arrMap(x.jobs_to_be_done, 5, (s: any) => clip(s, 200)),
+        pains: arrMap(x.pains, 5, (s: any) => clip(s, 200)),
+        gains: arrMap(x.gains, 5, (s: any) => clip(s, 200)),
+        channels: arrMap(x.channels, 6, (s: any) => clip(s, 80)),
+        objections: arrMap(x.objections, 5, (s: any) => clip(s, 200)),
+        quote: clip(x.quote, 300),
+      })),
+      usage,
+    };
+  });
+
+// ---------- 16. A/B variants ----------
+
+const ABVariantsInput = z.object({
+  original: z.string().trim().min(2).max(500),
+  asset_type: z.enum(["headline", "ad", "subject_line", "cta", "tagline"]),
+  audience: z.string().trim().max(200).optional().default(""),
+});
+
+export type ABVariantsResult = {
+  variants: { rank: number; text: string; angle: string; rationale: string }[];
+  hypothesis: string;
+  usage: UsageSnapshot;
+};
+
+export const generateABVariants = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => ABVariantsInput.parse(input))
+  .handler(async ({ data, context }): Promise<ABVariantsResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior CRO copywriter. Output strictly valid JSON:
+{ "variants": [ {"rank": 1..8, "text": string (same asset type as input, respecting its natural length), "angle": one of "benefit"|"curiosity"|"urgency"|"social-proof"|"contrarian"|"specificity"|"question"|"loss-aversion", "rationale": string (1 sentence)} ] (exactly 8, ranked best-to-worst), "hypothesis": string (1-2 sentences: which variant should win and why) }
+JSON only.`;
+    const user = `Asset type: ${data.asset_type}
+Original: "${data.original}"
+Audience: ${data.audience || "general"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 1, { mode: "ab_variants", asset_type: data.asset_type });
+    return {
+      variants: arrMap(p.variants, 8, (v: any, i: number) => ({
+        rank: Number(v.rank) || i + 1,
+        text: clip(v.text, 400),
+        angle: clip(v.angle, 40),
+        rationale: clip(v.rationale, 300),
+      })),
+      hypothesis: clip(p.hypothesis, 500),
+      usage,
+    };
+  });
+
+// ---------- 17. SEO meta pack ----------
+
+const SeoMetaInput = z.object({
+  topic_or_url: z.string().trim().min(2).max(400),
+  primary_keyword: z.string().trim().max(80).optional().default(""),
+  audience: z.string().trim().max(200).optional().default(""),
+});
+
+export type SeoMetaResult = {
+  titles: { text: string; chars: number; ok: boolean }[];
+  descriptions: { text: string; chars: number; ok: boolean }[];
+  open_graph: { title: string; description: string; type: string; image_alt: string };
+  twitter_card: { card: string; title: string; description: string };
+  json_ld: string;
+  usage: UsageSnapshot;
+};
+
+export const generateSeoMeta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => SeoMetaInput.parse(input))
+  .handler(async ({ data, context }): Promise<SeoMetaResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior SEO specialist. Output strictly valid JSON:
+{
+  "titles": string[10] (each <=60 chars, primary keyword near the front when possible),
+  "descriptions": string[10] (each 140-160 chars, benefit-led, end with CTA),
+  "og": {"title": string (<=70 chars), "description": string (<=200 chars), "type": "website"|"article", "image_alt": string},
+  "twitter": {"card": "summary_large_image"|"summary", "title": string (<=70 chars), "description": string (<=200 chars)},
+  "json_ld_type": "Article"|"Product"|"FAQPage"|"Organization",
+  "json_ld_payload": object (matching the chosen type, schema.org-compliant)
+}
+JSON only.`;
+    const user = `Topic / URL: ${data.topic_or_url}
+Primary keyword: ${data.primary_keyword || "infer"}
+Audience: ${data.audience || "general"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "seo_meta" });
+    const titles = arrMap(p.titles, 10, (t: any) => {
+      const tt = clip(t, 80); return { text: tt, chars: tt.length, ok: tt.length > 0 && tt.length <= 60 };
+    });
+    const descriptions = arrMap(p.descriptions, 10, (t: any) => {
+      const tt = clip(t, 200); return { text: tt, chars: tt.length, ok: tt.length >= 120 && tt.length <= 160 };
+    });
+    const jsonLdObj = {
+      "@context": "https://schema.org",
+      "@type": clip(p.json_ld_type, 40) || "Article",
+      ...(typeof p.json_ld_payload === "object" && p.json_ld_payload !== null ? p.json_ld_payload : {}),
+    };
+    return {
+      titles, descriptions,
+      open_graph: {
+        title: clip(p.og?.title, 100),
+        description: clip(p.og?.description, 240),
+        type: clip(p.og?.type, 20) || "website",
+        image_alt: clip(p.og?.image_alt, 200),
+      },
+      twitter_card: {
+        card: clip(p.twitter?.card, 40) || "summary_large_image",
+        title: clip(p.twitter?.title, 100),
+        description: clip(p.twitter?.description, 240),
+      },
+      json_ld: JSON.stringify(jsonLdObj, null, 2),
+      usage,
+    };
+  });
+
+// ---------- 18. Pricing page copy ----------
+
+const PricingCopyInput = z.object({
+  product: z.string().trim().min(2).max(300),
+  audience: z.string().trim().max(200).optional().default(""),
+  currency: z.string().trim().max(8).default("USD"),
+  positioning: z.enum(["value", "premium", "freemium", "enterprise"]).default("value"),
+});
+
+export type PricingCopyResult = {
+  intro_headline: string;
+  intro_subhead: string;
+  tiers: {
+    name: string; tagline: string; price_monthly: string; price_annual: string;
+    badge: string | null; cta: string;
+    features: string[];
+  }[];
+  feature_matrix: { feature: string; tiers: boolean[] }[];
+  faq: { q: string; a: string }[];
+  usage: UsageSnapshot;
+};
+
+export const generatePricingCopy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => PricingCopyInput.parse(input))
+  .handler(async ({ data, context }): Promise<PricingCopyResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior pricing-page copywriter. Output strictly valid JSON:
+{
+  "intro_headline": string (<=80 chars),
+  "intro_subhead": string (<=160 chars),
+  "tiers": [ {"name": string, "tagline": string (<=80 chars), "price_monthly": string (e.g. "$19"), "price_annual": string (e.g. "$190 / yr"), "badge": "Most popular" | null, "cta": string (<=24 chars), "features": string[5..7]} ] (exactly 3, mark the middle tier "Most popular"),
+  "feature_matrix": [ {"feature": string, "tiers": boolean[3]} ] (8 rows summarising what's included per tier),
+  "faq": [{"q": string, "a": string}] (exactly 5)
+}
+Currency: ${data.currency}. Positioning: ${data.positioning}. JSON only.`;
+    const user = `Product: ${data.product}
+Audience: ${data.audience || "general"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 2, { mode: "pricing_copy" });
+    return {
+      intro_headline: clip(p.intro_headline, 120),
+      intro_subhead: clip(p.intro_subhead, 240),
+      tiers: arrMap(p.tiers, 3, (t: any) => ({
+        name: clip(t.name, 40),
+        tagline: clip(t.tagline, 120),
+        price_monthly: clip(t.price_monthly, 30),
+        price_annual: clip(t.price_annual, 40),
+        badge: t.badge ? clip(t.badge, 40) : null,
+        cta: clip(t.cta, 40),
+        features: arrMap(t.features, 10, (f: any) => clip(f, 200)),
+      })),
+      feature_matrix: arrMap(p.feature_matrix, 12, (row: any) => ({
+        feature: clip(row.feature, 200),
+        tiers: Array.isArray(row.tiers) ? row.tiers.slice(0, 3).map((b: any) => Boolean(b)) : [false, false, false],
+      })),
+      faq: arrMap(p.faq, 6, (f: any) => ({ q: clip(f.q, 200), a: clip(f.a, 500) })),
+      usage,
+    };
+  });
+
+// ---------- 19. Case study ----------
+
+const CaseStudyInput = z.object({
+  customer: z.string().trim().min(1).max(120),
+  industry: z.string().trim().max(120).optional().default(""),
+  product: z.string().trim().min(2).max(300),
+  outcomes: z.string().trim().min(5).max(1000), // free text bullets
+});
+
+export type CaseStudyResult = {
+  title: string;
+  subtitle: string;
+  hero_metric: { value: string; label: string };
+  sections: { heading: string; body: string }[]; // Challenge, Solution, Results, What's next
+  pull_quote: { text: string; attribution: string };
+  metrics: { value: string; label: string }[];
+  cta: string;
+  markdown: string;
+  usage: UsageSnapshot;
+};
+
+export const generateCaseStudy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => CaseStudyInput.parse(input))
+  .handler(async ({ data, context }): Promise<CaseStudyResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `You are a senior B2B case-study writer. Output strictly valid JSON:
+{
+  "title": string (<=100 chars, includes customer name),
+  "subtitle": string (<=160 chars, one-line outcome),
+  "hero_metric": {"value": string (e.g. "3.2x"), "label": string (<=60 chars)},
+  "sections": [
+    {"heading": "Challenge", "body": string (90-160 words)},
+    {"heading": "Solution", "body": string (90-160 words)},
+    {"heading": "Results", "body": string (90-160 words, cite specific numbers)},
+    {"heading": "What's next", "body": string (40-90 words)}
+  ],
+  "pull_quote": {"text": string (1-2 sentences), "attribution": string (Name, Title)},
+  "metrics": [{"value": string, "label": string}] (exactly 3, scannable),
+  "cta": string (<=40 chars)
+}
+JSON only.`;
+    const user = `Customer: ${data.customer}
+Industry: ${data.industry || "unspecified"}
+Product / service used: ${data.product}
+Outcomes / wins (free text):
+${data.outcomes}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user);
+    const p = parseJsonLoose<any>(content);
+    const usage = await recordUsage(supabase, userId, 3, { mode: "case_study" });
+    const sections = arrMap(p.sections, 4, (s: any) => ({ heading: clip(s.heading, 60), body: clip(s.body, 2000) }));
+    const metrics = arrMap(p.metrics, 4, (m: any) => ({ value: clip(m.value, 30), label: clip(m.label, 80) }));
+    const pull = { text: clip(p.pull_quote?.text, 400), attribution: clip(p.pull_quote?.attribution, 160) };
+    const markdown = `# ${clip(p.title, 200)}\n\n_${clip(p.subtitle, 240)}_\n\n**${clip(p.hero_metric?.value, 30)}** — ${clip(p.hero_metric?.label, 100)}\n\n${sections.map((s) => `## ${s.heading}\n\n${s.body}`).join("\n\n")}\n\n> "${pull.text}"\n> — ${pull.attribution}\n\n### Highlights\n${metrics.map((m) => `- **${m.value}** ${m.label}`).join("\n")}\n\n**${clip(p.cta, 60)}**\n`;
+    return {
+      title: clip(p.title, 200),
+      subtitle: clip(p.subtitle, 240),
+      hero_metric: { value: clip(p.hero_metric?.value, 30), label: clip(p.hero_metric?.label, 100) },
+      sections,
+      pull_quote: pull,
+      metrics,
+      cta: clip(p.cta, 60),
+      markdown,
+      usage,
+    };
+  });
+
+// ---------- 20. Generic markdown tools (taglines, names, threads, etc.) ----------
+
+export const MARKETING_TOOL_KEYS = [
+  "tagline", "slogan", "naming", "domain", "valueprop",
+  "journey", "webinar", "podcast", "influencer", "thread",
+  "carousel", "youtube", "tiktok", "objections", "promo",
+  "referral", "survey", "faq", "affiliate", "event",
+] as const;
+export type MarketingToolKey = (typeof MARKETING_TOOL_KEYS)[number];
+
+const TOOL_SYSTEM: Record<MarketingToolKey, string> = {
+  tagline: "You are a senior brand copywriter. Produce 12 distinctive taglines (<=8 words each) for the product. Group as: Bold, Friendly, Minimal, Witty. Markdown with H3 per group + bullets.",
+  slogan: "You are a brand strategist. Produce 10 memorable slogans with a 1-line rationale each. Markdown bullets.",
+  naming: "You are a naming consultant. Produce 15 brand/product name ideas grouped: Invented, Descriptive, Evocative, Compound. For each, give the name + a 1-line meaning. Markdown.",
+  domain: "You are a domain naming expert. Suggest 15 available-sounding .com domains plus 5 alternatives on .ai, .io, .co. Mark each with short rationale. Markdown bullets.",
+  valueprop: "You are a positioning strategist. Output a value proposition canvas in markdown: Customer Jobs, Pains, Gains, Products & Services, Pain Relievers, Gain Creators. Use bullets under H3 headings.",
+  journey: "You are a CX strategist. Produce a 5-stage customer journey map (Awareness, Consideration, Decision, Onboarding, Advocacy). For each: Actions, Touchpoints, Emotions, Opportunities. Markdown.",
+  webinar: "You are an event marketer. Produce a webinar promo pack in markdown: Title, Subtitle, 3 learning outcomes, 2 email invites (subject + body), 1 LinkedIn post, 1 Twitter post, 1 reminder email.",
+  podcast: "You are a PR specialist. Write 3 podcast pitch emails: (1) cold pitch, (2) follow-up, (3) post-recording thank-you. Each with subject + body. Markdown.",
+  influencer: "You are a partnerships lead. Write 3 influencer outreach DMs (Instagram, TikTok, LinkedIn), each <=120 words, plus a 1-page collab brief. Markdown.",
+  thread: "You are a viral Twitter/X writer. Produce one 9-tweet thread with strong hook, body tweets numbered 1/ to 8/, and a CTA tweet. Each tweet <=270 chars. Markdown.",
+  carousel: "You are a LinkedIn carousel designer. Produce a 10-slide carousel script. For each slide: Slide N — Headline + 1-2 line body. End with a CTA slide. Markdown.",
+  youtube: "You are a YouTube growth expert. Produce: 5 click-worthy titles, 1 SEO description (~200 words with timestamps placeholders), 20 tags, 3 pinned-comment ideas. Markdown.",
+  tiktok: "You are a short-form video writer. Produce 8 TikTok/Reels scripts of 15-30s each: HOOK (3s) / BODY / CTA, plus on-screen text and 5 trending hashtags per script. Markdown.",
+  objections: "You are a sales enablement coach. List the 8 most common buyer objections for this product, and for each give a concise rebuttal (2-3 sentences) and a follow-up question. Markdown.",
+  promo: "You are a promo copywriter. Produce a discount/promo announcement pack: 1 hero headline, 3 banner variants, 1 email (subject+body), 1 SMS (<=160 chars), 1 social post, 1 urgency line. Markdown.",
+  referral: "You are a growth marketer. Produce referral-program copy: program name, 1 hero headline, 3-bullet how-it-works, 1 referrer email, 1 referred-friend email, 1 social share template. Markdown.",
+  survey: "You are a research lead. Produce a customer survey: 1 intro paragraph, 1 NPS question, 3 CSAT questions, 5 open-ended discovery questions, 2 demographic questions. Markdown.",
+  faq: "You are a website copywriter. Write 12 high-converting FAQs covering pricing, refunds, security, onboarding, support, integrations, and objections. Question + 2-4 sentence answer. Markdown.",
+  affiliate: "You are an affiliate program manager. Produce affiliate-program copy: program pitch (150 words), commission structure suggestions (3 tiers), 1 recruiter email, 1 welcome email, 5 swipe-file social posts affiliates can reuse. Markdown.",
+  event: "You are an event marketer. Produce event invitation copy: 1 hero invite (date/venue placeholders), 2 email invites (save-the-date + RSVP reminder), 1 LinkedIn post, 1 Twitter post, 1 calendar event description. Markdown.",
+};
+
+const MarketingToolInput = z.object({
+  tool: z.enum(MARKETING_TOOL_KEYS),
+  product: z.string().trim().min(2).max(400),
+  audience: z.string().trim().max(200).optional().default(""),
+  extra: z.string().trim().max(800).optional().default(""),
+});
+
+export type MarketingToolResult = { tool: MarketingToolKey; markdown: string; usage: UsageSnapshot };
+
+export const generateMarketingTool = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => MarketingToolInput.parse(input))
+  .handler(async ({ data, context }): Promise<MarketingToolResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+    const system = `${TOOL_SYSTEM[data.tool]}\n\nReturn clean markdown only (no JSON, no code fences around the whole answer). Keep it tight, scannable, and on-brand.`;
+    const user = `Product / service: ${data.product}
+Audience: ${data.audience || "general"}
+Extra context: ${data.extra || "(none)"}${brandBlock(brand)}`;
+    const content = await callOpenRouter(system, user, false);
+    const usage = await recordUsage(supabase, userId, 2, { mode: `tool:${data.tool}` });
+    return { tool: data.tool, markdown: clip(content, 12000), usage };
+  });
+
+// ============================================================
+//  Mega Pack — one prompt → entire marketing system
+// ============================================================
+
+const MegaPackInput = z.object({
+  product: z.string().trim().min(2).max(400),
+  audience: z.string().trim().max(200).optional().default(""),
+  goal: z.string().trim().max(200).optional().default("acquire first 1000 customers"),
+  budget: z.enum(["bootstrapped", "lean", "funded", "enterprise"]).optional().default("lean"),
+  region: z.string().trim().max(80).optional().default("global"),
+});
+
+export type MegaPackResult = {
+  brief: { product: string; audience: string; goal: string; budget: string; region: string };
+  positioning: string;
+  brand_voice: { adjectives: string[]; do: string[]; dont: string[]; sample_paragraph: string };
+  personas: { name: string; role: string; goals: string[]; pains: string[]; channels: string[] }[];
+  channel_mix: { name: string; weekly_cadence: string; why: string }[];
+  ads: { platform: string; headline: string; primary_text: string; cta: string }[];
+  email_drip: { day: number; subject: string; preview: string; body: string }[];
+  social_calendar: { day: number; platform: string; hook: string; body: string; hashtags: string[] }[];
+  seo: { primary_keywords: string[]; meta_title: string; meta_description: string; faqs: { q: string; a: string }[] };
+  landing_copy: { hero: string; subhero: string; bullets: string[]; cta: string; testimonial_template: string };
+  thirty_day_plan: { week: number; focus: string; actions: string[] }[];
+  kpis: { metric: string; target: string }[];
+  usage: UsageSnapshot;
+};
+
+function megaPackMarkdown(p: MegaPackResult): string {
+  const lines: string[] = [];
+  lines.push(`# Marketing Mega Pack — ${p.brief.product}`);
+  lines.push(`\n_Audience: ${p.brief.audience || "general"} · Goal: ${p.brief.goal} · Budget: ${p.brief.budget} · Region: ${p.brief.region}_\n`);
+  lines.push(`## Positioning\n${p.positioning}\n`);
+  lines.push(`## Brand voice`);
+  lines.push(`**Adjectives:** ${p.brand_voice.adjectives.join(", ")}`);
+  lines.push(`\n**Do:**\n${p.brand_voice.do.map(d => `- ${d}`).join("\n")}`);
+  lines.push(`\n**Don't:**\n${p.brand_voice.dont.map(d => `- ${d}`).join("\n")}`);
+  lines.push(`\n**Sample:**\n> ${p.brand_voice.sample_paragraph}\n`);
+  lines.push(`## Personas`);
+  for (const x of p.personas) {
+    lines.push(`### ${x.name} — ${x.role}`);
+    lines.push(`- Goals: ${x.goals.join("; ")}`);
+    lines.push(`- Pains: ${x.pains.join("; ")}`);
+    lines.push(`- Channels: ${x.channels.join(", ")}\n`);
+  }
+  lines.push(`## Channel mix`);
+  for (const c of p.channel_mix) lines.push(`- **${c.name}** (${c.weekly_cadence}) — ${c.why}`);
+  lines.push(`\n## Ads`);
+  for (const a of p.ads) lines.push(`### ${a.platform}\n**${a.headline}**\n\n${a.primary_text}\n\n_CTA:_ ${a.cta}\n`);
+  lines.push(`## Email drip`);
+  for (const e of p.email_drip) lines.push(`### Day ${e.day} — ${e.subject}\n_Preview:_ ${e.preview}\n\n${e.body}\n`);
+  lines.push(`## Social calendar`);
+  for (const s of p.social_calendar) lines.push(`- **Day ${s.day} · ${s.platform}** — *${s.hook}* — ${s.body} ${s.hashtags.map(h => `#${h.replace(/^#/, "")}`).join(" ")}`);
+  lines.push(`\n## SEO\n**Primary keywords:** ${p.seo.primary_keywords.join(", ")}\n\n**Meta title:** ${p.seo.meta_title}\n\n**Meta description:** ${p.seo.meta_description}\n`);
+  lines.push(`### FAQs`);
+  for (const f of p.seo.faqs) lines.push(`**Q:** ${f.q}\n\n**A:** ${f.a}\n`);
+  lines.push(`## Landing page copy\n**Hero:** ${p.landing_copy.hero}\n\n**Subhero:** ${p.landing_copy.subhero}\n\n**Bullets:**\n${p.landing_copy.bullets.map(b => `- ${b}`).join("\n")}\n\n**CTA:** ${p.landing_copy.cta}\n\n**Testimonial template:** ${p.landing_copy.testimonial_template}\n`);
+  lines.push(`## 30-day plan`);
+  for (const w of p.thirty_day_plan) lines.push(`### Week ${w.week} — ${w.focus}\n${w.actions.map(a => `- ${a}`).join("\n")}\n`);
+  lines.push(`## KPIs`);
+  for (const k of p.kpis) lines.push(`- **${k.metric}**: ${k.target}`);
+  return lines.join("\n");
+}
+
+export { megaPackMarkdown };
+
+export const generateMegaPack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => MegaPackInput.parse(input))
+  .handler(async ({ data, context }): Promise<MegaPackResult> => {
+    const { supabase, userId } = context as any;
+    const brand = await loadBrand(supabase, userId);
+
+    const system = `You are a senior CMO and growth strategist. Produce a complete, on-brand marketing system as STRICT JSON only (no prose, no code fences). All arrays must be filled — no empty lists. Be concrete, specific, and concise. Schema:
+{
+  "positioning": string,
+  "brand_voice": { "adjectives": string[5], "do": string[5], "dont": string[5], "sample_paragraph": string },
+  "personas": [{ "name": string, "role": string, "goals": string[3], "pains": string[3], "channels": string[3] }] (3 personas),
+  "channel_mix": [{ "name": string, "weekly_cadence": string, "why": string }] (5 items),
+  "ads": [{ "platform": "Google Search"|"Meta"|"LinkedIn"|"X"|"YouTube", "headline": string<=60, "primary_text": string<=240, "cta": string<=20 }] (5 items),
+  "email_drip": [{ "day": number, "subject": string<=60, "preview": string<=90, "body": string }] (5 emails for days 1,3,7,14,21),
+  "social_calendar": [{ "day": number(1-14), "platform": "LinkedIn"|"X"|"Instagram"|"TikTok"|"YouTube", "hook": string, "body": string, "hashtags": string[3] }] (14 entries),
+  "seo": { "primary_keywords": string[8], "meta_title": string<=60, "meta_description": string<=160, "faqs": [{ "q": string, "a": string }] (8 faqs) },
+  "landing_copy": { "hero": string<=80, "subhero": string<=160, "bullets": string[5], "cta": string<=24, "testimonial_template": string },
+  "thirty_day_plan": [{ "week": 1|2|3|4, "focus": string, "actions": string[5] }] (4 weeks),
+  "kpis": [{ "metric": string, "target": string }] (6 items)
+}`;
+
+    const userMsg = `Brief:
+Product/service: ${data.product}
+Audience: ${data.audience || "general"}
+30-day goal: ${data.goal}
+Budget: ${data.budget}
+Region: ${data.region}${brandBlock(brand)}
+
+Return the JSON object only.`;
+
+    const content = await callOpenRouter(system, userMsg, true);
+    const parsed = parseJsonLoose<any>(content);
+
+    // Defensive normalization — never let one missing array crash the UI.
+    const arr = (v: any) => (Array.isArray(v) ? v : []);
+    const str = (v: any, d = "") => (typeof v === "string" ? v : d);
+
+    const usage = await recordUsage(supabase, userId, 8, { mode: "megapack" });
+
+    return {
+      brief: {
+        product: data.product,
+        audience: data.audience,
+        goal: data.goal,
+        budget: data.budget,
+        region: data.region,
+      },
+      positioning: str(parsed.positioning),
+      brand_voice: {
+        adjectives: arr(parsed.brand_voice?.adjectives).map(String).slice(0, 8),
+        do: arr(parsed.brand_voice?.do).map(String).slice(0, 8),
+        dont: arr(parsed.brand_voice?.dont).map(String).slice(0, 8),
+        sample_paragraph: str(parsed.brand_voice?.sample_paragraph),
+      },
+      personas: arr(parsed.personas).slice(0, 5).map((p: any) => ({
+        name: str(p?.name, "Persona"),
+        role: str(p?.role),
+        goals: arr(p?.goals).map(String).slice(0, 5),
+        pains: arr(p?.pains).map(String).slice(0, 5),
+        channels: arr(p?.channels).map(String).slice(0, 5),
+      })),
+      channel_mix: arr(parsed.channel_mix).slice(0, 8).map((c: any) => ({
+        name: str(c?.name), weekly_cadence: str(c?.weekly_cadence), why: str(c?.why),
+      })),
+      ads: arr(parsed.ads).slice(0, 8).map((a: any) => ({
+        platform: str(a?.platform, "Meta"),
+        headline: str(a?.headline),
+        primary_text: str(a?.primary_text),
+        cta: str(a?.cta, "Learn more"),
+      })),
+      email_drip: arr(parsed.email_drip).slice(0, 8).map((e: any, i: number) => ({
+        day: Number.isFinite(e?.day) ? Number(e.day) : i + 1,
+        subject: str(e?.subject),
+        preview: str(e?.preview),
+        body: str(e?.body),
+      })),
+      social_calendar: arr(parsed.social_calendar).slice(0, 30).map((s: any, i: number) => ({
+        day: Number.isFinite(s?.day) ? Number(s.day) : i + 1,
+        platform: str(s?.platform, "LinkedIn"),
+        hook: str(s?.hook),
+        body: str(s?.body),
+        hashtags: arr(s?.hashtags).map(String).slice(0, 8),
+      })),
+      seo: {
+        primary_keywords: arr(parsed.seo?.primary_keywords).map(String).slice(0, 20),
+        meta_title: str(parsed.seo?.meta_title),
+        meta_description: str(parsed.seo?.meta_description),
+        faqs: arr(parsed.seo?.faqs).slice(0, 12).map((f: any) => ({
+          q: str(f?.q), a: str(f?.a),
+        })),
+      },
+      landing_copy: {
+        hero: str(parsed.landing_copy?.hero),
+        subhero: str(parsed.landing_copy?.subhero),
+        bullets: arr(parsed.landing_copy?.bullets).map(String).slice(0, 8),
+        cta: str(parsed.landing_copy?.cta, "Get started"),
+        testimonial_template: str(parsed.landing_copy?.testimonial_template),
+      },
+      thirty_day_plan: arr(parsed.thirty_day_plan).slice(0, 6).map((w: any, i: number) => ({
+        week: Number.isFinite(w?.week) ? Number(w.week) : i + 1,
+        focus: str(w?.focus),
+        actions: arr(w?.actions).map(String).slice(0, 8),
+      })),
+      kpis: arr(parsed.kpis).slice(0, 10).map((k: any) => ({
+        metric: str(k?.metric), target: str(k?.target),
+      })),
       usage,
     };
   });

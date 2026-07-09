@@ -53,7 +53,7 @@ function Privacy() {
             <li><strong>Usage & telemetry:</strong> features used, prompt counts, model selections, error logs.</li>
             <li><strong>Device & technical data:</strong> IP address, browser type, device type, OS, referrer URL.</li>
             <li><strong>Support data:</strong> messages you send to support and our responses.</li>
-            <li><strong>Payment data:</strong> processed by Razorpay (see "Sharing" below); we receive a payment ID, payment status, and minimal metadata — we do <em>not</em> store full card numbers, CVVs, or UPI PINs.</li>
+            <li><strong>Payment data:</strong> if you contact us to purchase a plan, we receive a payment reference and minimal metadata — we do <em>not</em> store full card numbers, CVVs, or UPI PINs.</li>
           </ul>
         </Section>
 
@@ -71,7 +71,7 @@ function Privacy() {
 
         <Section title="4. Who we share data with">
           <ul className="list-disc space-y-2 pl-5">
-            <li><strong>Razorpay Software Private Limited</strong> — our payment gateway for all transactions. Razorpay processes payments (UPI, cards, wallets, net banking), handles refunds, and issues receipts. See <a className="text-[#635bff] underline" href="https://razorpay.com/privacy/" target="_blank" rel="noopener noreferrer">Razorpay's Privacy Policy</a>.</li>
+            <li><strong>Cloud hosting & infrastructure providers</strong> — to host the service and store data.</li>
             <li><strong>Cloud hosting & infrastructure providers</strong> — to host the service and store data.</li>
             <li><strong>AI model providers</strong> — your prompts may be sent to upstream large-language-model providers (e.g. Google AI, OpenRouter) to generate responses.</li>
             <li><strong>Analytics providers</strong> — Google Analytics for aggregate usage statistics.</li>

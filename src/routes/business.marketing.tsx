@@ -4,18 +4,32 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft, Download, Loader2, Megaphone, Sparkles, Copy, Check, FileText, Compass,
   Image as ImageIcon, Layout, Palette, X, Plus, Trash2, Search, Mail, Target, Globe,
+  Calendar, Video, Newspaper, Send, MessageSquare, Users, FlaskConical, Code2, Tags, BookOpen,
+  Quote, Lightbulb, Type, Globe2, Heart, Map as MapIcon, Mic, AtSign, Twitter, Linkedin,
+  Youtube, Music2, ShieldQuestion, Percent, Gift, ClipboardList, HelpCircle, Link2, PartyPopper,
+  Rocket, FileJson,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
+import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import {
   generateMarketing, generateCampaign, generateBlog, generateStrategy, generateHeroWireframe,
   getBrandProfile, saveBrandProfile,
   generateCompetitor, generateEmailDrip, generateAdPack, generateLandingHtml,
+  generateSocialCalendar, generateVideoScript, generatePressRelease, generateColdOutreach,
+  generateBrandVoice, generatePersonas, generateABVariants, generateSeoMeta,
+  generatePricingCopy, generateCaseStudy,
+  generateMarketingTool, type MarketingToolKey,
+  generateMegaPack, megaPackMarkdown,
   type MarketingResult, type CampaignResult, type BlogResult, type StrategyResult,
   type HeroWireframeResult, type BrandProfile,
   type CompetitorResult, type EmailDripResult, type AdPackResult, type LandingHtmlResult,
+  type SocialCalendarResult, type VideoScriptResult, type PressReleaseResult, type ColdOutreachResult,
+  type BrandVoiceResult, type PersonasResult, type ABVariantsResult, type SeoMetaResult,
+  type PricingCopyResult, type CaseStudyResult, type MegaPackResult,
 } from "@/lib/marketing.functions";
+
 
 export const Route = createFileRoute("/business/marketing")({
   head: () => ({
@@ -34,9 +48,16 @@ export const Route = createFileRoute("/business/marketing")({
   ),
 });
 
-type Mode = "quick" | "campaign" | "blog" | "strategy" | "hero" | "competitor" | "drip" | "adpack" | "landing";
+type Mode =
+  | "megapack"
+  | "quick" | "campaign" | "blog" | "strategy" | "hero"
+  | "competitor" | "drip" | "adpack" | "landing"
+  | "calendar" | "video" | "press" | "outreach" | "voice"
+  | "personas" | "abtest" | "seometa" | "pricing" | "casestudy"
+  | MarketingToolKey;
 
 const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
+  { id: "megapack", label: "Mega Pack ⚡", icon: Rocket, credits: 8 },
   { id: "quick", label: "Quick copy", icon: Sparkles, credits: 1 },
   { id: "campaign", label: "Campaign pack", icon: Megaphone, credits: 3 },
   { id: "blog", label: "SEO blog", icon: FileText, credits: 3 },
@@ -46,7 +67,44 @@ const TABS: { id: Mode; label: string; icon: any; credits: number }[] = [
   { id: "drip", label: "Email drip (5)", icon: Mail, credits: 3 },
   { id: "adpack", label: "Ad pack", icon: Target, credits: 3 },
   { id: "landing", label: "Landing HTML", icon: Globe, credits: 3 },
+  { id: "calendar", label: "Social calendar", icon: Calendar, credits: 3 },
+  { id: "video", label: "Video script", icon: Video, credits: 2 },
+  { id: "press", label: "Press release", icon: Newspaper, credits: 2 },
+  { id: "outreach", label: "Cold outreach", icon: Send, credits: 3 },
+  { id: "voice", label: "Brand voice", icon: MessageSquare, credits: 2 },
+  { id: "personas", label: "Personas", icon: Users, credits: 2 },
+  { id: "abtest", label: "A/B variants", icon: FlaskConical, credits: 1 },
+  { id: "seometa", label: "SEO meta pack", icon: Code2, credits: 2 },
+  { id: "pricing", label: "Pricing copy", icon: Tags, credits: 2 },
+  { id: "casestudy", label: "Case study", icon: BookOpen, credits: 3 },
+  { id: "tagline", label: "Taglines", icon: Quote, credits: 2 },
+  { id: "slogan", label: "Slogans", icon: Lightbulb, credits: 2 },
+  { id: "naming", label: "Product naming", icon: Type, credits: 2 },
+  { id: "domain", label: "Domain ideas", icon: Globe2, credits: 2 },
+  { id: "valueprop", label: "Value prop canvas", icon: Heart, credits: 2 },
+  { id: "journey", label: "Customer journey", icon: MapIcon, credits: 2 },
+  { id: "webinar", label: "Webinar promo", icon: Video, credits: 2 },
+  { id: "podcast", label: "Podcast pitch", icon: Mic, credits: 2 },
+  { id: "influencer", label: "Influencer DM", icon: AtSign, credits: 2 },
+  { id: "thread", label: "X/Twitter thread", icon: Twitter, credits: 2 },
+  { id: "carousel", label: "LinkedIn carousel", icon: Linkedin, credits: 2 },
+  { id: "youtube", label: "YouTube SEO", icon: Youtube, credits: 2 },
+  { id: "tiktok", label: "TikTok hooks", icon: Music2, credits: 2 },
+  { id: "objections", label: "Sales objections", icon: ShieldQuestion, credits: 2 },
+  { id: "promo", label: "Promo / discount", icon: Percent, credits: 2 },
+  { id: "referral", label: "Referral program", icon: Gift, credits: 2 },
+  { id: "survey", label: "Survey questions", icon: ClipboardList, credits: 2 },
+  { id: "faq", label: "FAQ pack", icon: HelpCircle, credits: 2 },
+  { id: "affiliate", label: "Affiliate program", icon: Link2, credits: 2 },
+  { id: "event", label: "Event invite", icon: PartyPopper, credits: 2 },
 ];
+
+const TOOL_KEYS_SET = new Set<string>([
+  "tagline","slogan","naming","domain","valueprop","journey","webinar","podcast",
+  "influencer","thread","carousel","youtube","tiktok","objections","promo",
+  "referral","survey","faq","affiliate","event",
+]);
+
 
 const TONES = ["professional","friendly","bold","playful","luxurious","minimal","urgent"] as const;
 const CHANNELS = [
@@ -69,6 +127,7 @@ function MarketingPage() {
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
         <div className="flex items-center gap-3">
+          <CurrentPlanBadge className="hidden sm:inline-flex" />
           <UsageBadge usage={usage} onTopupSuccess={(u) => setUsage(u)} />
           <button onClick={() => setBrandOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-full border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#0a2540] hover:border-[#635bff] hover:text-[#635bff]">
@@ -110,6 +169,7 @@ function MarketingPage() {
           })}
         </div>
 
+        {mode === "megapack" && <MegaPackPanel usage={usage} setUsage={setUsage} />}
         {mode === "quick" && <QuickPanel usage={usage} setUsage={setUsage} />}
         {mode === "campaign" && <CampaignPanel usage={usage} setUsage={setUsage} />}
         {mode === "blog" && <BlogPanel usage={usage} setUsage={setUsage} />}
@@ -119,6 +179,19 @@ function MarketingPage() {
         {mode === "drip" && <DripPanel usage={usage} setUsage={setUsage} />}
         {mode === "adpack" && <AdPackPanel usage={usage} setUsage={setUsage} />}
         {mode === "landing" && <LandingPanel usage={usage} setUsage={setUsage} />}
+        {mode === "calendar" && <CalendarPanel usage={usage} setUsage={setUsage} />}
+        {mode === "video" && <VideoPanel usage={usage} setUsage={setUsage} />}
+        {mode === "press" && <PressPanel usage={usage} setUsage={setUsage} />}
+        {mode === "outreach" && <OutreachPanel usage={usage} setUsage={setUsage} />}
+        {mode === "voice" && <VoicePanel usage={usage} setUsage={setUsage} />}
+        {mode === "personas" && <PersonasPanel usage={usage} setUsage={setUsage} />}
+        {mode === "abtest" && <ABPanel usage={usage} setUsage={setUsage} />}
+        {mode === "seometa" && <SeoMetaPanel usage={usage} setUsage={setUsage} />}
+        {mode === "pricing" && <PricingCopyPanel usage={usage} setUsage={setUsage} />}
+        {mode === "casestudy" && <CaseStudyPanel usage={usage} setUsage={setUsage} />}
+        {TOOL_KEYS_SET.has(mode) && (
+          <ToolPanel key={mode} tool={mode as MarketingToolKey} label={TABS.find(t => t.id === mode)?.label ?? mode} usage={usage} setUsage={setUsage} />
+        )}
       </main>
 
       {brandOpen && <BrandVoiceDrawer onClose={() => setBrandOpen(false)} />}
@@ -1114,10 +1187,931 @@ function TagInput({ label, items, onAdd, onRemove }: { label: string; items: str
   );
 }
 
+// ============================================================
+// ============== 10 NEW PANELS (compact, shared shape) =======
+// ============================================================
+
+function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={`mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff] ${props.className || ""}`} />;
+}
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...props} className={`mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff] ${props.className || ""}`} />;
+}
+function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} className={`rounded-full border px-3 py-1.5 text-[12.5px] font-medium ${active ? "border-[#635bff] bg-[#635bff] text-white" : "border-[#e3e8ee] bg-white text-[#0a2540] hover:border-[#635bff]"}`}>{children}</button>
+  );
+}
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[16px] font-semibold">{children}</h2>;
+}
+function DownloadButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#0a2540] hover:border-[#635bff] hover:text-[#635bff]">
+      <Download className="h-3.5 w-3.5" /> {children}
+    </button>
+  );
+}
+
+// ---- 10. Social Calendar ----
+const PLATFORMS = ["instagram","linkedin","x","tiktok","facebook"] as const;
+function CalendarPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateSocialCalendar);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [tone, setTone] = useState("friendly");
+  const [platforms, setPlatforms] = useState<string[]>(["instagram", "linkedin"]);
+  const [result, setResult] = useState<SocialCalendarResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const togglePlatform = (p: string) => setPlatforms((cur) => cur.includes(p) ? cur.filter((x) => x !== p) : [...cur, p]);
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Add a product or topic.");
+    if (platforms.length === 0) return setError("Pick at least one platform.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { product: product.trim(), audience: audience.trim(), tone, platforms: platforms as any } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  const downloadCsv = () => {
+    if (!result) return;
+    const rows = [["day","date_offset","platform","hook","caption","hashtags","best_time","cta"], ...result.days.map((d) => [d.day, d.date_offset, d.platform, d.hook, d.caption, d.hashtags.join(" "), d.best_time, d.cta])];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    downloadText("social-calendar.csv", csv, "text/csv");
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product / topic</Label>
+        <TextArea rows={3} value={product} onChange={(e) => setProduct(e.target.value.slice(0, 300))} placeholder="e.g. Eco-friendly water bottles" />
+        <Label className="mt-3">Audience</Label>
+        <TextInput value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))} />
+        <Label className="mt-3">Tone</Label>
+        <TextInput value={tone} onChange={(e) => setTone(e.target.value.slice(0, 40))} />
+        <Label className="mt-3">Platforms</Label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {PLATFORMS.map((p) => <Pill key={p} active={platforms.includes(p)} onClick={() => togglePlatform(p)}>{p}</Pill>)}
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate 30-day calendar (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between"><SectionTitle>30-day calendar</SectionTitle>{result && <DownloadButton onClick={downloadCsv}>CSV</DownloadButton>}</div>
+        {!result ? <Empty>Pick platforms and generate.</Empty> : (
+          <div className="mt-5 max-h-[640px] overflow-auto rounded-lg border border-[#eef1f5]">
+            <table className="w-full text-[12.5px]">
+              <thead className="sticky top-0 bg-[#fafbfc] text-[#697386]">
+                <tr><th className="px-2 py-2 text-left">Day</th><th className="px-2 py-2 text-left">Platform</th><th className="px-2 py-2 text-left">Hook + caption</th><th className="px-2 py-2 text-left">Time</th></tr>
+              </thead>
+              <tbody>
+                {result.days.map((d) => (
+                  <tr key={d.day} className="border-t border-[#eef1f5] align-top">
+                    <td className="px-2 py-2 font-semibold">{d.day}</td>
+                    <td className="px-2 py-2">{d.platform}</td>
+                    <td className="px-2 py-2"><div className="font-semibold">{d.hook}</div><div className="text-[#697386]">{d.caption}</div><div className="mt-1 text-[11px] text-[#635bff]">{d.hashtags.map((h) => h.startsWith("#") ? h : `#${h}`).join(" ")}</div><div className="text-[11px] text-[#697386]">CTA: {d.cta}</div></td>
+                    <td className="px-2 py-2 whitespace-nowrap text-[#697386]">{d.best_time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 11. Video / Reels script ----
+function VideoPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateVideoScript);
+  const [topic, setTopic] = useState("");
+  const [audience, setAudience] = useState("");
+  const [length, setLength] = useState<"30s"|"60s"|"3min">("60s");
+  const [tone, setTone] = useState("energetic");
+  const [result, setResult] = useState<VideoScriptResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (topic.trim().length < 2) return setError("Add a topic.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { topic: topic.trim(), audience: audience.trim(), length, tone } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Topic</Label>
+        <TextArea rows={3} value={topic} onChange={(e) => setTopic(e.target.value.slice(0, 300))} placeholder="e.g. 3 ways our planner saves you an hour a day" />
+        <Label className="mt-3">Audience</Label>
+        <TextInput value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))} />
+        <Label className="mt-3">Length</Label>
+        <div className="mt-1.5 flex gap-1.5">{(["30s","60s","3min"] as const).map((l) => <Pill key={l} active={length === l} onClick={() => setLength(l)}>{l}</Pill>)}</div>
+        <Label className="mt-3">Tone</Label>
+        <TextInput value={tone} onChange={(e) => setTone(e.target.value.slice(0, 40))} />
+        <GenerateButton loading={loading} onClick={run}>Generate script (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>Script</SectionTitle>
+        {!result ? <Empty>Generate a script first.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <CopyableBlock label="Hook (first 2 seconds)" text={result.hook}><p className="text-[18px] font-semibold">{result.hook}</p></CopyableBlock>
+            <div>
+              <Label>Shot list</Label>
+              <div className="mt-2 space-y-2">
+                {result.beats.map((b, i) => (
+                  <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3 text-[13px]">
+                    <div className="text-[11px] font-semibold text-[#635bff]">{b.time}</div>
+                    <div className="mt-1"><b>Shot:</b> {b.shot}</div>
+                    <div><b>VO:</b> {b.voiceover}</div>
+                    <div><b>On-screen:</b> {b.on_screen_text}</div>
+                    <div className="text-[#697386]"><b>B-roll:</b> {b.b_roll}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <CopyableBlock label="Thumbnail concept" text={result.thumbnail_concept}><p className="text-[14px]">{result.thumbnail_concept}</p></CopyableBlock>
+            <CopyableBlock label="CTA" text={result.cta}><span className="inline-flex rounded-md bg-[#635bff] px-3 py-1.5 text-[13px] font-semibold text-white">{result.cta}</span></CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 12. Press release ----
+function PressPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generatePressRelease);
+  const [company, setCompany] = useState("");
+  const [city, setCity] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const [spokesperson, setSpokesperson] = useState("");
+  const [spokespersonTitle, setSpokespersonTitle] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [result, setResult] = useState<PressReleaseResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (company.trim().length < 2 || announcement.trim().length < 5) return setError("Add company + announcement.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { company: company.trim(), city: city.trim(), announcement: announcement.trim(), spokesperson: spokesperson.trim(), spokesperson_title: spokespersonTitle.trim(), contact_email: contactEmail.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Company</Label><TextInput value={company} onChange={(e) => setCompany(e.target.value.slice(0, 120))} />
+        <Label className="mt-3">City</Label><TextInput value={city} onChange={(e) => setCity(e.target.value.slice(0, 80))} placeholder="San Francisco, CA" />
+        <Label className="mt-3">Announcement</Label>
+        <TextArea rows={4} value={announcement} onChange={(e) => setAnnouncement(e.target.value.slice(0, 500))} placeholder="What's the news? Funding, launch, partnership..." />
+        <Label className="mt-3">Spokesperson</Label><TextInput value={spokesperson} onChange={(e) => setSpokesperson(e.target.value.slice(0, 120))} placeholder="Jane Doe" />
+        <Label className="mt-3">Title</Label><TextInput value={spokespersonTitle} onChange={(e) => setSpokespersonTitle(e.target.value.slice(0, 120))} placeholder="CEO" />
+        <Label className="mt-3">Media contact email</Label><TextInput value={contactEmail} onChange={(e) => setContactEmail(e.target.value.slice(0, 120))} />
+        <GenerateButton loading={loading} onClick={run}>Generate release (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between"><SectionTitle>Press release</SectionTitle>
+          {result && <div className="flex gap-2"><DownloadButton onClick={() => downloadText("press-release.html", result.html, "text/html")}>HTML</DownloadButton><DownloadButton onClick={() => { const txt = `FOR IMMEDIATE RELEASE\n\n${result.headline}\n${result.subhead}\n\n${result.dateline} — ${result.body_paragraphs.join("\n\n")}\n\n"${result.quote.text}"\n— ${result.quote.attribution}\n\nAbout: ${result.boilerplate}\n${result.contact_block}\n\n###`; downloadText("press-release.txt", txt); }}>TXT</DownloadButton></div>}
+        </div>
+        {!result ? <Empty>Fill in the announcement to generate.</Empty> : (
+          <div className="mt-5 space-y-3 text-[14px]">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#697386]">For immediate release</div>
+            <h1 className="text-[22px] font-bold leading-tight">{result.headline}</h1>
+            <p className="text-[15px] italic text-[#3c4257]">{result.subhead}</p>
+            <p><b>{result.dateline}</b> — {result.body_paragraphs[0]}</p>
+            {result.body_paragraphs.slice(1, -1).map((b, i) => <p key={i}>{b}</p>)}
+            <blockquote className="border-l-2 border-[#635bff] pl-4 italic text-[#3c4257]">"{result.quote.text}"<br/><span className="text-[12px] not-italic">— {result.quote.attribution}</span></blockquote>
+            {result.body_paragraphs.length > 1 && <p>{result.body_paragraphs[result.body_paragraphs.length - 1]}</p>}
+            <div className="mt-4 border-t border-[#eef1f5] pt-3 text-[13px] text-[#3c4257]"><b>About:</b> {result.boilerplate}{result.contact_block && <><br/><br/>{result.contact_block}</>}</div>
+            <p className="text-center text-[#697386]">###</p>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 13. Cold outreach ----
+function OutreachPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateColdOutreach);
+  const [product, setProduct] = useState("");
+  const [persona, setPersona] = useState("");
+  const [valueProp, setValueProp] = useState("");
+  const [sender, setSender] = useState("");
+  const [result, setResult] = useState<ColdOutreachResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2 || persona.trim().length < 2 || valueProp.trim().length < 2) return setError("Fill product, persona, value prop.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { product: product.trim(), target_persona: persona.trim(), value_prop: valueProp.trim(), sender_name: sender.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Product / service</Label><TextArea rows={3} value={product} onChange={(e) => setProduct(e.target.value.slice(0, 300))} />
+        <Label className="mt-3">Target persona</Label><TextInput value={persona} onChange={(e) => setPersona(e.target.value.slice(0, 200))} placeholder="VP of Engineering at 50–200 person SaaS" />
+        <Label className="mt-3">Value prop</Label><TextArea rows={2} value={valueProp} onChange={(e) => setValueProp(e.target.value.slice(0, 300))} />
+        <Label className="mt-3">Sender name</Label><TextInput value={sender} onChange={(e) => setSender(e.target.value.slice(0, 120))} />
+        <GenerateButton loading={loading} onClick={run}>Generate outreach (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>Outreach pack</SectionTitle>
+        {!result ? <Empty>Generate to see emails + LinkedIn templates.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <div>
+              <Label>Initial emails (3 variants)</Label>
+              <div className="mt-2 space-y-3">
+                {result.emails.map((e, i) => (
+                  <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3">
+                    <div className="text-[11px] font-semibold text-[#635bff]">{e.variant}</div>
+                    <div className="mt-1 text-[13px]"><b>Subject:</b> {e.subject}</div>
+                    <pre className="mt-2 whitespace-pre-wrap text-[13px] text-[#3c4257]">{e.body}</pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Follow-ups</Label>
+              <div className="mt-2 space-y-3">
+                {result.follow_ups.map((e, i) => (
+                  <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3">
+                    <div className="text-[11px] font-semibold text-[#635bff]">Day +{e.day_offset}</div>
+                    <div className="mt-1 text-[13px]"><b>Subject:</b> {e.subject}</div>
+                    <pre className="mt-2 whitespace-pre-wrap text-[13px] text-[#3c4257]">{e.body}</pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <CopyableBlock label="LinkedIn connection note" text={result.linkedin.connection_note}><p className="text-[13.5px]">{result.linkedin.connection_note}</p></CopyableBlock>
+            <CopyableBlock label="LinkedIn first message" text={result.linkedin.first_message}><p className="whitespace-pre-wrap text-[13.5px]">{result.linkedin.first_message}</p></CopyableBlock>
+            <CopyableBlock label="LinkedIn follow-up" text={result.linkedin.follow_up}><p className="whitespace-pre-wrap text-[13.5px]">{result.linkedin.follow_up}</p></CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 14. Brand voice ----
+function VoicePanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateBrandVoice);
+  const [sample, setSample] = useState("");
+  const [result, setResult] = useState<BrandVoiceResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (sample.trim().length < 10) return setError("Paste a paragraph of brand copy or a description.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { sample_or_description: sample.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Sample copy or brand description</Label>
+        <TextArea rows={10} value={sample} onChange={(e) => setSample(e.target.value.slice(0, 2000))} placeholder="Paste an existing blog post, About page, or describe how you want the brand to sound..." />
+        <GenerateButton loading={loading} onClick={run}>Derive brand voice (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between"><SectionTitle>Brand voice guidelines</SectionTitle>{result && <DownloadButton onClick={() => downloadText("brand-voice.md", result.style_guide_markdown, "text/markdown")}>Markdown</DownloadButton>}</div>
+        {!result ? <Empty>Paste sample copy to begin.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <CopyableBlock label="Voice summary" text={result.voice_summary}><p className="text-[14px]">{result.voice_summary}</p></CopyableBlock>
+            <div>
+              <Label>Attributes</Label>
+              <div className="mt-2 flex flex-wrap gap-1.5">{result.attributes.map((a, i) => <span key={i} className="rounded-full bg-[#635bff]/10 px-3 py-1 text-[12px] font-semibold text-[#635bff]">{a}</span>)}</div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div><Label>Do</Label><ul className="mt-1.5 space-y-1 text-[13px] text-[#1f7a3a]">{result.do_words.map((w, i) => <li key={i}>✓ {w}</li>)}</ul></div>
+              <div><Label>Don't</Label><ul className="mt-1.5 space-y-1 text-[13px] text-[#c0392b]">{result.dont_words.map((w, i) => <li key={i}>✗ {w}</li>)}</ul></div>
+            </div>
+            <div>
+              <Label>Sample rewrites</Label>
+              <div className="mt-2 space-y-2">
+                {result.sample_rewrites.map((r, i) => (
+                  <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3 text-[13px]">
+                    <div className="text-[#c0392b]"><b>Before:</b> {r.before}</div>
+                    <div className="mt-1 text-[#1f7a3a]"><b>After:</b> {r.after}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 15. Personas ----
+function PersonasPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generatePersonas);
+  const [product, setProduct] = useState("");
+  const [hint, setHint] = useState("");
+  const [result, setResult] = useState<PersonasResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { product: product.trim(), audience_hint: hint.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Product</Label><TextArea rows={3} value={product} onChange={(e) => setProduct(e.target.value.slice(0, 300))} />
+        <Label className="mt-3">Audience hint</Label><TextArea rows={3} value={hint} onChange={(e) => setHint(e.target.value.slice(0, 300))} placeholder="e.g. B2B SaaS, Indian SMBs, hobbyists..." />
+        <GenerateButton loading={loading} onClick={run}>Generate 3 personas (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>Personas</SectionTitle>
+        {!result ? <Empty>Generate to build personas.</Empty> : (
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            {result.personas.map((p, i) => (
+              <div key={i} className="rounded-xl border border-[#eef1f5] bg-[#fafbfc] p-4 text-[13px]">
+                <div className="text-[15px] font-bold">{p.name}</div>
+                <div className="text-[12px] text-[#697386]">{p.role} · {p.age_range}</div>
+                <p className="mt-2 text-[12.5px] italic text-[#3c4257]">"{p.quote}"</p>
+                <div className="mt-3"><Label>Demographics</Label><p className="mt-1 text-[12.5px]">{p.demographics}</p></div>
+                <div className="mt-2"><Label>Jobs to be done</Label><ul className="mt-1 list-disc pl-4 text-[12.5px]">{p.jobs_to_be_done.map((j, k) => <li key={k}>{j}</li>)}</ul></div>
+                <div className="mt-2"><Label>Pains</Label><ul className="mt-1 list-disc pl-4 text-[12.5px] text-[#c0392b]">{p.pains.map((j, k) => <li key={k}>{j}</li>)}</ul></div>
+                <div className="mt-2"><Label>Gains</Label><ul className="mt-1 list-disc pl-4 text-[12.5px] text-[#1f7a3a]">{p.gains.map((j, k) => <li key={k}>{j}</li>)}</ul></div>
+                <div className="mt-2"><Label>Channels</Label><div className="mt-1 flex flex-wrap gap-1">{p.channels.map((c, k) => <span key={k} className="rounded bg-white px-2 py-0.5 text-[11px] ring-1 ring-[#e3e8ee]">{c}</span>)}</div></div>
+                <div className="mt-2"><Label>Objections</Label><ul className="mt-1 list-disc pl-4 text-[12.5px]">{p.objections.map((j, k) => <li key={k}>{j}</li>)}</ul></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 16. A/B variants ----
+const AB_TYPES = ["headline","ad","subject_line","cta","tagline"] as const;
+function ABPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateABVariants);
+  const [original, setOriginal] = useState("");
+  const [assetType, setAssetType] = useState<typeof AB_TYPES[number]>("headline");
+  const [audience, setAudience] = useState("");
+  const [result, setResult] = useState<ABVariantsResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (original.trim().length < 2) return setError("Paste the original asset.");
+    if (usage && usage.remaining < 1) return setError(`Need 1 credit, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { original: original.trim(), asset_type: assetType, audience: audience.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Asset type</Label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">{AB_TYPES.map((t) => <Pill key={t} active={assetType === t} onClick={() => setAssetType(t)}>{t.replace("_", " ")}</Pill>)}</div>
+        <Label className="mt-3">Original</Label>
+        <TextArea rows={3} value={original} onChange={(e) => setOriginal(e.target.value.slice(0, 500))} />
+        <Label className="mt-3">Audience</Label><TextInput value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))} />
+        <GenerateButton loading={loading} onClick={run}>Generate 8 variants (1 credit)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>Ranked variants</SectionTitle>
+        {!result ? <Empty>Generate to see ranked alternatives.</Empty> : (
+          <div className="mt-5 space-y-3">
+            {result.variants.map((v) => (
+              <div key={v.rank} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="rounded-full bg-[#635bff]/10 px-2 py-0.5 font-semibold text-[#635bff]">#{v.rank} · {v.angle}</span>
+                </div>
+                <p className="mt-1.5 text-[14px] font-semibold">{v.text}</p>
+                <p className="mt-1 text-[12px] text-[#697386]">{v.rationale}</p>
+              </div>
+            ))}
+            <div className="rounded-lg border border-[#635bff]/30 bg-[#635bff]/5 p-3 text-[13px]"><b>Hypothesis:</b> {result.hypothesis}</div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 17. SEO meta ----
+function SeoMetaPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateSeoMeta);
+  const [topic, setTopic] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [audience, setAudience] = useState("");
+  const [result, setResult] = useState<SeoMetaResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (topic.trim().length < 2) return setError("Add a URL or topic.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { topic_or_url: topic.trim(), primary_keyword: keyword.trim(), audience: audience.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>URL or topic</Label><TextInput value={topic} onChange={(e) => setTopic(e.target.value.slice(0, 400))} placeholder="https://example.com/post OR a topic" />
+        <Label className="mt-3">Primary keyword</Label><TextInput value={keyword} onChange={(e) => setKeyword(e.target.value.slice(0, 80))} />
+        <Label className="mt-3">Audience</Label><TextInput value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))} />
+        <GenerateButton loading={loading} onClick={run}>Generate meta pack (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>SEO meta pack</SectionTitle>
+        {!result ? <Empty>Run to get titles, descriptions, OG, schema.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <div>
+              <Label>10 title options (≤60 chars)</Label>
+              <ul className="mt-2 space-y-1">{result.titles.map((t, i) => <li key={i} className="flex items-start gap-2 text-[13px]"><span className={`mt-0.5 rounded px-1.5 text-[10px] ${t.ok ? "bg-[#dff5e6] text-[#1f7a3a]" : "bg-[#fff1f0] text-[#c0392b]"}`}>{t.chars}</span><span>{t.text}</span></li>)}</ul>
+            </div>
+            <div>
+              <Label>10 meta descriptions (120–160)</Label>
+              <ul className="mt-2 space-y-1">{result.descriptions.map((t, i) => <li key={i} className="flex items-start gap-2 text-[13px]"><span className={`mt-0.5 rounded px-1.5 text-[10px] ${t.ok ? "bg-[#dff5e6] text-[#1f7a3a]" : "bg-[#fff1f0] text-[#c0392b]"}`}>{t.chars}</span><span>{t.text}</span></li>)}</ul>
+            </div>
+            <CopyableBlock label="Open Graph" text={`<meta property="og:title" content="${result.open_graph.title}" />\n<meta property="og:description" content="${result.open_graph.description}" />\n<meta property="og:type" content="${result.open_graph.type}" />\n<meta property="og:image:alt" content="${result.open_graph.image_alt}" />`}>
+              <pre className="whitespace-pre-wrap text-[12px]">{`<meta property="og:title" content="${result.open_graph.title}" />
+<meta property="og:description" content="${result.open_graph.description}" />
+<meta property="og:type" content="${result.open_graph.type}" />
+<meta property="og:image:alt" content="${result.open_graph.image_alt}" />`}</pre>
+            </CopyableBlock>
+            <CopyableBlock label="Twitter card" text={`<meta name="twitter:card" content="${result.twitter_card.card}" />\n<meta name="twitter:title" content="${result.twitter_card.title}" />\n<meta name="twitter:description" content="${result.twitter_card.description}" />`}>
+              <pre className="whitespace-pre-wrap text-[12px]">{`<meta name="twitter:card" content="${result.twitter_card.card}" />
+<meta name="twitter:title" content="${result.twitter_card.title}" />
+<meta name="twitter:description" content="${result.twitter_card.description}" />`}</pre>
+            </CopyableBlock>
+            <CopyableBlock label="JSON-LD" text={`<script type="application/ld+json">\n${result.json_ld}\n</script>`}>
+              <pre className="whitespace-pre-wrap text-[12px]">{result.json_ld}</pre>
+            </CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 18. Pricing copy ----
+function PricingCopyPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generatePricingCopy);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [positioning, setPositioning] = useState<"value"|"premium"|"freemium"|"enterprise">("value");
+  const [result, setResult] = useState<PricingCopyResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { product: product.trim(), audience: audience.trim(), currency: currency.trim() || "USD", positioning } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Product</Label><TextArea rows={3} value={product} onChange={(e) => setProduct(e.target.value.slice(0, 300))} />
+        <Label className="mt-3">Audience</Label><TextInput value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))} />
+        <Label className="mt-3">Currency</Label><TextInput value={currency} onChange={(e) => setCurrency(e.target.value.slice(0, 8))} />
+        <Label className="mt-3">Positioning</Label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">{(["value","premium","freemium","enterprise"] as const).map((p) => <Pill key={p} active={positioning === p} onClick={() => setPositioning(p)}>{p}</Pill>)}</div>
+        <GenerateButton loading={loading} onClick={run}>Generate pricing copy (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <SectionTitle>Pricing page</SectionTitle>
+        {!result ? <Empty>Generate 3 tiers + FAQ.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <div className="text-center">
+              <h3 className="text-[22px] font-bold">{result.intro_headline}</h3>
+              <p className="mt-2 text-[14px] text-[#3c4257]">{result.intro_subhead}</p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {result.tiers.map((t, i) => (
+                <div key={i} className={`rounded-xl border p-4 ${t.badge ? "border-[#635bff] bg-[#635bff]/5" : "border-[#eef1f5] bg-[#fafbfc]"}`}>
+                  {t.badge && <div className="mb-2 inline-block rounded-full bg-[#635bff] px-2 py-0.5 text-[10px] font-bold uppercase text-white">{t.badge}</div>}
+                  <div className="text-[15px] font-bold">{t.name}</div>
+                  <div className="text-[12px] text-[#697386]">{t.tagline}</div>
+                  <div className="mt-3 text-[24px] font-bold">{t.price_monthly}<span className="text-[12px] font-normal text-[#697386]">/mo</span></div>
+                  <div className="text-[11px] text-[#697386]">or {t.price_annual}</div>
+                  <ul className="mt-3 space-y-1.5 text-[12.5px]">{t.features.map((f, k) => <li key={k} className="flex gap-2"><Check className="mt-0.5 h-3 w-3 shrink-0 text-[#635bff]" />{f}</li>)}</ul>
+                  <button className="mt-4 w-full rounded-md bg-[#635bff] py-2 text-[12.5px] font-semibold text-white">{t.cta}</button>
+                </div>
+              ))}
+            </div>
+            <div>
+              <Label>Feature matrix</Label>
+              <div className="mt-2 overflow-auto rounded-lg border border-[#eef1f5]">
+                <table className="w-full text-[12.5px]">
+                  <thead className="bg-[#fafbfc]"><tr><th className="px-3 py-2 text-left">Feature</th>{result.tiers.map((t, i) => <th key={i} className="px-3 py-2 text-center">{t.name}</th>)}</tr></thead>
+                  <tbody>{result.feature_matrix.map((row, i) => (
+                    <tr key={i} className="border-t border-[#eef1f5]"><td className="px-3 py-1.5">{row.feature}</td>{row.tiers.map((b, k) => <td key={k} className="px-3 py-1.5 text-center">{b ? <Check className="mx-auto h-3.5 w-3.5 text-[#1f7a3a]" /> : <X className="mx-auto h-3.5 w-3.5 text-[#c0392b]/40" />}</td>)}</tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <Label>FAQ</Label>
+              <div className="mt-2 space-y-2">{result.faq.map((f, i) => (
+                <details key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3 text-[13px]"><summary className="cursor-pointer font-semibold">{f.q}</summary><p className="mt-2 text-[#3c4257]">{f.a}</p></details>
+              ))}</div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---- 19. Case study ----
+function CaseStudyPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateCaseStudy);
+  const [customer, setCustomer] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [product, setProduct] = useState("");
+  const [outcomes, setOutcomes] = useState("");
+  const [result, setResult] = useState<CaseStudyResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const run = async () => {
+    setError(null);
+    if (customer.trim().length < 1 || product.trim().length < 2 || outcomes.trim().length < 5) return setError("Fill customer, product, outcomes.");
+    if (usage && usage.remaining < 3) return setError(`Need 3 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const data = await gen({ data: { customer: customer.trim(), industry: industry.trim(), product: product.trim(), outcomes: outcomes.trim() } });
+      setResult(data); setUsage(data.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <Card>
+        <Label>Customer name</Label><TextInput value={customer} onChange={(e) => setCustomer(e.target.value.slice(0, 120))} />
+        <Label className="mt-3">Industry</Label><TextInput value={industry} onChange={(e) => setIndustry(e.target.value.slice(0, 120))} />
+        <Label className="mt-3">Product / service used</Label><TextArea rows={2} value={product} onChange={(e) => setProduct(e.target.value.slice(0, 300))} />
+        <Label className="mt-3">Outcomes (bullets, free text)</Label>
+        <TextArea rows={6} value={outcomes} onChange={(e) => setOutcomes(e.target.value.slice(0, 1000))} placeholder={"- 3.2x increase in signups\n- Cut onboarding from 14 to 3 days\n- $120k saved annually"} />
+        <GenerateButton loading={loading} onClick={run}>Draft case study (3 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between"><SectionTitle>Case study</SectionTitle>{result && <DownloadButton onClick={() => downloadText("case-study.md", result.markdown, "text/markdown")}>Markdown</DownloadButton>}</div>
+        {!result ? <Empty>Fill in the wins to draft.</Empty> : (
+          <div className="mt-5 space-y-5">
+            <div><h2 className="text-[22px] font-bold">{result.title}</h2><p className="mt-1 text-[14px] text-[#697386]">{result.subtitle}</p></div>
+            <div className="rounded-xl bg-[#635bff]/5 p-5 text-center ring-1 ring-[#635bff]/20"><div className="text-[36px] font-bold text-[#635bff]">{result.hero_metric.value}</div><div className="text-[13px] text-[#3c4257]">{result.hero_metric.label}</div></div>
+            <div className="grid grid-cols-3 gap-2">{result.metrics.map((m, i) => (
+              <div key={i} className="rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-3 text-center"><div className="text-[18px] font-bold">{m.value}</div><div className="text-[11px] text-[#697386]">{m.label}</div></div>
+            ))}</div>
+            {result.sections.map((s, i) => (
+              <div key={i}><h3 className="text-[15px] font-bold text-[#0a2540]">{s.heading}</h3><p className="mt-2 whitespace-pre-wrap text-[13.5px] leading-relaxed text-[#3c4257]">{s.body}</p></div>
+            ))}
+            <blockquote className="rounded-lg border-l-4 border-[#635bff] bg-[#fafbfc] p-4 italic text-[#3c4257]">"{result.pull_quote.text}"<br/><span className="mt-2 block text-[12px] not-italic text-[#697386]">— {result.pull_quote.attribution}</span></blockquote>
+            <div className="text-center"><span className="inline-flex rounded-md bg-[#635bff] px-5 py-2.5 text-[13px] font-semibold text-white">{result.cta}</span></div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 function Label({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <span className={`block text-[11.5px] font-semibold uppercase tracking-[0.1em] text-[#697386] ${className}`}>{children}</span>;
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="mt-6 flex h-72 items-center justify-center rounded-lg border border-dashed border-[#e3e8ee] text-[13.5px] text-[#697386]">{children}</div>;
+}
+
+// ============ Generic markdown ToolPanel (powers 20 lightweight features) ============
+
+function ToolPanel({ tool, label, usage, setUsage }: PanelProps & { tool: MarketingToolKey; label: string }) {
+  const gen = useServerFn(generateMarketingTool);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [extra, setExtra] = useState("");
+  const [markdown, setMarkdown] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product or service first.");
+    if (usage && usage.remaining < 2) return setError(`Need 2 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { tool, product: product.trim(), audience: audience.trim(), extra: extra.trim() } });
+      setMarkdown(r.markdown); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <Label>Product / service</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 400))} rows={3}
+          placeholder="What are you marketing?"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Audience (optional)</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <Label className="mt-3">Extra context (optional)</Label>
+        <textarea value={extra} onChange={(e) => setExtra(e.target.value.slice(0, 800))} rows={3}
+          placeholder="Goals, constraints, must-mention details…"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+
+        <GenerateButton loading={loading} onClick={run}>Generate {label.toLowerCase()} (2 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold">{label}</h2>
+          {markdown && (
+            <div className="flex gap-2">
+              <button type="button" onClick={async () => {
+                try { await navigator.clipboard.writeText(markdown); setCopied(true); setTimeout(() => setCopied(false), 1400); } catch {}
+              }} className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}{copied ? "Copied" : "Copy"}
+              </button>
+              <button type="button" onClick={() => downloadText(`${tool}-${Date.now()}.md`, markdown, "text/markdown")}
+                className="inline-flex items-center gap-1 rounded-md border border-[#e3e8ee] px-2.5 py-1 text-[12px] font-medium text-[#697386] hover:border-[#635bff] hover:text-[#635bff]">
+                <Download className="h-3 w-3" /> .md
+              </button>
+            </div>
+          )}
+        </div>
+        {!markdown ? <Empty>Fill in the form to generate.</Empty> : (
+          <pre className="mt-5 max-h-[640px] overflow-auto whitespace-pre-wrap rounded-lg border border-[#eef1f5] bg-[#fafbfc] p-4 font-sans text-[13.5px] leading-relaxed text-[#3c4257]">{markdown}</pre>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ---------- Mega Pack: complete marketing system from one brief ----------
+
+function MegaPackPanel({ usage, setUsage }: PanelProps) {
+  const gen = useServerFn(generateMegaPack);
+  const [product, setProduct] = useState("");
+  const [audience, setAudience] = useState("");
+  const [goal, setGoal] = useState("acquire first 1000 customers");
+  const [budget, setBudget] = useState<"bootstrapped" | "lean" | "funded" | "enterprise">("lean");
+  const [region, setRegion] = useState("global");
+  const [result, setResult] = useState<MegaPackResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = async () => {
+    setError(null);
+    if (product.trim().length < 2) return setError("Describe your product first.");
+    if (usage && usage.remaining < 8) return setError(`Need 8 credits, have ${usage.remaining}.`);
+    setLoading(true);
+    try {
+      const r = await gen({ data: { product: product.trim(), audience, goal, budget, region } });
+      setResult(r); setUsage(r.usage);
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); } finally { setLoading(false); }
+  };
+
+  const downloadMd = () => {
+    if (!result) return;
+    downloadText(`megapack-${Date.now()}.md`, megaPackMarkdown(result), "text/markdown");
+  };
+  const downloadJson = () => {
+    if (!result) return;
+    const { usage: _u, ...rest } = result;
+    downloadText(`megapack-${Date.now()}.json`, JSON.stringify(rest, null, 2), "application/json");
+  };
+  const downloadCsv = () => {
+    if (!result) return;
+    const rows: string[] = ["day,platform,hook,body,hashtags"];
+    for (const s of result.social_calendar) {
+      const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+      rows.push([s.day, esc(s.platform), esc(s.hook), esc(s.body), esc(s.hashtags.join(" "))].join(","));
+    }
+    downloadText(`megapack-social-${Date.now()}.csv`, rows.join("\n"), "text/csv");
+  };
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[460px_1fr]">
+      <Card>
+        <div className="mb-2 rounded-md bg-gradient-to-r from-[#635bff]/10 to-[#00d4ff]/10 px-3 py-2 text-[12px] font-semibold text-[#635bff]">
+          One brief → positioning, voice, personas, channel mix, 5 ads, 5-email drip, 14-day social calendar, SEO, landing copy, 30-day plan, KPIs.
+        </div>
+        <Label>Product / company</Label>
+        <textarea value={product} onChange={(e) => setProduct(e.target.value.slice(0, 400))} rows={3}
+          placeholder="e.g. AI-powered invoice OCR for Indian SMEs"
+          className="mt-1.5 w-full resize-none rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">Audience</Label>
+        <input value={audience} onChange={(e) => setAudience(e.target.value.slice(0, 200))}
+          placeholder="e.g. CFOs at 50-500 person companies"
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <Label className="mt-3">30-day goal</Label>
+        <input value={goal} onChange={(e) => setGoal(e.target.value.slice(0, 200))}
+          className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <Label>Budget</Label>
+            <select value={budget} onChange={(e) => setBudget(e.target.value as any)}
+              className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]">
+              <option value="bootstrapped">Bootstrapped</option>
+              <option value="lean">Lean</option>
+              <option value="funded">Funded</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div>
+            <Label>Region</Label>
+            <input value={region} onChange={(e) => setRegion(e.target.value.slice(0, 80))}
+              className="mt-1.5 w-full rounded-md border border-[#e3e8ee] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#635bff]" />
+          </div>
+        </div>
+        <GenerateButton loading={loading} onClick={run}>Generate Mega Pack (8 credits)</GenerateButton>
+        <ErrorMsg message={error} />
+      </Card>
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[16px] font-semibold">Complete marketing system</h2>
+          <div className="flex gap-2">
+            <button disabled={!result} onClick={downloadMd}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <Download className="h-3.5 w-3.5" /> .md
+            </button>
+            <button disabled={!result} onClick={downloadJson}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <FileJson className="h-3.5 w-3.5" /> .json
+            </button>
+            <button disabled={!result} onClick={downloadCsv}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12px] font-semibold hover:border-[#635bff] hover:text-[#635bff] disabled:opacity-40">
+              <Download className="h-3.5 w-3.5" /> calendar.csv
+            </button>
+          </div>
+        </div>
+        {!result ? <Empty>Your end-to-end marketing system will appear here. Export-ready for any team.</Empty> : (
+          <div className="mt-5 space-y-4">
+            <CopyableBlock label="Positioning" text={result.positioning}>
+              <p className="text-[14px] leading-relaxed text-[#0a2540]">{result.positioning}</p>
+            </CopyableBlock>
+
+            <CopyableBlock label="Brand voice" text={`Adjectives: ${result.brand_voice.adjectives.join(", ")}\nDo: ${result.brand_voice.do.join("; ")}\nDon't: ${result.brand_voice.dont.join("; ")}\nSample: ${result.brand_voice.sample_paragraph}`}>
+              <div className="space-y-2 text-[13px]">
+                <p><b className="text-[#635bff]">Adjectives:</b> {result.brand_voice.adjectives.join(" · ")}</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-md bg-emerald-50 p-2"><b className="text-emerald-700">Do</b><ul className="mt-1 space-y-0.5">{result.brand_voice.do.map((d, i) => <li key={i}>• {d}</li>)}</ul></div>
+                  <div className="rounded-md bg-rose-50 p-2"><b className="text-rose-700">Don't</b><ul className="mt-1 space-y-0.5">{result.brand_voice.dont.map((d, i) => <li key={i}>• {d}</li>)}</ul></div>
+                </div>
+                <p className="italic text-[#425466]">"{result.brand_voice.sample_paragraph}"</p>
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Personas" text={result.personas.map(p => `${p.name} (${p.role})`).join("\n")}>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {result.personas.map((p, i) => (
+                  <div key={i} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12px]">
+                    <p className="text-[13px] font-semibold text-[#635bff]">{p.name}</p>
+                    <p className="text-[11.5px] text-[#697386]">{p.role}</p>
+                    <p className="mt-1"><b>Goals:</b> {p.goals.join("; ")}</p>
+                    <p className="mt-1"><b>Pains:</b> {p.pains.join("; ")}</p>
+                    <p className="mt-1"><b>Channels:</b> {p.channels.join(", ")}</p>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Channel mix" text={result.channel_mix.map(c => `${c.name} (${c.weekly_cadence}): ${c.why}`).join("\n")}>
+              <ul className="space-y-1.5 text-[13px]">
+                {result.channel_mix.map((c, i) => (
+                  <li key={i}><b>{c.name}</b> · <span className="text-[#635bff]">{c.weekly_cadence}</span> — {c.why}</li>
+                ))}
+              </ul>
+            </CopyableBlock>
+
+            <CopyableBlock label="Ads" text={result.ads.map(a => `[${a.platform}] ${a.headline} — ${a.primary_text} (${a.cta})`).join("\n")}>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {result.ads.map((a, i) => (
+                  <div key={i} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12.5px]">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#635bff]">{a.platform}</p>
+                    <p className="mt-1 font-bold text-[#0a2540]">{a.headline}</p>
+                    <p className="mt-1 text-[#3c4257]">{a.primary_text}</p>
+                    <p className="mt-1 text-[11.5px] text-[#697386]">CTA: {a.cta}</p>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Email drip" text={result.email_drip.map(e => `Day ${e.day} — ${e.subject}\n${e.body}`).join("\n\n")}>
+              <div className="space-y-2">
+                {result.email_drip.map((e, i) => (
+                  <details key={i} className="rounded-md border border-[#eef1f5] bg-white p-2 text-[13px]">
+                    <summary className="cursor-pointer font-semibold text-[#0a2540]">Day {e.day} — {e.subject}</summary>
+                    <p className="mt-1 text-[11.5px] text-[#697386]">{e.preview}</p>
+                    <pre className="mt-2 whitespace-pre-wrap text-[12.5px] text-[#3c4257]">{e.body}</pre>
+                  </details>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Social calendar (14 days)" text={result.social_calendar.map(s => `Day ${s.day} ${s.platform}: ${s.hook}`).join("\n")}>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-[12px]">
+                  <thead><tr className="text-left text-[#697386]"><th className="py-1 pr-3">Day</th><th className="pr-3">Platform</th><th className="pr-3">Hook</th><th>Hashtags</th></tr></thead>
+                  <tbody>
+                    {result.social_calendar.map((s, i) => (
+                      <tr key={i} className="border-t border-[#eef1f5]">
+                        <td className="py-1 pr-3 font-semibold">{s.day}</td>
+                        <td className="pr-3 text-[#635bff]">{s.platform}</td>
+                        <td className="pr-3">{s.hook}</td>
+                        <td className="text-[#697386]">{s.hashtags.map(h => `#${h.replace(/^#/, "")}`).join(" ")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="SEO" text={`Keywords: ${result.seo.primary_keywords.join(", ")}\nTitle: ${result.seo.meta_title}\nDescription: ${result.seo.meta_description}`}>
+              <p className="text-[12.5px]"><b>Keywords:</b> {result.seo.primary_keywords.join(" · ")}</p>
+              <p className="mt-1 text-[12.5px]"><b>Meta title:</b> {result.seo.meta_title}</p>
+              <p className="mt-1 text-[12.5px]"><b>Meta description:</b> {result.seo.meta_description}</p>
+              <div className="mt-2 space-y-1">
+                {result.seo.faqs.map((f, i) => (
+                  <details key={i} className="rounded bg-[#f6f9fc] p-2 text-[12.5px]"><summary className="cursor-pointer font-semibold">{f.q}</summary><p className="mt-1 text-[#3c4257]">{f.a}</p></details>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="Landing page copy" text={`${result.landing_copy.hero}\n${result.landing_copy.subhero}\n\n${result.landing_copy.bullets.join("\n- ")}\n\nCTA: ${result.landing_copy.cta}`}>
+              <p className="text-[18px] font-bold text-[#0a2540]">{result.landing_copy.hero}</p>
+              <p className="mt-1 text-[14px] text-[#425466]">{result.landing_copy.subhero}</p>
+              <ul className="mt-2 space-y-1 text-[13px]">{result.landing_copy.bullets.map((b, i) => <li key={i}>✓ {b}</li>)}</ul>
+              <p className="mt-2 inline-block rounded-md bg-[#635bff] px-3 py-1.5 text-[12.5px] font-semibold text-white">{result.landing_copy.cta}</p>
+              <p className="mt-2 text-[11.5px] italic text-[#697386]">Testimonial template: {result.landing_copy.testimonial_template}</p>
+            </CopyableBlock>
+
+            <CopyableBlock label="30-day plan" text={result.thirty_day_plan.map(w => `Week ${w.week} — ${w.focus}\n${w.actions.map(a => `- ${a}`).join("\n")}`).join("\n\n")}>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {result.thirty_day_plan.map((w) => (
+                  <div key={w.week} className="rounded-md border border-[#eef1f5] bg-white p-3 text-[12.5px]">
+                    <p className="font-bold">Week {w.week} — <span className="text-[#635bff]">{w.focus}</span></p>
+                    <ul className="mt-1 space-y-0.5">{w.actions.map((a, i) => <li key={i}>• {a}</li>)}</ul>
+                  </div>
+                ))}
+              </div>
+            </CopyableBlock>
+
+            <CopyableBlock label="KPIs" text={result.kpis.map(k => `${k.metric}: ${k.target}`).join("\n")}>
+              <ul className="grid gap-1 text-[13px] sm:grid-cols-2">{result.kpis.map((k, i) => <li key={i}><b>{k.metric}:</b> {k.target}</li>)}</ul>
+            </CopyableBlock>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
 }
