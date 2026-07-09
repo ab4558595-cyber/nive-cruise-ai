@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ArrowLeft, ShieldCheck, Zap, Globe, Layers, Sparkles } from "lucide-react";
 import { PLANS, plansForProduct } from "@/lib/plans";
 import { Ribbon } from "@/components/Ribbon";
-
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { LegalFooter } from "@/components/LegalFooter";
 
 const CODE_PLANS = plansForProduct("code");
@@ -43,7 +43,7 @@ function Pricing() {
       className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
       style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
     >
-      
+      <PaymentTestModeBanner />
       <Ribbon />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
@@ -125,7 +125,7 @@ function Pricing() {
                     plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
                   }`}
                 >
-                  Get {plan.name} — ₹{plan.price}
+                  Choose {plan.name}
                 </Link>
               )}
             </div>

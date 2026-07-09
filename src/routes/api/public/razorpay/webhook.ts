@@ -1,53 +1,88 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "crypto";
+import { markWebhookProcessed } from "@/lib/rate-limit.server";
+
+// Safety-net webhook: activates the user_plan in case the client-side verify
+// call fails (e.g. user closes the tab right after payment). HMAC verified +
+// replay-protected via processed_webhook_events.
+
+const VALID_PLANS = new Set(["starter", "pro", "biz-growth", "biz-scale"]);
 
 export const Route = createFileRoute("/api/public/razorpay/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const signature = request.headers.get("x-razorpay-signature");
-        const body = await request.text();
-        const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-        if (!signature || !secret) return new Response("missing signature", { status: 401 });
+        const rawBody = await request.text();
+        if (!signature) return new Response("Missing signature", { status: 401 });
 
-        const expected = createHmac("sha256", secret).update(body).digest("hex");
-        const a = Buffer.from(signature);
-        const b = Buffer.from(expected);
-        if (a.length !== b.length || !timingSafeEqual(a, b)) {
-          return new Response("invalid signature", { status: 401 });
+        const { verifyWebhookSignature } = await import("@/lib/razorpay.server");
+        const ok = await verifyWebhookSignature(rawBody, signature);
+        if (!ok) return new Response("Invalid signature", { status: 401 });
+
+        let event: any;
+        try {
+          event = JSON.parse(rawBody);
+        } catch {
+          return new Response("Invalid JSON", { status: 400 });
         }
 
-        const event = JSON.parse(body) as {
-          event: string;
-          payload: { payment?: { entity: { id: string; notes?: Record<string, string> } } };
-        };
-
-        if (event.event === "payment.captured") {
-          const p = event.payload.payment?.entity;
-          const userId = p?.notes?.user_id;
-          const planId = p?.notes?.plan_id;
-          if (userId && planId) {
-            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-            // idempotency
-            const { data: seen } = await supabaseAdmin
-              .from("processed_webhook_events")
-              .select("event_id")
-              .eq("event_id", p.id)
-              .maybeSingle();
-            if (!seen) {
-              const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-              await supabaseAdmin.from("user_plans").upsert(
-                { user_id: userId, plan_id: planId, active: true, expires_at: expiresAt },
-                { onConflict: "user_id" },
-              );
-              await supabaseAdmin
-                .from("processed_webhook_events")
-                .insert({ event_id: p.id, source: "razorpay" });
+        // Replay protection: dedupe by Razorpay event id.
+        const eventId = event?.id ?? event?.payload?.payment?.entity?.id;
+        if (eventId) {
+          try {
+            const fresh = await markWebhookProcessed(String(eventId), "razorpay");
+            if (!fresh) {
+              return Response.json({ received: true, duplicate: true });
             }
+          } catch (e) {
+            console.error("replay-protection insert failed:", e);
+            // Continue — better to risk a rare double-process than to fail webhooks.
           }
         }
 
-        return Response.json({ ok: true });
+        try {
+          if (event?.event === "payment.captured") {
+            const payment = event.payload?.payment?.entity;
+            const notes = payment?.notes ?? {};
+            const userId = notes.user_id as string | undefined;
+            const planId = notes.plan_id as string | undefined;
+
+            if (userId && planId && VALID_PLANS.has(planId)) {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+              // Idempotency: skip if already active for this plan
+              const { data: existing } = await supabaseAdmin
+                .from("user_plans")
+                .select("id")
+                .eq("user_id", userId)
+                .eq("plan_id", planId)
+                .eq("active", true)
+                .gte("expires_at", new Date().toISOString())
+                .maybeSingle();
+
+              if (!existing) {
+                await supabaseAdmin
+                  .from("user_plans")
+                  .update({ active: false })
+                  .eq("user_id", userId)
+                  .eq("active", true);
+
+                const expires = new Date();
+                expires.setDate(expires.getDate() + 30);
+                await supabaseAdmin.from("user_plans").insert({
+                  user_id: userId,
+                  plan_id: planId,
+                  active: true,
+                  expires_at: expires.toISOString(),
+                });
+              }
+            }
+          }
+          return Response.json({ received: true });
+        } catch (e) {
+          console.error("Razorpay webhook error:", e);
+          return new Response("Webhook error", { status: 500 });
+        }
       },
     },
   },

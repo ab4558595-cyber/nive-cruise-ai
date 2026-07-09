@@ -86,8 +86,13 @@ function Terms() {
 
         <Section title="7. Plans, payments & subscriptions">
           Paid plans are billed as one-time 30-day access purchases at the prices shown on our
-          pricing pages. To purchase a plan or request an invoice, contact us at
-          bansal.monikaji1982@gmail.com. For refund requests, contact the same address.
+          pricing pages. Payments are processed securely by <strong>Razorpay</strong>, our payment
+          gateway, which supports UPI, cards, wallets, and net banking. By making a payment you
+          agree to Razorpay's{" "}
+          <a className="text-[#635bff] underline" href="https://razorpay.com/terms/" target="_blank" rel="noopener noreferrer">
+            Terms of Use
+          </a>
+          . For refund requests, contact us at bansal.monikaji1982@gmail.com.
         </Section>
 
         <Section title="8. Service availability">

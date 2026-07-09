@@ -1,87 +1,94 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { PLANS } from "./plans";
+import { getPlan } from "./plans";
 
-const CreateOrderInput = z.object({ planId: z.string().min(1).max(32) });
-
-function basicAuth() {
-  const id = process.env.RAZORPAY_KEY_ID!;
-  const secret = process.env.RAZORPAY_KEY_SECRET!;
-  return "Basic " + Buffer.from(`${id}:${secret}`).toString("base64");
-}
+const CreateOrderInput = z.object({
+  planId: z.string().min(1).max(32),
+});
 
 export const createRazorpayOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => CreateOrderInput.parse(input))
   .handler(async ({ data, context }) => {
-    const plan = PLANS.find((p) => p.id === data.planId);
+    const plan = getPlan(data.planId);
     if (!plan) throw new Error("Unknown plan");
-    if (plan.price === 0) throw new Error("Free plan does not require payment");
+    if (plan.price <= 0) throw new Error("Free plan does not require payment");
 
     const { userId, claims } = context as { userId: string; claims: { email?: string } };
+    const { rzpFetch, getRazorpayKeys } = await import("./razorpay.server");
 
-    const res = await fetch("https://api.razorpay.com/v1/orders", {
+    const receipt = `nv_${plan.id}_${Date.now().toString(36)}`.slice(0, 40);
+    const res = await rzpFetch("/orders", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: basicAuth() },
       body: JSON.stringify({
-        amount: plan.price * 100,
+        amount: plan.price * 100, // paise
         currency: "INR",
-        receipt: `${plan.id}_${userId.slice(0, 8)}_${Date.now()}`,
-        notes: { user_id: userId, plan_id: plan.id, user_email: claims.email ?? "" },
+        receipt,
+        notes: {
+          user_id: userId,
+          plan_id: plan.id,
+          user_email: claims.email ?? "",
+        },
       }),
     });
+    const body = await res.json();
     if (!res.ok) {
-      const text = await res.text();
-      console.error("razorpay order create failed", res.status, text);
-      throw new Error("Could not create order. Please try again.");
+      console.error("Razorpay order create failed:", body);
+      throw new Error(body?.error?.description || "Could not create payment order");
     }
-    const order = await res.json();
+
     return {
-      orderId: order.id as string,
-      amount: order.amount as number,
-      currency: order.currency as string,
-      keyId: process.env.RAZORPAY_KEY_ID!,
+      orderId: body.id as string,
+      amount: body.amount as number,
+      currency: body.currency as string,
+      keyId: getRazorpayKeys().keyId,
       planName: plan.name,
       userEmail: claims.email ?? "",
     };
   });
 
 const VerifyInput = z.object({
-  razorpay_order_id: z.string(),
-  razorpay_payment_id: z.string(),
-  razorpay_signature: z.string(),
-  planId: z.string(),
+  planId: z.string().min(1).max(32),
+  razorpayOrderId: z.string().min(1),
+  razorpayPaymentId: z.string().min(1),
+  razorpaySignature: z.string().min(1),
 });
 
 export const verifyRazorpayPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => VerifyInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { createHmac, timingSafeEqual } = await import("crypto");
-    const expected = createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-      .update(`${data.razorpay_order_id}|${data.razorpay_payment_id}`)
-      .digest("hex");
-    const sigBuf = Buffer.from(data.razorpay_signature);
-    const expBuf = Buffer.from(expected);
-    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
-      throw new Error("Payment signature invalid");
-    }
-
-    const plan = PLANS.find((p) => p.id === data.planId);
+    const plan = getPlan(data.planId);
     if (!plan) throw new Error("Unknown plan");
 
     const { userId } = context as { userId: string };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { verifyCheckoutSignature } = await import("./razorpay.server");
+    const ok = await verifyCheckoutSignature({
+      orderId: data.razorpayOrderId,
+      paymentId: data.razorpayPaymentId,
+      signature: data.razorpaySignature,
+    });
+    if (!ok) throw new Error("Invalid payment signature");
 
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { error } = await supabaseAdmin.from("user_plans").upsert(
-      { user_id: userId, plan_id: plan.id, active: true, expires_at: expiresAt },
-      { onConflict: "user_id" },
-    );
-    if (error) {
-      console.error("activate plan failed", error);
-      throw new Error("Payment ok but plan activation failed. Contact support.");
-    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 30);
+
+    // Deactivate any current active plan, then insert new one
+    await supabaseAdmin
+      .from("user_plans")
+      .update({ active: false })
+      .eq("user_id", userId)
+      .eq("active", true);
+
+    const { error } = await supabaseAdmin.from("user_plans").insert({
+      user_id: userId,
+      plan_id: plan.id,
+      active: true,
+      expires_at: expires.toISOString(),
+    });
+    if (error) throw new Error(error.message);
+
     return { ok: true, planId: plan.id };
   });

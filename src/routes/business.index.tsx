@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
-import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
+import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
@@ -14,7 +14,11 @@ export const Route = createFileRoute("/business/")({
     ],
     links: [{ rel: "canonical", href: "/business" }],
   }),
-  component: () => <Business />,
+  component: () => (
+    <BusinessAuthGate>
+      <Business />
+    </BusinessAuthGate>
+  ),
 });
 
 function Business() {
@@ -40,12 +44,14 @@ function Business() {
               <Link to="/business/marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</Link>
               <Link to="/business/usage" className="transition-colors hover:text-[#635bff]">Usage</Link>
               <Link to="/business/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
-              <Link to="/founder" className="transition-colors hover:text-[#635bff]">Founder</Link>
+              <Link to="/social" className="transition-colors hover:text-[#635bff]">Social Manager</Link>
+              <Link to="/welcome" className="text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
+                ← Nive for Builders
+              </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <CurrentPlanBadge className="hidden sm:inline-flex" />
             <Link
               to="/auth"
               className="hidden whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
