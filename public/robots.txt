@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /checkout/
 
-Sitemap: https://nive-ai.co.in/sitemap.xml
+Sitemap: https://www.nive-ai.co.in/sitemap.xml

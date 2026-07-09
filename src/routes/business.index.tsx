@@ -1,23 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Database, Megaphone, MessageSquare, Shield, Zap } from "lucide-react";
+import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
 import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
     meta: [
-      { title: "Nive AI for Business — AI tools for marketing, synthetic data & growth" },
-      { name: "description", content: "Nive AI for Business is the all-in-one AI platform for companies: generate privacy-safe synthetic datasets, full marketing campaigns, SEO blogs, email drips, ad copy and 30-day go-to-market plans — tuned to your brand voice." },
-      { name: "keywords", content: "AI for business, business AI tools, AI business platform, AI tools for small business, AI marketing for business, AI marketing platform, AI marketing generator, synthetic data for business, synthetic data generator, AI ad copy, AI email marketing, AI SEO writer, AI go-to-market, AI brand voice, Nive AI Business, Nive AI for Business" },
-      { property: "og:title", content: "Nive AI for Business — AI tools for marketing, synthetic data & growth" },
-      { property: "og:description", content: "All-in-one AI for business: synthetic datasets, marketing campaigns, SEO blogs, email drips, ad copy and 30-day go-to-market plans — tuned to your brand." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://nive-ai.co.in/business" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Nive AI for Business — AI tools for marketing & synthetic data" },
-      { name: "twitter:description", content: "All-in-one AI for business: synthetic datasets, marketing campaigns, SEO, email drips & GTM strategy." },
+      { title: "Nive AI for Business — Synthetic data & AI marketing" },
+      { name: "description", content: "Nive AI for Business: generate privacy-safe synthetic datasets and on-brand marketing copy in seconds. Built for data teams, marketers, and agencies." },
+      { property: "og:title", content: "Nive AI for Business — Synthetic data & AI marketing" },
+      { property: "og:description", content: "Generate synthetic datasets and AI-powered marketing copy. One platform, two superpowers." },
+      { property: "og:url", content: "/business" },
     ],
-    links: [{ rel: "canonical", href: "https://nive-ai.co.in/business" }],
+    links: [{ rel: "canonical", href: "/business" }],
   }),
   component: () => <Business />,
 });
@@ -149,17 +144,6 @@ function Business() {
           <MiniCard icon={<Megaphone className="h-4 w-4" />} title="One brand, every channel" body="Define your brand voice once. Reuse it across ads, email, social, and product copy." />
         </div>
       </section>
-
-      {/* Feedback button */}
-      <a
-        href="https://docs.google.com/forms/d/e/1FAIpQLSeydBaE7sbnuuJuTvVep3P3nAVyz6nIPwlt6b7DV8BDT_aILQ/viewform?usp=publish-editor"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-[#635bff] px-4 py-2.5 text-[14px] font-medium text-white shadow-lg transition-all hover:bg-[#5048d6] hover:shadow-xl"
-      >
-        <MessageSquare className="h-4 w-4" />
-        Feedback
-      </a>
     </div>
   );
 }

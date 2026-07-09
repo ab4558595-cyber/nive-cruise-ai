@@ -52,7 +52,7 @@ function Checkout() {
     return (
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
         <h1 className="text-2xl font-bold">Unknown plan</h1>
-        <Link to="/business/pricing" className="mt-4 inline-block text-[#d97706] underline">Back to pricing</Link>
+        <Link to="/pricing" className="mt-4 inline-block text-[#d97706] underline">Back to pricing</Link>
       </div>
     );
   }
@@ -103,7 +103,7 @@ function Checkout() {
     <div className="min-h-screen bg-[#fffbeb] text-[#451a03]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <header className="mx-auto flex max-w-[880px] items-center justify-between px-6 py-5">
         <Link to="/welcome" className="text-[22px] font-bold tracking-tight">nive</Link>
-        <Link to="/business/pricing" className="inline-flex items-center gap-1.5 text-[14px] text-[#451a03]/70 hover:text-[#d97706]">
+        <Link to="/pricing" className="inline-flex items-center gap-1.5 text-[14px] text-[#451a03]/70 hover:text-[#d97706]">
           <ArrowLeft className="h-4 w-4" /> Back to pricing
         </Link>
       </header>

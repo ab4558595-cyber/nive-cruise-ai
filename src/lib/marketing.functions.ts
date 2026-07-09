@@ -10,86 +10,67 @@ import {
 
 // ---------- Shared helpers ----------
 
-const HF_PROXY_URL = "https://4idn-my-lovable-api.hf.space";
-
-/**
- * Sole AI provider: HF proxy at 4idn-my-lovable-api.hf.space.
- *
- * Important: do NOT send `response_format: { type: "json_object" }` — that
- * makes the upstream NVIDIA model exceed the proxy's 30s read timeout and
- * return HTTP 500. Instead, ask for JSON explicitly in the system prompt
- * (every caller's prompt already says "JSON only").
- *
- * The upstream is a reasoning model: when it does emit a final answer it
- * lands in `content`, but if `content` is empty we fall back to the
- * `reasoning` / `reasoning_content` field and let `parseJsonLoose` extract
- * the JSON object from it. One automatic retry covers transient 5xx blips.
- */
-async function callHfProxy(systemPrompt: string, userPrompt: string): Promise<string> {
-  const body = JSON.stringify({
-    max_tokens: 4096,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-  });
-
-  let lastErr = "";
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(`${HF_PROXY_URL}/v1/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-      });
-      if (!res.ok) {
-        lastErr = `HF proxy ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`;
-        console.error(lastErr);
-        continue;
-      }
-      const data: any = await res.json();
-      const msg = data?.choices?.[0]?.message ?? {};
-      const content: string =
-        msg.content ||
-        msg.reasoning_content ||
-        msg.reasoning ||
-        data?.response ||
-        data?.content ||
-        data?.message ||
-        "";
-      if (content) return content;
-      lastErr = "HF proxy returned empty content";
-      console.error(lastErr);
-    } catch (e) {
-      lastErr = `HF proxy threw: ${e instanceof Error ? e.message : String(e)}`;
-      console.error(lastErr);
-    }
+async function callApiFreeLLM(systemPrompt: string, userPrompt: string): Promise<string> {
+  const key = process.env.APIFREELLM_API_KEY;
+  if (!key) return "";
+  try {
+    const res = await fetch("https://apifreellm.com/api/v1/chat", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
+    });
+    if (!res.ok) return "";
+    const data: any = await res.json();
+    return (
+      data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? ""
+    );
+  } catch {
+    return "";
   }
-  throw new Error(
-    "AI provider is temporarily unavailable. Please try again in a moment.",
-  );
 }
 
-// Back-compat alias for the rest of this file.
-const callOpenRouter = async (system: string, user: string, _json = true) =>
-  callHfProxy(system, user);
+async function callOpenRouter(systemPrompt: string, userPrompt: string, json = true) {
+  // Primary: Lovable AI Gateway. Fallback: ApiFreeLLM.
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (apiKey) {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        max_tokens: 4096,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        ...(json ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      if (content) return content;
+    } else {
+      console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status, (await res.text().catch(() => "")).slice(0, 200));
+    }
+  }
+  const fb = await callApiFreeLLM(systemPrompt, userPrompt);
+  if (!fb) throw new Error("AI provider unavailable");
+  return fb;
+}
 
 function parseJsonLoose<T = any>(s: string): T {
   try {
     return JSON.parse(s) as T;
   } catch {
-    // Strip markdown fences if present, then grab the first {...} block.
-    const cleaned = s.replace(/```(?:json)?/gi, "").replace(/```/g, "");
-    try {
-      return JSON.parse(cleaned) as T;
-    } catch {
-      const m = cleaned.match(/\{[\s\S]*\}/);
-      if (m) return JSON.parse(m[0]) as T;
-      throw new Error("Model returned invalid JSON");
-    }
+    const m = s.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]) as T;
+    throw new Error("Model returned invalid JSON");
   }
 }
-
 
 async function recordUsage(
   supabase: any,
@@ -1657,181 +1638,4 @@ Extra context: ${data.extra || "(none)"}${brandBlock(brand)}`;
     const content = await callOpenRouter(system, user, false);
     const usage = await recordUsage(supabase, userId, 2, { mode: `tool:${data.tool}` });
     return { tool: data.tool, markdown: clip(content, 12000), usage };
-  });
-
-// ============================================================
-//  Mega Pack — one prompt → entire marketing system
-// ============================================================
-
-const MegaPackInput = z.object({
-  product: z.string().trim().min(2).max(400),
-  audience: z.string().trim().max(200).optional().default(""),
-  goal: z.string().trim().max(200).optional().default("acquire first 1000 customers"),
-  budget: z.enum(["bootstrapped", "lean", "funded", "enterprise"]).optional().default("lean"),
-  region: z.string().trim().max(80).optional().default("global"),
-});
-
-export type MegaPackResult = {
-  brief: { product: string; audience: string; goal: string; budget: string; region: string };
-  positioning: string;
-  brand_voice: { adjectives: string[]; do: string[]; dont: string[]; sample_paragraph: string };
-  personas: { name: string; role: string; goals: string[]; pains: string[]; channels: string[] }[];
-  channel_mix: { name: string; weekly_cadence: string; why: string }[];
-  ads: { platform: string; headline: string; primary_text: string; cta: string }[];
-  email_drip: { day: number; subject: string; preview: string; body: string }[];
-  social_calendar: { day: number; platform: string; hook: string; body: string; hashtags: string[] }[];
-  seo: { primary_keywords: string[]; meta_title: string; meta_description: string; faqs: { q: string; a: string }[] };
-  landing_copy: { hero: string; subhero: string; bullets: string[]; cta: string; testimonial_template: string };
-  thirty_day_plan: { week: number; focus: string; actions: string[] }[];
-  kpis: { metric: string; target: string }[];
-  usage: UsageSnapshot;
-};
-
-function megaPackMarkdown(p: MegaPackResult): string {
-  const lines: string[] = [];
-  lines.push(`# Marketing Mega Pack — ${p.brief.product}`);
-  lines.push(`\n_Audience: ${p.brief.audience || "general"} · Goal: ${p.brief.goal} · Budget: ${p.brief.budget} · Region: ${p.brief.region}_\n`);
-  lines.push(`## Positioning\n${p.positioning}\n`);
-  lines.push(`## Brand voice`);
-  lines.push(`**Adjectives:** ${p.brand_voice.adjectives.join(", ")}`);
-  lines.push(`\n**Do:**\n${p.brand_voice.do.map(d => `- ${d}`).join("\n")}`);
-  lines.push(`\n**Don't:**\n${p.brand_voice.dont.map(d => `- ${d}`).join("\n")}`);
-  lines.push(`\n**Sample:**\n> ${p.brand_voice.sample_paragraph}\n`);
-  lines.push(`## Personas`);
-  for (const x of p.personas) {
-    lines.push(`### ${x.name} — ${x.role}`);
-    lines.push(`- Goals: ${x.goals.join("; ")}`);
-    lines.push(`- Pains: ${x.pains.join("; ")}`);
-    lines.push(`- Channels: ${x.channels.join(", ")}\n`);
-  }
-  lines.push(`## Channel mix`);
-  for (const c of p.channel_mix) lines.push(`- **${c.name}** (${c.weekly_cadence}) — ${c.why}`);
-  lines.push(`\n## Ads`);
-  for (const a of p.ads) lines.push(`### ${a.platform}\n**${a.headline}**\n\n${a.primary_text}\n\n_CTA:_ ${a.cta}\n`);
-  lines.push(`## Email drip`);
-  for (const e of p.email_drip) lines.push(`### Day ${e.day} — ${e.subject}\n_Preview:_ ${e.preview}\n\n${e.body}\n`);
-  lines.push(`## Social calendar`);
-  for (const s of p.social_calendar) lines.push(`- **Day ${s.day} · ${s.platform}** — *${s.hook}* — ${s.body} ${s.hashtags.map(h => `#${h.replace(/^#/, "")}`).join(" ")}`);
-  lines.push(`\n## SEO\n**Primary keywords:** ${p.seo.primary_keywords.join(", ")}\n\n**Meta title:** ${p.seo.meta_title}\n\n**Meta description:** ${p.seo.meta_description}\n`);
-  lines.push(`### FAQs`);
-  for (const f of p.seo.faqs) lines.push(`**Q:** ${f.q}\n\n**A:** ${f.a}\n`);
-  lines.push(`## Landing page copy\n**Hero:** ${p.landing_copy.hero}\n\n**Subhero:** ${p.landing_copy.subhero}\n\n**Bullets:**\n${p.landing_copy.bullets.map(b => `- ${b}`).join("\n")}\n\n**CTA:** ${p.landing_copy.cta}\n\n**Testimonial template:** ${p.landing_copy.testimonial_template}\n`);
-  lines.push(`## 30-day plan`);
-  for (const w of p.thirty_day_plan) lines.push(`### Week ${w.week} — ${w.focus}\n${w.actions.map(a => `- ${a}`).join("\n")}\n`);
-  lines.push(`## KPIs`);
-  for (const k of p.kpis) lines.push(`- **${k.metric}**: ${k.target}`);
-  return lines.join("\n");
-}
-
-export { megaPackMarkdown };
-
-export const generateMegaPack = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input) => MegaPackInput.parse(input))
-  .handler(async ({ data, context }): Promise<MegaPackResult> => {
-    const { supabase, userId } = context as any;
-    const brand = await loadBrand(supabase, userId);
-
-    const system = `You are a senior CMO and growth strategist. Produce a complete, on-brand marketing system as STRICT JSON only (no prose, no code fences). All arrays must be filled — no empty lists. Be concrete, specific, and concise. Schema:
-{
-  "positioning": string,
-  "brand_voice": { "adjectives": string[5], "do": string[5], "dont": string[5], "sample_paragraph": string },
-  "personas": [{ "name": string, "role": string, "goals": string[3], "pains": string[3], "channels": string[3] }] (3 personas),
-  "channel_mix": [{ "name": string, "weekly_cadence": string, "why": string }] (5 items),
-  "ads": [{ "platform": "Google Search"|"Meta"|"LinkedIn"|"X"|"YouTube", "headline": string<=60, "primary_text": string<=240, "cta": string<=20 }] (5 items),
-  "email_drip": [{ "day": number, "subject": string<=60, "preview": string<=90, "body": string }] (5 emails for days 1,3,7,14,21),
-  "social_calendar": [{ "day": number(1-14), "platform": "LinkedIn"|"X"|"Instagram"|"TikTok"|"YouTube", "hook": string, "body": string, "hashtags": string[3] }] (14 entries),
-  "seo": { "primary_keywords": string[8], "meta_title": string<=60, "meta_description": string<=160, "faqs": [{ "q": string, "a": string }] (8 faqs) },
-  "landing_copy": { "hero": string<=80, "subhero": string<=160, "bullets": string[5], "cta": string<=24, "testimonial_template": string },
-  "thirty_day_plan": [{ "week": 1|2|3|4, "focus": string, "actions": string[5] }] (4 weeks),
-  "kpis": [{ "metric": string, "target": string }] (6 items)
-}`;
-
-    const userMsg = `Brief:
-Product/service: ${data.product}
-Audience: ${data.audience || "general"}
-30-day goal: ${data.goal}
-Budget: ${data.budget}
-Region: ${data.region}${brandBlock(brand)}
-
-Return the JSON object only.`;
-
-    const content = await callOpenRouter(system, userMsg, true);
-    const parsed = parseJsonLoose<any>(content);
-
-    // Defensive normalization — never let one missing array crash the UI.
-    const arr = (v: any) => (Array.isArray(v) ? v : []);
-    const str = (v: any, d = "") => (typeof v === "string" ? v : d);
-
-    const usage = await recordUsage(supabase, userId, 8, { mode: "megapack" });
-
-    return {
-      brief: {
-        product: data.product,
-        audience: data.audience,
-        goal: data.goal,
-        budget: data.budget,
-        region: data.region,
-      },
-      positioning: str(parsed.positioning),
-      brand_voice: {
-        adjectives: arr(parsed.brand_voice?.adjectives).map(String).slice(0, 8),
-        do: arr(parsed.brand_voice?.do).map(String).slice(0, 8),
-        dont: arr(parsed.brand_voice?.dont).map(String).slice(0, 8),
-        sample_paragraph: str(parsed.brand_voice?.sample_paragraph),
-      },
-      personas: arr(parsed.personas).slice(0, 5).map((p: any) => ({
-        name: str(p?.name, "Persona"),
-        role: str(p?.role),
-        goals: arr(p?.goals).map(String).slice(0, 5),
-        pains: arr(p?.pains).map(String).slice(0, 5),
-        channels: arr(p?.channels).map(String).slice(0, 5),
-      })),
-      channel_mix: arr(parsed.channel_mix).slice(0, 8).map((c: any) => ({
-        name: str(c?.name), weekly_cadence: str(c?.weekly_cadence), why: str(c?.why),
-      })),
-      ads: arr(parsed.ads).slice(0, 8).map((a: any) => ({
-        platform: str(a?.platform, "Meta"),
-        headline: str(a?.headline),
-        primary_text: str(a?.primary_text),
-        cta: str(a?.cta, "Learn more"),
-      })),
-      email_drip: arr(parsed.email_drip).slice(0, 8).map((e: any, i: number) => ({
-        day: Number.isFinite(e?.day) ? Number(e.day) : i + 1,
-        subject: str(e?.subject),
-        preview: str(e?.preview),
-        body: str(e?.body),
-      })),
-      social_calendar: arr(parsed.social_calendar).slice(0, 30).map((s: any, i: number) => ({
-        day: Number.isFinite(s?.day) ? Number(s.day) : i + 1,
-        platform: str(s?.platform, "LinkedIn"),
-        hook: str(s?.hook),
-        body: str(s?.body),
-        hashtags: arr(s?.hashtags).map(String).slice(0, 8),
-      })),
-      seo: {
-        primary_keywords: arr(parsed.seo?.primary_keywords).map(String).slice(0, 20),
-        meta_title: str(parsed.seo?.meta_title),
-        meta_description: str(parsed.seo?.meta_description),
-        faqs: arr(parsed.seo?.faqs).slice(0, 12).map((f: any) => ({
-          q: str(f?.q), a: str(f?.a),
-        })),
-      },
-      landing_copy: {
-        hero: str(parsed.landing_copy?.hero),
-        subhero: str(parsed.landing_copy?.subhero),
-        bullets: arr(parsed.landing_copy?.bullets).map(String).slice(0, 8),
-        cta: str(parsed.landing_copy?.cta, "Get started"),
-        testimonial_template: str(parsed.landing_copy?.testimonial_template),
-      },
-      thirty_day_plan: arr(parsed.thirty_day_plan).slice(0, 6).map((w: any, i: number) => ({
-        week: Number.isFinite(w?.week) ? Number(w.week) : i + 1,
-        focus: str(w?.focus),
-        actions: arr(w?.actions).map(String).slice(0, 8),
-      })),
-      kpis: arr(parsed.kpis).slice(0, 10).map((k: any) => ({
-        metric: str(k?.metric), target: str(k?.target),
-      })),
-      usage,
-    };
   });
