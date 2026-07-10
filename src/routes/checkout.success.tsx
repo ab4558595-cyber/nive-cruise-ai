@@ -66,16 +66,16 @@ function Success() {
   }, [plan]);
 
   return (
-    <div className="min-h-screen bg-[#fffbeb]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-[#f6f9fc]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <main className="mx-auto max-w-[520px] px-6 pt-24">
-        <div className="rounded-2xl bg-white p-8 text-center shadow-[0_15px_50px_rgba(50,50,93,0.1)] ring-1 ring-[#fde68a]">
+        <div className="rounded-2xl bg-white p-8 text-center shadow-[0_15px_50px_rgba(50,50,93,0.1)] ring-1 ring-[#e3e8ee]">
           {state === "syncing" && (
             <>
-              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#d97706]/10">
-                <Loader2 className="h-7 w-7 animate-spin text-[#d97706]" />
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#635bff]/10">
+                <Loader2 className="h-7 w-7 animate-spin text-[#635bff]" />
               </div>
-              <h1 className="mt-4 text-[26px] font-bold tracking-tight text-[#451a03]">Confirming your payment…</h1>
-              <p className="mt-2 text-[14px] text-[#92400e]">
+              <h1 className="mt-4 text-[26px] font-bold tracking-tight text-[#0a2540]">Confirming your payment…</h1>
+              <p className="mt-2 text-[14px] text-[#697386]">
                 We're activating your plan. This usually takes a few seconds.
               </p>
             </>
@@ -83,18 +83,18 @@ function Success() {
 
           {state === "active" && (
             <>
-              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#d97706]/10">
-                <CheckCircle2 className="h-7 w-7 text-[#d97706]" />
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#635bff]/10">
+                <CheckCircle2 className="h-7 w-7 text-[#635bff]" />
               </div>
-              <h1 className="mt-4 text-[26px] font-bold tracking-tight text-[#451a03]">You're in!</h1>
-              <p className="mt-2 text-[14px] text-[#92400e]">
+              <h1 className="mt-4 text-[26px] font-bold tracking-tight text-[#0a2540]">You're in!</h1>
+              <p className="mt-2 text-[14px] text-[#697386]">
                 Your <span className="font-semibold capitalize">{activePlan?.replace("biz-", "")}</span> plan is active. A receipt has been emailed to you.
               </p>
               <div className="mt-6 flex flex-col gap-2">
-                <Link to="/" className="rounded-md bg-[#d97706] py-2.5 text-[14px] font-semibold text-white hover:bg-[#b45309]">
+                <Link to="/" className="rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white hover:bg-[#5048d6]">
                   Start building
                 </Link>
-                <Link to="/business" className="rounded-md border border-[#fde68a] py-2.5 text-[14px] font-semibold text-[#451a03] hover:border-[#fbbf24]">
+                <Link to="/business" className="rounded-md border border-[#e0e6eb] py-2.5 text-[14px] font-semibold text-[#0a2540] hover:border-[#cfd7df]">
                   Open Business suite
                 </Link>
               </div>
@@ -103,11 +103,11 @@ function Success() {
 
           {state === "timeout" && (
             <>
-              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#fef2f2]">
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1f0]">
                 <AlertCircle className="h-7 w-7 text-[#c0392b]" />
               </div>
-              <h1 className="mt-4 text-[22px] font-bold tracking-tight text-[#451a03]">Still syncing…</h1>
-              <p className="mt-2 text-[14px] text-[#92400e]">
+              <h1 className="mt-4 text-[22px] font-bold tracking-tight text-[#0a2540]">Still syncing…</h1>
+              <p className="mt-2 text-[14px] text-[#697386]">
                 Your payment was received but activation is taking longer than usual.
                 Refresh in a moment or contact support if it doesn't appear.
               </p>
@@ -115,11 +115,11 @@ function Success() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="rounded-md bg-[#d97706] py-2.5 text-[14px] font-semibold text-white hover:bg-[#b45309]"
+                  className="rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white hover:bg-[#5048d6]"
                 >
                   Check again
                 </button>
-                <Link to="/business" className="rounded-md border border-[#fde68a] py-2.5 text-[14px] font-semibold text-[#451a03] hover:border-[#fbbf24]">
+                <Link to="/business" className="rounded-md border border-[#e0e6eb] py-2.5 text-[14px] font-semibold text-[#0a2540] hover:border-[#cfd7df]">
                   Open Business suite
                 </Link>
               </div>

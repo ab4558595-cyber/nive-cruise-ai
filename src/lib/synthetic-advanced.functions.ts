@@ -55,50 +55,38 @@ async function recordSyntheticUsage(
 }
 
 async function callGeminiJson(systemPrompt: string, userPrompt: string): Promise<any> {
-  const parseLoose = (content: string) => {
-    try { return JSON.parse(content); } catch {
-      const m = content.match(/\{[\s\S]*\}/);
-      if (m) return JSON.parse(m[0]);
-      throw new Error("AI returned invalid JSON");
-    }
-  };
-
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (apiKey) {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        max_tokens: 4096,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.ok) {
-      const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-      const content = data.choices?.[0]?.message?.content ?? "";
-      if (content) return parseLoose(content);
-    } else {
-      console.error("Lovable AI failed, falling back to ApiFreeLLM:", res.status);
-    }
-  }
-
-  const fbKey = process.env.APIFREELLM_API_KEY;
-  if (!fbKey) throw new Error("AI not configured");
-  const res = await fetch("https://apifreellm.com/api/v1/chat", {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error("AI not configured");
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: { Authorization: `Bearer ${fbKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ message: `[SYSTEM]\n${systemPrompt}\n\n[USER]\n${userPrompt}` }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      "HTTP-Referer": "https://nive-ai.co.in",
+      "X-Title": "Nive AI Synthetic Data",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+    }),
   });
-  if (!res.ok) throw new Error(`AI error ${res.status}`);
-  const data: any = await res.json();
-  const content =
-    data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? "";
-  return parseLoose(content);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`AI error ${res.status}: ${txt.slice(0, 200)}`);
+  }
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const content = data.choices?.[0]?.message?.content ?? "";
+  try {
+    return JSON.parse(content);
+  } catch {
+    const m = content.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+    throw new Error("AI returned invalid JSON");
+  }
 }
 
 // ---------- AI-described schema ----------

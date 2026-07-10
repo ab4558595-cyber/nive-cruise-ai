@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, ShieldCheck, Check, BadgeCheck } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Check } from "lucide-react";
 import { getPlan } from "@/lib/plans";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +52,7 @@ function Checkout() {
     return (
       <div className="mx-auto max-w-xl px-6 py-20 text-center">
         <h1 className="text-2xl font-bold">Unknown plan</h1>
-        <Link to="/business/pricing" className="mt-4 inline-block text-[#d97706] underline">Back to pricing</Link>
+        <Link to="/pricing" className="mt-4 inline-block text-[#635bff] underline">Back to pricing</Link>
       </div>
     );
   }
@@ -74,7 +74,7 @@ function Checkout() {
         description: `${order.planName} plan — 30 days`,
         order_id: order.orderId,
         prefill: { email: order.userEmail },
-        theme: { color: "#d97706" },
+        theme: { color: "#635bff" },
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
           setStatus("processing");
           try {
@@ -100,51 +100,39 @@ function Checkout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbeb] text-[#451a03]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-[#f6f9fc] text-[#0a2540]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <header className="mx-auto flex max-w-[880px] items-center justify-between px-6 py-5">
         <Link to="/welcome" className="text-[22px] font-bold tracking-tight">nive</Link>
-        <Link to="/business/pricing" className="inline-flex items-center gap-1.5 text-[14px] text-[#451a03]/70 hover:text-[#d97706]">
+        <Link to="/pricing" className="inline-flex items-center gap-1.5 text-[14px] text-[#0a2540]/70 hover:text-[#635bff]">
           <ArrowLeft className="h-4 w-4" /> Back to pricing
         </Link>
       </header>
 
       <main className="mx-auto max-w-[560px] px-6 pb-24 pt-6">
-        <div className="rounded-2xl bg-white p-7 shadow-[0_15px_50px_rgba(50,50,93,0.1)] ring-1 ring-[#fde68a]">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#d97706]">Checkout</p>
+        <div className="rounded-2xl bg-white p-7 shadow-[0_15px_50px_rgba(50,50,93,0.1)] ring-1 ring-[#e3e8ee]">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Checkout</p>
           <h1 className="mt-2 text-[28px] font-bold tracking-tight">{plan.name} plan</h1>
-          <p className="mt-1 text-[14px] text-[#92400e]">{plan.tagline}</p>
+          <p className="mt-1 text-[14px] text-[#697386]">{plan.tagline}</p>
 
-          <div className="my-6 flex items-baseline gap-2 border-b border-t border-[#fde68a] py-5">
+          <div className="my-6 flex items-baseline gap-2 border-b border-t border-[#e3e8ee] py-5">
             <span className="text-[40px] font-bold">₹{plan.price}</span>
-            <span className="text-[14px] text-[#92400e]">/ {plan.period}</span>
+            <span className="text-[14px] text-[#697386]">/ {plan.period}</span>
           </div>
 
           <ul className="space-y-2 text-[14px]">
             {plan.features.slice(0, 5).map((f) => (
               <li key={f} className="flex items-start gap-2.5">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#d97706]" />
-                <span className="text-[#78350f]">{f}</span>
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#635bff]" />
+                <span className="text-[#3c4257]">{f}</span>
               </li>
             ))}
           </ul>
-
-          <div className="mt-5 flex items-center justify-center gap-1.5">
-            <BadgeCheck className="h-4 w-4 text-blue-500" />
-            <span className="text-[13px] font-semibold text-[#451a03]">Nive AI</span>
-          </div>
-
-          <div className="mt-3 flex items-center justify-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#fde68a] bg-[#fffbeb] px-3 py-1.5 shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#d97706]" />
-              <span className="text-[11px] font-semibold tracking-wide text-[#78350f] uppercase">Razorpay trusted business</span>
-            </div>
-          </div>
 
           {authed === false ? (
             <Link
               to="/auth"
               search={{ redirect: `/checkout/${plan.id}` }}
-              className="mt-7 inline-flex w-full items-center justify-center rounded-md bg-[#451a03] py-3 text-[15px] font-semibold text-white hover:bg-[#78350f]"
+              className="mt-7 inline-flex w-full items-center justify-center rounded-md bg-[#0a2540] py-3 text-[15px] font-semibold text-white hover:bg-[#1a3a5c]"
             >
               Sign in to continue
             </Link>
@@ -153,7 +141,7 @@ function Checkout() {
               type="button"
               onClick={handlePay}
               disabled={status === "loading" || status === "processing" || authed === null}
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#d97706] py-3 text-[15px] font-semibold text-white shadow-[0_2px_6px_rgba(99,91,255,0.35)] transition-all hover:bg-[#b45309] disabled:opacity-60"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#635bff] py-3 text-[15px] font-semibold text-white shadow-[0_2px_6px_rgba(99,91,255,0.35)] transition-all hover:bg-[#5048d6] disabled:opacity-60"
             >
               {(status === "loading" || status === "processing") && <Loader2 className="h-4 w-4 animate-spin" />}
               {status === "processing" ? "Activating plan…" : status === "loading" ? "Opening…" : `Pay ₹${plan.price} securely`}
@@ -161,10 +149,10 @@ function Checkout() {
           )}
 
           {error && (
-            <p className="mt-3 rounded-md bg-[#fef2f2] px-3 py-2 text-[13px] text-[#c0392b]">{error}</p>
+            <p className="mt-3 rounded-md bg-[#fff1f0] px-3 py-2 text-[13px] text-[#c0392b]">{error}</p>
           )}
 
-          <p className="mt-5 flex items-center justify-center gap-1.5 text-[12px] text-[#92400e]">
+          <p className="mt-5 flex items-center justify-center gap-1.5 text-[12px] text-[#697386]">
             <ShieldCheck className="h-3.5 w-3.5" /> Secured by Razorpay · Cards · UPI · Netbanking
           </p>
         </div>

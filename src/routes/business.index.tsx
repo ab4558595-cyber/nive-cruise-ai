@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Database, Megaphone, MessageSquare, Shield, Zap } from "lucide-react";
+import { Database, Megaphone, Shield, Zap } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
-import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
+import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
@@ -14,7 +14,11 @@ export const Route = createFileRoute("/business/")({
     ],
     links: [{ rel: "canonical", href: "/business" }],
   }),
-  component: () => <Business />,
+  component: () => (
+    <BusinessAuthGate>
+      <Business />
+    </BusinessAuthGate>
+  ),
 });
 
 function Business() {
@@ -40,12 +44,10 @@ function Business() {
               <Link to="/business/marketing" className="transition-colors hover:text-[#635bff]">AI Marketing</Link>
               <Link to="/business/usage" className="transition-colors hover:text-[#635bff]">Usage</Link>
               <Link to="/business/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
-              <Link to="/founder" className="transition-colors hover:text-[#635bff]">Founder</Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <CurrentPlanBadge className="hidden sm:inline-flex" />
             <Link
               to="/auth"
               className="hidden whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#ff5a36] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
@@ -144,17 +146,6 @@ function Business() {
           <MiniCard icon={<Megaphone className="h-4 w-4" />} title="One brand, every channel" body="Define your brand voice once. Reuse it across ads, email, social, and product copy." />
         </div>
       </section>
-
-      {/* Feedback button */}
-      <a
-        href="https://docs.google.com/forms/d/e/1FAIpQLSeydBaE7sbnuuJuTvVep3P3nAVyz6nIPwlt6b7DV8BDT_aILQ/viewform?usp=publish-editor"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full bg-[#635bff] px-4 py-2.5 text-[14px] font-medium text-white shadow-lg transition-all hover:bg-[#5048d6] hover:shadow-xl"
-      >
-        <MessageSquare className="h-4 w-4" />
-        Feedback
-      </a>
     </div>
   );
 }

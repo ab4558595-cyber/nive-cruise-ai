@@ -11,7 +11,6 @@ import {
 import { Ribbon } from "@/components/Ribbon";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { useUsage, UsageBadge } from "@/components/UsageBadge";
-import { CurrentPlanBadge } from "@/components/CurrentPlanBadge";
 import {
   generateMarketing, generateCampaign, generateBlog, generateStrategy, generateHeroWireframe,
   getBrandProfile, saveBrandProfile,
@@ -123,7 +122,6 @@ function MarketingPage() {
           nive<span className="ml-1 text-[#635bff]">/business</span>
         </Link>
         <div className="flex items-center gap-3">
-          <CurrentPlanBadge className="hidden sm:inline-flex" />
           <UsageBadge usage={usage} onTopupSuccess={(u) => setUsage(u)} />
           <button onClick={() => setBrandOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-full border border-[#e3e8ee] bg-white px-3 py-1.5 text-[12.5px] font-semibold text-[#0a2540] hover:border-[#635bff] hover:text-[#635bff]">

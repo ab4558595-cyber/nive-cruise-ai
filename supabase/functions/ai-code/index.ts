@@ -145,71 +145,97 @@ Deno.serve(async (req) => {
     const presetKey = typeof preset === "string" && PRESET_PROMPTS[preset] !== undefined ? preset : "default";
     const presetExtras = PRESET_PROMPTS[presetKey];
 
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     const systemMessage = { role: "system", content: BASE_PROMPT + planExtras + presetExtras };
     const fullMessages = [systemMessage, ...messages];
 
-    // Provider chain: Lovable AI first, then ApiFreeLLM as fallback.
+    // Try OpenRouter first (free models), fall back to Lovable AI
     let response: Response | null = null;
     let usedProvider = "lovable";
     let usedModel = cfg.model;
 
-    async function tryApiFreeLLM(): Promise<Response | null> {
-      const key = Deno.env.get("APIFREELLM_API_KEY");
-      if (!key) return null;
+    if (OPENROUTER_API_KEY) {
       try {
+        for (const model of cfg.orModels) {
+          const orResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://nive-cruise-ai.lovable.app",
+              "X-Title": "Nive AI",
+            },
+            body: JSON.stringify({ model, messages: fullMessages, stream: true }),
+          });
+          if (orResp.ok) {
+            response = orResp;
+            usedProvider = "openrouter";
+            usedModel = model;
+            break;
+          }
+
+          const errText = await orResp.text();
+          console.error(`OpenRouter model ${model} failed, trying next:`, orResp.status, errText.slice(0, 300));
+        }
+      } catch (e) {
+        console.error("OpenRouter threw, falling back:", e);
+      }
+    }
+
+    if (!response) {
+      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
+      });
+    }
+
+    // Final fallback: ApiFreeLLM (free, non-streaming, single-message)
+    const APIFREELLM_API_KEY = Deno.env.get("APIFREELLM_API_KEY");
+    if ((!response || !response.ok) && APIFREELLM_API_KEY) {
+      try {
+        if (response) {
+          const errText = await response.text().catch(() => "");
+          console.error("Primary providers failed, trying ApiFreeLLM:", response.status, errText.slice(0, 300));
+        }
         const flatPrompt = fullMessages
           .map((m: { role: string; content: string }) => `[${m.role.toUpperCase()}]\n${m.content}`)
           .join("\n\n");
         const afResp = await fetch("https://apifreellm.com/api/v1/chat", {
           method: "POST",
-          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${APIFREELLM_API_KEY}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ message: flatPrompt }),
         });
-        if (!afResp.ok) {
+        if (afResp.ok) {
+          const data = await afResp.json();
+          const text: string =
+            data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? "";
+          // Emit one OpenAI-style SSE chunk + [DONE] so the client streaming parser works as-is
+          const sse =
+            `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n` +
+            `data: [DONE]\n\n`;
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode(sse));
+              controller.close();
+            },
+          });
+          response = new Response(stream, { status: 200, headers: { "Content-Type": "text/event-stream" } });
+          usedProvider = "apifreellm";
+          usedModel = "apifreellm";
+        } else {
           console.error("ApiFreeLLM failed:", afResp.status, (await afResp.text()).slice(0, 300));
-          return null;
         }
-        const data = await afResp.json();
-        const text: string =
-          data?.response ?? data?.message ?? data?.content ?? data?.choices?.[0]?.message?.content ?? "";
-        const sse =
-          `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n` +
-          `data: [DONE]\n\n`;
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(new TextEncoder().encode(sse));
-            controller.close();
-          },
-        });
-        return new Response(stream, { status: 200, headers: { "Content-Type": "text/event-stream" } });
       } catch (e) {
         console.error("ApiFreeLLM threw:", e);
-        return null;
       }
     }
-
-    // 1) Lovable AI Gateway
-    response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: cfg.model, messages: fullMessages, stream: true }),
-    });
-
-    // 2) Fallback: ApiFreeLLM if Lovable failed
-    if (!response.ok) {
-      const errText = await response.text().catch(() => "");
-      console.error("Lovable AI failed, trying ApiFreeLLM:", response.status, errText.slice(0, 300));
-      const af = await tryApiFreeLLM();
-      if (af) {
-        response = af;
-        usedProvider = "apifreellm";
-        usedModel = "apifreellm";
-      }
-    }
-
 
     if (!response || !response.ok) {
       const status = response?.status ?? 500;
