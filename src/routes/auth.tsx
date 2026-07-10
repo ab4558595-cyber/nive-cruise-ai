@@ -38,7 +38,7 @@ function AuthPage() {
     !redirectTo.startsWith("//") &&
     !redirectTo.startsWith("/auth")
       ? redirectTo
-      : "/business";
+      : "/welcome";
 
   // If user is already signed in (e.g. returning from Google OAuth redirect), navigate away.
   useEffect(() => {
