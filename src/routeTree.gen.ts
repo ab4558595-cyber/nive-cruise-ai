@@ -18,9 +18,9 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as CodeRouteImport } from './routes/code'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
@@ -80,6 +80,11 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CodeRoute = CodeRouteImport.update({
+  id: '/code',
+  path: '/code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -88,11 +93,6 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
@@ -164,9 +164,9 @@ const ApiPublicRazorpayWebhookRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -191,9 +191,9 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -219,9 +219,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -248,9 +248,9 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -275,9 +275,9 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -302,9 +302,9 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
   id:
     | '__root__'
-    | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -330,9 +330,9 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  CodeRoute: typeof CodeRoute
   DocsRoute: typeof DocsRoute
   FounderRoute: typeof FounderRoute
   PricingRoute: typeof PricingRoute
@@ -422,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/code': {
+      id: '/code'
+      path: '/code'
+      fullPath: '/code'
+      preLoaderRoute: typeof CodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -434,13 +441,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/business/': {
@@ -538,9 +538,9 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  CodeRoute: CodeRoute,
   DocsRoute: DocsRoute,
   FounderRoute: FounderRoute,
   PricingRoute: PricingRoute,
