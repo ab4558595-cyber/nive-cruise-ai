@@ -66,10 +66,10 @@ const TOOLS: Tool[] = [
   { title: "Usage & Credits", desc: "Track daily credit burn per tool, see limits, and top up when a launch week gets busy.", href: "/business/usage", icon: BarChart3, accent: "#00b3d4" },
   { title: "Documentation", desc: "Quickstarts, tool-by-tool guides, security notes, public API reference and FAQ.", href: "/docs", icon: BookOpen, accent: "#0a2540" },
   { title: "Plans & Pricing", desc: "Free tier for exploring, paid plans for daily work. One account unlocks every Nive tool.", href: "/pricing", icon: Tag, accent: "#635bff" },
-  { title: "Voice Agents", desc: "Speak your brief and get back code, copy or a call script — hands-free building.", icon: Mic, accent: "#7a5cff", soon: true },
-  { title: "Design Studio", desc: "Generate UI concepts, hero art and brand kits that stay consistent with your saved brand voice.", icon: Palette, accent: "#ff4d8d", soon: true },
-  { title: "Automations", desc: "Chain Nive tools into workflows: brief → copy → schedule → report, on a timer.", icon: Workflow, accent: "#00b3d4", soon: true },
-  { title: "Custom Agents", desc: "Save prompts, tools and brand context as a reusable agent your whole team can run.", icon: Bot, accent: "#0a2540", soon: true },
+  { title: "Voice Agents", desc: "Speak your brief and get back code, copy, a call script or clean notes — hands-free building.", href: "/voice", icon: Mic, accent: "#7a5cff", tag: "New" },
+  { title: "Design Studio", desc: "Generate UI concepts, palettes, type pairings, hero art direction and ready-to-paste CSS tokens.", href: "/design", icon: Palette, accent: "#ff4d8d", tag: "New" },
+  { title: "Automations", desc: "Chain Nive steps into workflows: brief → copy → schedule → report, each step feeding the next.", href: "/automations", icon: Workflow, accent: "#00b3d4", tag: "New" },
+  { title: "Custom Agents", desc: "Save prompts, skills and brand context as a reusable agent your whole team can run.", href: "/agents", icon: Bot, accent: "#0a2540", tag: "New" },
 ];
 
 function Home() {
