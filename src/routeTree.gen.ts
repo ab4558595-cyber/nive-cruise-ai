@@ -21,6 +21,7 @@ import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as CodeRouteImport } from './routes/code'
+import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -96,6 +97,11 @@ const DesignRoute = DesignRouteImport.update({
 const CodeRoute = CodeRouteImport.update({
   id: '/code',
   path: '/code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomationsRoute = AutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/automations'
     | '/code'
     | '/design'
     | '/docs'
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/automations'
     | '/code'
     | '/design'
     | '/docs'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/automations'
     | '/code'
     | '/design'
     | '/docs'
@@ -369,6 +381,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  AutomationsRoute: typeof AutomationsRoute
   CodeRoute: typeof CodeRoute
   DesignRoute: typeof DesignRoute
   DocsRoute: typeof DocsRoute
@@ -480,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/code'
       fullPath: '/code'
       preLoaderRoute: typeof CodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automations': {
+      id: '/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AutomationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -601,6 +621,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  AutomationsRoute: AutomationsRoute,
   CodeRoute: CodeRoute,
   DesignRoute: DesignRoute,
   DocsRoute: DocsRoute,
