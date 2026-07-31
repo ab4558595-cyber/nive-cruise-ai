@@ -86,7 +86,7 @@ export function BusinessAuthGate({ children }: { children: React.ReactNode }) {
               <Sparkles className="h-4 w-4" /> See Business plans
             </Link>
             <Link
-              to="/"
+              to="/code"
               className="inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white px-5 py-2.5 text-[14px] font-semibold text-[#0a2540] transition-all hover:border-[#cfd7df]"
             >
               Back to chat

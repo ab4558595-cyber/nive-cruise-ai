@@ -27,16 +27,16 @@ import {
 import { GuidedTour } from "@/components/GuidedTour";
 
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/code")({
   head: () => ({
     meta: [
       { title: "Nive AI — Elite coding copilot for any platform" },
       { name: "description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
       { property: "og:title", content: "Nive AI — Elite coding copilot for any platform" },
       { property: "og:description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "/code" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "/code" }],
   }),
   component: Index,
 });

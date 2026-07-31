@@ -190,7 +190,7 @@ function Welcome() {
             New: attach your own <span className="font-semibold text-[#0a2540]">images, audio, video or files</span> in the
             composer and tell Nive what to do with them.
           </span>
-          <Link to="/" className="ml-auto whitespace-nowrap font-medium text-[#635bff] hover:text-[#0a2540]">
+          <Link to="/code" className="ml-auto whitespace-nowrap font-medium text-[#635bff] hover:text-[#0a2540]">
             Try it now ›
           </Link>
         </div>
