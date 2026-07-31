@@ -4,7 +4,8 @@
 
 ## Pages
 
-- [Home](/): Chat with Cruise AI to generate code with live preview.
+- [Home](/): Launcher for every Nive AI tool.
+- [Code Studio](/code): Chat with Nive AI to generate code with live preview.
 - [Welcome](/welcome): Product overview and free trial signup.
 - [Pricing](/pricing): Free, Starter (₹49) and Pro (₹149) plans.
 - [Sign in](/auth): Sign in or create a Cruise AI account.
