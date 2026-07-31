@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -18,8 +19,11 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as DesignRouteImport } from './routes/design'
 import { Route as CodeRouteImport } from './routes/code'
+import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
@@ -39,6 +43,11 @@ import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/publi
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VoiceRoute = VoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -81,14 +90,29 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DesignRoute = DesignRouteImport.update({
+  id: '/design',
+  path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CodeRoute = CodeRouteImport.update({
   id: '/code',
   path: '/code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutomationsRoute = AutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -172,8 +196,11 @@ const ApiPublicRazorpayWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
+  '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -182,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
+  '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
@@ -200,8 +228,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
+  '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -210,6 +241,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
+  '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
@@ -229,8 +261,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
+  '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -239,6 +274,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/terms': typeof TermsRoute
+  '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
   '/business/pricing': typeof BusinessPricingRoute
@@ -259,8 +295,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/agents'
     | '/auth'
+    | '/automations'
     | '/code'
+    | '/design'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -269,6 +308,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/social'
     | '/terms'
+    | '/voice'
     | '/welcome'
     | '/business/marketing'
     | '/business/pricing'
@@ -287,8 +327,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/agents'
     | '/auth'
+    | '/automations'
     | '/code'
+    | '/design'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -297,6 +340,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/social'
     | '/terms'
+    | '/voice'
     | '/welcome'
     | '/business/marketing'
     | '/business/pricing'
@@ -315,8 +359,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/agents'
     | '/auth'
+    | '/automations'
     | '/code'
+    | '/design'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -325,6 +372,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/social'
     | '/terms'
+    | '/voice'
     | '/welcome'
     | '/business/marketing'
     | '/business/pricing'
@@ -344,8 +392,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
+  AutomationsRoute: typeof AutomationsRoute
   CodeRoute: typeof CodeRoute
+  DesignRoute: typeof DesignRoute
   DocsRoute: typeof DocsRoute
   FounderRoute: typeof FounderRoute
   PricingRoute: typeof PricingRoute
@@ -354,6 +405,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SocialRoute: typeof SocialRoute
   TermsRoute: typeof TermsRoute
+  VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   BusinessMarketingRoute: typeof BusinessMarketingRoute
   BusinessPricingRoute: typeof BusinessPricingRoute
@@ -377,6 +429,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voice': {
+      id: '/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof VoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -435,6 +494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/design': {
+      id: '/design'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/code': {
       id: '/code'
       path: '/code'
@@ -442,11 +508,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/automations': {
+      id: '/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AutomationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -560,8 +640,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
+  AutomationsRoute: AutomationsRoute,
   CodeRoute: CodeRoute,
+  DesignRoute: DesignRoute,
   DocsRoute: DocsRoute,
   FounderRoute: FounderRoute,
   PricingRoute: PricingRoute,
@@ -570,6 +653,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SocialRoute: SocialRoute,
   TermsRoute: TermsRoute,
+  VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   BusinessMarketingRoute: BusinessMarketingRoute,
   BusinessPricingRoute: BusinessPricingRoute,

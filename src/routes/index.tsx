@@ -66,10 +66,10 @@ const TOOLS: Tool[] = [
   { title: "Usage & Credits", desc: "Track daily credit burn per tool, see limits, and top up when a launch week gets busy.", href: "/business/usage", icon: BarChart3, accent: "#00b3d4" },
   { title: "Documentation", desc: "Quickstarts, tool-by-tool guides, security notes, public API reference and FAQ.", href: "/docs", icon: BookOpen, accent: "#0a2540" },
   { title: "Plans & Pricing", desc: "Free tier for exploring, paid plans for daily work. One account unlocks every Nive tool.", href: "/pricing", icon: Tag, accent: "#635bff" },
-  { title: "Voice Agents", desc: "Speak your brief and get back code, copy or a call script — hands-free building.", icon: Mic, accent: "#7a5cff", soon: true },
-  { title: "Design Studio", desc: "Generate UI concepts, hero art and brand kits that stay consistent with your saved brand voice.", icon: Palette, accent: "#ff4d8d", soon: true },
-  { title: "Automations", desc: "Chain Nive tools into workflows: brief → copy → schedule → report, on a timer.", icon: Workflow, accent: "#00b3d4", soon: true },
-  { title: "Custom Agents", desc: "Save prompts, tools and brand context as a reusable agent your whole team can run.", icon: Bot, accent: "#0a2540", soon: true },
+  { title: "Voice Agents", desc: "Speak your brief and get back code, copy, a call script or clean notes — hands-free building.", href: "/voice", icon: Mic, accent: "#7a5cff", tag: "New" },
+  { title: "Design Studio", desc: "Generate UI concepts, palettes, type pairings, hero art direction and ready-to-paste CSS tokens.", href: "/design", icon: Palette, accent: "#ff4d8d", tag: "New" },
+  { title: "Automations", desc: "Chain Nive steps into workflows: brief → copy → schedule → report, each step feeding the next.", href: "/automations", icon: Workflow, accent: "#00b3d4", tag: "New" },
+  { title: "Custom Agents", desc: "Save prompts, skills and brand context as a reusable agent your whole team can run.", href: "/agents", icon: Bot, accent: "#0a2540", tag: "New" },
 ];
 
 function Home() {
@@ -179,7 +179,7 @@ function Home() {
           <div>
             <h2 className="text-[28px] font-semibold tracking-[-0.01em] sm:text-[34px]">All tools</h2>
             <p className="mt-2 text-[15px] text-[#425466]">
-              Nive keeps growing. Live tools are ready now; the rest are on the roadmap.
+              Nine tools, one account, one credit pool — every tile below is live today.
             </p>
           </div>
           <Link to="/docs" className="text-[15px] font-medium text-[#635bff] hover:text-[#0a2540]">
@@ -188,49 +188,76 @@ function Home() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {TOOLS.map((t) => {
-            const body = (
-              <>
-                <div className="flex items-start justify-between gap-3">
+          {TOOLS.map((t) => (
+            <Link
+              key={t.title}
+              to={t.href!}
+              className="group relative overflow-hidden rounded-xl border border-[#0a2540]/10 bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-transparent hover:shadow-[0_14px_32px_rgba(10,37,64,0.12)]"
+            >
+              <span
+                className="absolute inset-x-0 top-0 h-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                style={{ background: `linear-gradient(90deg, ${t.accent}, transparent)` }}
+              />
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                  style={{ backgroundColor: `${t.accent}14`, color: t.accent }}
+                >
+                  <t.icon className="h-5 w-5" />
+                </span>
+                {t.tag && (
                   <span
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg"
+                    className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
                     style={{ backgroundColor: `${t.accent}14`, color: t.accent }}
                   >
-                    <t.icon className="h-5 w-5" />
+                    {t.tag}
                   </span>
-                  {t.soon && (
-                    <span className="rounded-full bg-[#f6f9fc] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8792a2]">
-                      Soon
-                    </span>
-                  )}
-                </div>
-                <h3 className="mt-4 text-[17px] font-semibold">{t.title}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[#425466]">{t.desc}</p>
-              </>
-            );
-
-            return t.soon || !t.href ? (
-              <div
-                key={t.title}
-                className="rounded-xl border border-dashed border-[#0a2540]/12 bg-[#f6f9fc]/60 p-6"
-              >
-                {body}
+                )}
               </div>
-            ) : (
+              <h3 className="mt-4 text-[17px] font-semibold">{t.title}</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-[#425466]">{t.desc}</p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[#635bff]">
+                Open <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* How it flows */}
+      <section className="border-y border-[#0a2540]/8 bg-[#0a2540] text-white">
+        <div className="mx-auto max-w-[1280px] px-6 py-16 sm:px-10">
+          <h2 className="text-[26px] font-semibold tracking-[-0.01em] sm:text-[32px]">
+            One brief, all the way through
+          </h2>
+          <p className="mt-3 max-w-[620px] text-[15px] leading-relaxed text-white/70">
+            Speak a brief into Voice Agents, shape the look in Design Studio, run the campaign in
+            Automations, then hand the whole thing to a Custom Agent your team can re-run.
+          </p>
+          <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { n: "01", t: "Speak it", d: "Dictate the brief hands-free — Nive cleans up the transcript.", href: "/voice" },
+              { n: "02", t: "Design it", d: "Palette, type, sections and CSS tokens in one pass.", href: "/design" },
+              { n: "03", t: "Run it", d: "Chain steps so each one reads the last one's output.", href: "/automations" },
+              { n: "04", t: "Reuse it", d: "Freeze the prompt and brand context into an agent.", href: "/agents" },
+            ].map((s) => (
               <Link
-                key={t.title}
-                to={t.href}
-                className="group rounded-xl border border-[#0a2540]/10 bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(10,37,64,0.10)]"
+                key={s.n}
+                to={s.href}
+                className="group rounded-xl border border-white/12 bg-white/5 p-5 transition-colors hover:border-white/35 hover:bg-white/10"
               >
-                {body}
-                <span className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[#635bff]">
+                <span className="text-[12px] font-semibold tracking-[0.16em] text-[#00d4ff]">{s.n}</span>
+                <p className="mt-2 text-[17px] font-semibold">{s.t}</p>
+                <p className="mt-1.5 text-[14px] leading-relaxed text-white/70">{s.d}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-[#00d4ff]">
                   Open <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </section>
+
 
       {/* Footer strip */}
       <section className="border-t border-[#0a2540]/8 bg-[#f6f9fc]">
