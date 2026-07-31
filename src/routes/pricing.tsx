@@ -112,7 +112,7 @@ function Pricing() {
               </ul>
               {plan.price === 0 ? (
                 <Link
-                  to="/"
+                  to="/code"
                   className="mt-7 inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-semibold text-[#0a2540] shadow-sm transition-all hover:border-[#cfd7df] hover:shadow"
                 >
                   Use free

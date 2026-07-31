@@ -18,6 +18,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as CodeRouteImport } from './routes/code'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -78,6 +79,11 @@ const FounderRoute = FounderRouteImport.update({
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodeRoute = CodeRouteImport.update({
+  id: '/code',
+  path: '/code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/code': typeof CodeRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/pricing': typeof PricingRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/code'
     | '/docs'
     | '/founder'
     | '/pricing'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  CodeRoute: typeof CodeRoute
   DocsRoute: typeof DocsRoute
   FounderRoute: typeof FounderRoute
   PricingRoute: typeof PricingRoute
@@ -420,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/code': {
+      id: '/code'
+      path: '/code'
+      fullPath: '/code'
+      preLoaderRoute: typeof CodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -541,6 +561,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  CodeRoute: CodeRoute,
   DocsRoute: DocsRoute,
   FounderRoute: FounderRoute,
   PricingRoute: PricingRoute,

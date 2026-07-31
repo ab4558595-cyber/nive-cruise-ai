@@ -91,7 +91,7 @@ function Success() {
                 Your <span className="font-semibold capitalize">{activePlan?.replace("biz-", "")}</span> plan is active. A receipt has been emailed to you.
               </p>
               <div className="mt-6 flex flex-col gap-2">
-                <Link to="/" className="rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white hover:bg-[#5048d6]">
+                <Link to="/code" className="rounded-md bg-[#635bff] py-2.5 text-[14px] font-semibold text-white hover:bg-[#5048d6]">
                   Start building
                 </Link>
                 <Link to="/business" className="rounded-md border border-[#e0e6eb] py-2.5 text-[14px] font-semibold text-[#0a2540] hover:border-[#cfd7df]">
