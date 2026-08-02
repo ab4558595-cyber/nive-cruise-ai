@@ -5,6 +5,8 @@ import {
   Mic, Palette, Workflow, Bot, ArrowRight, Sparkles, LogIn, Shield,
 } from "lucide-react";
 import { Ribbon } from "@/components/Ribbon";
+import { BetaBanner } from "@/components/BetaBanner";
+import niveLogo from "@/assets/nive-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -86,12 +88,13 @@ function Home() {
       className="min-h-screen bg-white text-[#0a2540]"
       style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
     >
+      <BetaBanner />
       <div className="relative overflow-hidden">
         <Ribbon />
 
         <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
-          <Link to="/" className="text-[22px] font-bold tracking-tight">
-            nive<span className="ml-1 text-[#635bff]">ai</span>
+          <Link to="/" className="flex items-center" aria-label="Nive AI home">
+            <img src={niveLogo.url} alt="Nive AI" className="h-9 w-auto sm:h-10" />
           </Link>
           <nav className="hidden items-center gap-6 text-[15px] font-medium md:flex">
             <Link to="/code" className="transition-colors hover:text-[#635bff]">Code</Link>

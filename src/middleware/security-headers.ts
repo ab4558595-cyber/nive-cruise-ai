@@ -14,7 +14,7 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
   const csp = [
     "default-src 'self'",
     "base-uri 'self'",
-    "frame-ancestors 'none'",
+    "frame-ancestors *",
     "form-action 'self' https://api.razorpay.com https://*.razorpay.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com",
@@ -31,7 +31,6 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
   setResponseHeaders({
     "Content-Security-Policy": csp,
     "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
-    "X-Frame-Options": "DENY",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), payment=(self \"https://checkout.razorpay.com\")",

@@ -101,7 +101,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
     ],
     scripts: [
       {
@@ -125,7 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Nive AI",
           alternateName: ["nive ai", "niveai", "Nive", "Nive A.I."],
           url: "https://nive-ai.co.in",
-          logo: "https://nive-ai.co.in/favicon.ico",
+          logo: "https://nive-ai.co.in/favicon.png",
           description: "Nive AI is an elite AI coding copilot that writes production-quality code for any language or platform.",
           foundingDate: "2025",
         }),
