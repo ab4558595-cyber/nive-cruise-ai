@@ -19,7 +19,7 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.razorpay.com",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com",
     "connect-src 'self' https: wss:",
     "frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://*.razorpay.in https://*.upi.com",
     "child-src 'self' https://*.razorpay.com",
