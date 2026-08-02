@@ -94,7 +94,7 @@ function Home() {
 
         <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
           <Link to="/" className="flex items-center" aria-label="Nive AI home">
-            <img src={niveLogo.url} alt="Nive AI" className="h-9 w-auto sm:h-10" />
+            <img src={niveLogo.url} alt="Nive AI" className="h-14 w-auto sm:h-16" />
           </Link>
           <nav className="hidden items-center gap-6 text-[15px] font-medium md:flex">
             <Link to="/code" className="transition-colors hover:text-[#635bff]">Code</Link>
