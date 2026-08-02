@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Sparkles, MessageSquare, PlayCircle, Rocket, X } from "lucide-react";
+import { safeStorage } from "@/lib/safeStorage";
 
 const STORAGE_KEY = "nive_tour_pending";
 
 export function markTourPending() {
   try {
-    localStorage.setItem(STORAGE_KEY, "1");
+    safeStorage.setItem(STORAGE_KEY, "1");
   } catch {}
 }
 
@@ -38,9 +39,9 @@ export function GuidedTour() {
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") {
+      if (safeStorage.getItem(STORAGE_KEY) === "1") {
         setOpen(true);
-        localStorage.removeItem(STORAGE_KEY);
+        safeStorage.removeItem(STORAGE_KEY);
       }
     } catch {}
   }, []);

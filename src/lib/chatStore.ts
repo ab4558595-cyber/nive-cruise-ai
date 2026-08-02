@@ -1,8 +1,9 @@
-// Multi-conversation store backed by localStorage.
+// Multi-conversation store backed by safeStorage.
 // One source of truth for the chat sidebar.
 
 import { useEffect, useState, useCallback } from "react";
 import type { Msg } from "@/components/ChatMessage";
+import { safeStorage } from "./safeStorage";
 
 export type Conversation = {
   id: string;
@@ -42,13 +43,13 @@ function load(): Store {
     return { conversations: [c], activeId: c.id };
   }
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = safeStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Store;
       if (parsed.conversations?.length) return parsed;
     }
     // migrate the old single conversation if present
-    const legacy = localStorage.getItem(LEGACY_KEY);
+    const legacy = safeStorage.getItem(LEGACY_KEY);
     if (legacy) {
       const msgs = JSON.parse(legacy) as Msg[];
       const c = newConvo(Array.isArray(msgs) ? msgs : []);
@@ -64,7 +65,7 @@ function load(): Store {
 
 function save(s: Store) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    safeStorage.setItem(KEY, JSON.stringify(s));
   } catch {
     /* quota */
   }

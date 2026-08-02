@@ -8,6 +8,7 @@ import {
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { StudioShell, Card, ErrorNote } from "@/components/StudioShell";
 import { runAutomationStep } from "@/lib/studio.functions";
+import { safeStorage } from "@/lib/safeStorage";
 
 export const Route = createFileRoute("/automations")({
   head: () => ({
@@ -78,7 +79,7 @@ function AutomationsPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(LS_KEY);
+      const raw = safeStorage.getItem(LS_KEY);
       if (raw) setSaved(JSON.parse(raw));
     } catch {
       /* ignore corrupt storage */
@@ -87,7 +88,7 @@ function AutomationsPage() {
 
   const persist = (next: Array<{ name: string; brief: string; steps: string[] }>) => {
     setSaved(next);
-    localStorage.setItem(LS_KEY, JSON.stringify(next));
+    safeStorage.setItem(LS_KEY, JSON.stringify(next));
   };
 
   const saveWorkflow = () => {

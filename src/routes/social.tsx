@@ -24,6 +24,7 @@ import {
 
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import {
+import { safeStorage } from "@/lib/safeStorage";
   generateSocialPost,
   generateSocialReply,
   analyzeSocialMetrics,
@@ -103,11 +104,11 @@ function SocialPage() {
   const [tab, setTab] = useState<Tab>("post");
   const [mode, setMode] = useState<Mode>(() => {
     if (typeof window === "undefined") return "business";
-    return (localStorage.getItem("nive_social_mode") as Mode) || "business";
+    return (safeStorage.getItem("nive_social_mode") as Mode) || "business";
   });
   function changeMode(m: Mode) {
     setMode(m);
-    if (typeof window !== "undefined") localStorage.setItem("nive_social_mode", m);
+    if (typeof window !== "undefined") safeStorage.setItem("nive_social_mode", m);
   }
 
   return (

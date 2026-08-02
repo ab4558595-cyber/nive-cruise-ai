@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 
 import { GuidedTour } from "@/components/GuidedTour";
+import { safeStorage } from "@/lib/safeStorage";
 
 
 export const Route = createFileRoute("/code")({
@@ -71,7 +72,7 @@ function Index() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [preset, setPreset] = useState<string>(() => {
     if (typeof window === "undefined") return "default";
-    return localStorage.getItem("cruise-ai-preset") || "default";
+    return safeStorage.getItem("cruise-ai-preset") || "default";
   });
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -115,7 +116,7 @@ function Index() {
 
   const removeAttachment = (i: number) => setAttachments((a) => a.filter((_, idx) => idx !== i));
 
-  useEffect(() => { try { localStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
+  useEffect(() => { try { safeStorage.setItem("cruise-ai-preset", preset); } catch {} }, [preset]);
 
   const latestAssistant = useMemo(
     () => [...messages].reverse().find((m) => m.role === "assistant")?.content || "",
@@ -337,9 +338,9 @@ function Index() {
     { id: "focus", label: "Focus composer", group: "Chat", icon: MessageSquare, shortcut: "⌘/", run: () => composerRef.current?.focus() },
     { id: "voice", label: voiceOn ? "Stop voice input" : "Start voice input", group: "Chat", icon: voiceOn ? MicOff : Mic, run: () => (voiceOn ? stopVoice() : startVoice()) },
     { id: "theme", label: "Toggle theme", group: "App", icon: Sun, run: () => {
-      const m = (localStorage.getItem("cruise-ai-theme") || "dark") as "dark" | "light" | "system";
+      const m = (safeStorage.getItem("cruise-ai-theme") || "dark") as "dark" | "light" | "system";
       const next = m === "dark" ? "light" : m === "light" ? "system" : "dark";
-      localStorage.setItem("cruise-ai-theme", next);
+      safeStorage.setItem("cruise-ai-theme", next);
       window.location.reload();
     } },
     { id: "sidebar", label: sidebarCollapsed ? "Show sidebar" : "Hide sidebar", group: "App", icon: PanelLeftOpen, run: () => setSidebarCollapsed((v) => !v) },

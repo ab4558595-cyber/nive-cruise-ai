@@ -2,6 +2,7 @@
 // No provider; just a hook backed by localStorage and a class on <html>.
 
 import { useEffect, useState, useCallback } from "react";
+import { safeStorage } from "./safeStorage";
 
 export type ThemeMode = "light" | "dark" | "system";
 const KEY = "cruise-ai-theme";
@@ -23,12 +24,12 @@ function apply(mode: ThemeMode) {
 export function useTheme() {
   const [mode, setModeState] = useState<ThemeMode>(() => {
     if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem(KEY) as ThemeMode) || "dark";
+    return (safeStorage.getItem(KEY) as ThemeMode) || "dark";
   });
 
   useEffect(() => {
     apply(mode);
-    try { localStorage.setItem(KEY, mode); } catch { /* quota */ }
+    try { safeStorage.setItem(KEY, mode); } catch { /* quota */ }
   }, [mode]);
 
   useEffect(() => {
