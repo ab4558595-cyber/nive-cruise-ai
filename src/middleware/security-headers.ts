@@ -14,7 +14,9 @@ export const securityHeaders = createMiddleware().server(async ({ next }) => {
   const csp = [
     "default-src 'self'",
     "base-uri 'self'",
-    "frame-ancestors *",
+    // '*' alone only matches network schemes; list schemes explicitly so the
+    // app can also be embedded from blob:/data:/file: preview sandboxes.
+    "frame-ancestors * https: http: blob: data: filesystem: file:",
     "form-action 'self' https://api.razorpay.com https://*.razorpay.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com",
