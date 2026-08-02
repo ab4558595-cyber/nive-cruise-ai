@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
+import { safeStorage } from "@/lib/safeStorage";
 import {
   generateSocialPost,
   generateSocialReply,
@@ -101,13 +102,14 @@ const useMode = () => React.useContext(ModeCtx);
 
 function SocialPage() {
   const [tab, setTab] = useState<Tab>("post");
-  const [mode, setMode] = useState<Mode>(() => {
-    if (typeof window === "undefined") return "business";
-    return (localStorage.getItem("nive_social_mode") as Mode) || "business";
-  });
+  const [mode, setMode] = useState<Mode>("business");
+  React.useEffect(() => {
+    const stored = safeStorage.getItem("nive_social_mode") as Mode | null;
+    if (stored && stored !== "business") setMode(stored);
+  }, []);
   function changeMode(m: Mode) {
     setMode(m);
-    if (typeof window !== "undefined") localStorage.setItem("nive_social_mode", m);
+    if (typeof window !== "undefined") safeStorage.setItem("nive_social_mode", m);
   }
 
   return (

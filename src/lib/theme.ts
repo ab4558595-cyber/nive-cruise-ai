@@ -2,6 +2,7 @@
 // No provider; just a hook backed by localStorage and a class on <html>.
 
 import { useEffect, useState, useCallback } from "react";
+import { safeStorage } from "./safeStorage";
 
 export type ThemeMode = "light" | "dark" | "system";
 const KEY = "cruise-ai-theme";
@@ -21,15 +22,23 @@ function apply(mode: ThemeMode) {
 }
 
 export function useTheme() {
-  const [mode, setModeState] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem(KEY) as ThemeMode) || "dark";
-  });
+  // Always start from the SSR default so hydration matches, then adopt the
+  // stored value after mount (storage is unavailable during SSR and can be
+  // blocked entirely inside cross-origin iframes).
+  const [mode, setModeState] = useState<ThemeMode>("dark");
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const stored = safeStorage.getItem(KEY) as ThemeMode | null;
+    if (stored && stored !== "dark") setModeState(stored);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     apply(mode);
-    try { localStorage.setItem(KEY, mode); } catch { /* quota */ }
-  }, [mode]);
+    safeStorage.setItem(KEY, mode);
+  }, [mode, hydrated]);
 
   useEffect(() => {
     if (mode !== "system" || typeof window === "undefined") return;

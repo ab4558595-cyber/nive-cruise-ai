@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, X } from "lucide-react";
+import { safeStorage } from "@/lib/safeStorage";
 
 const KEY = "nive-beta-banner-dismissed";
 
@@ -9,7 +10,7 @@ export function BetaBanner() {
 
   useEffect(() => {
     try {
-      setHidden(localStorage.getItem(KEY) === "1");
+      setHidden(safeStorage.getItem(KEY) === "1");
     } catch {
       setHidden(false);
     }
@@ -48,7 +49,7 @@ export function BetaBanner() {
           aria-label="Dismiss beta notice"
           onClick={() => {
             try {
-              localStorage.setItem(KEY, "1");
+              safeStorage.setItem(KEY, "1");
             } catch {
               /* ignore */
             }

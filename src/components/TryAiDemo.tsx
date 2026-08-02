@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, Loader2, Lock, ArrowUp, Copy, Check, Command, Cpu, Globe, Terminal, Smartphone } from "lucide-react";
+import { safeStorage } from "@/lib/safeStorage";
 
 const STORAGE_KEY = "nive_free_try_used_v1";
 
@@ -20,7 +21,7 @@ export function TryAiDemo() {
   const [copied, setCopied] = useState(false);
   const [used, setUsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    try { return localStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
+    try { return safeStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,7 +67,7 @@ export function TryAiDemo() {
         setError(data.error ?? "Something went wrong.");
       } else {
         setOutput(data.text ?? "");
-        try { localStorage.setItem(STORAGE_KEY, "1"); } catch { /* ignore */ }
+        try { safeStorage.setItem(STORAGE_KEY, "1"); } catch { /* ignore */ }
         setUsed(true);
       }
     } catch {

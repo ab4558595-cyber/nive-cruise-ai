@@ -6,6 +6,7 @@ import { Bot, Loader2, Plus, Trash2, Send, Pencil, X } from "lucide-react";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { StudioShell, Card, ErrorNote } from "@/components/StudioShell";
 import { runCustomAgent } from "@/lib/studio.functions";
+import { safeStorage } from "@/lib/safeStorage";
 
 export const Route = createFileRoute("/agents")({
   head: () => ({
@@ -86,14 +87,14 @@ function AgentsPage() {
   useEffect(() => {
     let list: Agent[] = [];
     try {
-      const raw = localStorage.getItem(LS_KEY);
+      const raw = safeStorage.getItem(LS_KEY);
       if (raw) list = JSON.parse(raw);
     } catch {
       /* ignore corrupt storage */
     }
     if (list.length === 0) {
       list = STARTERS.map((s) => ({ ...s, id: uid(), messages: [] }));
-      localStorage.setItem(LS_KEY, JSON.stringify(list));
+      safeStorage.setItem(LS_KEY, JSON.stringify(list));
     }
     setAgents(list);
     setActiveId(list[0]?.id ?? null);
@@ -101,7 +102,7 @@ function AgentsPage() {
 
   const persist = (next: Agent[]) => {
     setAgents(next);
-    localStorage.setItem(LS_KEY, JSON.stringify(next));
+    safeStorage.setItem(LS_KEY, JSON.stringify(next));
   };
 
   const active = agents.find((a) => a.id === activeId) ?? null;
