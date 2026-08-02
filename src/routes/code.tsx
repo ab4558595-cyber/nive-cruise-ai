@@ -70,10 +70,11 @@ function Index() {
   const [sideTab, setSideTab] = useState<"files" | "preview">("files");
   const [sideDismissed, setSideDismissed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [preset, setPreset] = useState<string>(() => {
-    if (typeof window === "undefined") return "default";
-    return safeStorage.getItem("cruise-ai-preset") || "default";
-  });
+  const [preset, setPreset] = useState<string>("default");
+  useEffect(() => {
+    const stored = safeStorage.getItem("cruise-ai-preset");
+    if (stored && stored !== "default") setPreset(stored);
+  }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
   const voiceRef = useRef<ReturnType<typeof createVoiceInput>>(null);
