@@ -12,17 +12,21 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as CodeRouteImport } from './routes/code'
 import { Route as AutomationsRouteImport } from './routes/automations'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AnalystRouteImport } from './routes/analyst'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -55,6 +59,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SocialRoute = SocialRouteImport.update({
   id: '/social',
   path: '/social',
@@ -63,6 +72,11 @@ const SocialRoute = SocialRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeoRoute = SeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RefundRoute = RefundRouteImport.update({
@@ -78,6 +92,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FounderRoute = FounderRouteImport.update({
@@ -108,6 +127,11 @@ const AutomationsRoute = AutomationsRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalystRoute = AnalystRouteImport.update({
+  id: '/analyst',
+  path: '/analyst',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgentsRoute = AgentsRouteImport.update({
@@ -197,17 +221,21 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/analyst': typeof AnalystRoute
   '/auth': typeof AuthRoute
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
+  '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
@@ -229,17 +257,21 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/analyst': typeof AnalystRoute
   '/auth': typeof AuthRoute
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
+  '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
@@ -262,17 +294,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/analyst': typeof AnalystRoute
   '/auth': typeof AuthRoute
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
+  '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
@@ -296,17 +332,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/agents'
+    | '/analyst'
     | '/auth'
     | '/automations'
     | '/code'
     | '/design'
     | '/docs'
     | '/founder'
+    | '/knowledge'
     | '/pricing'
     | '/privacy'
     | '/refund'
+    | '/seo'
     | '/sitemap.xml'
     | '/social'
+    | '/support'
     | '/terms'
     | '/voice'
     | '/welcome'
@@ -328,17 +368,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/agents'
+    | '/analyst'
     | '/auth'
     | '/automations'
     | '/code'
     | '/design'
     | '/docs'
     | '/founder'
+    | '/knowledge'
     | '/pricing'
     | '/privacy'
     | '/refund'
+    | '/seo'
     | '/sitemap.xml'
     | '/social'
+    | '/support'
     | '/terms'
     | '/voice'
     | '/welcome'
@@ -360,17 +404,21 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/agents'
+    | '/analyst'
     | '/auth'
     | '/automations'
     | '/code'
     | '/design'
     | '/docs'
     | '/founder'
+    | '/knowledge'
     | '/pricing'
     | '/privacy'
     | '/refund'
+    | '/seo'
     | '/sitemap.xml'
     | '/social'
+    | '/support'
     | '/terms'
     | '/voice'
     | '/welcome'
@@ -393,17 +441,21 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AgentsRoute: typeof AgentsRoute
+  AnalystRoute: typeof AnalystRoute
   AuthRoute: typeof AuthRoute
   AutomationsRoute: typeof AutomationsRoute
   CodeRoute: typeof CodeRoute
   DesignRoute: typeof DesignRoute
   DocsRoute: typeof DocsRoute
   FounderRoute: typeof FounderRoute
+  KnowledgeRoute: typeof KnowledgeRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
+  SeoRoute: typeof SeoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SocialRoute: typeof SocialRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -445,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/social': {
       id: '/social'
       path: '/social'
@@ -457,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seo': {
+      id: '/seo'
+      path: '/seo'
+      fullPath: '/seo'
+      preLoaderRoute: typeof SeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/refund': {
@@ -478,6 +544,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/founder': {
@@ -520,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analyst': {
+      id: '/analyst'
+      path: '/analyst'
+      fullPath: '/analyst'
+      preLoaderRoute: typeof AnalystRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agents': {
@@ -641,17 +721,21 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AgentsRoute: AgentsRoute,
+  AnalystRoute: AnalystRoute,
   AuthRoute: AuthRoute,
   AutomationsRoute: AutomationsRoute,
   CodeRoute: CodeRoute,
   DesignRoute: DesignRoute,
   DocsRoute: DocsRoute,
   FounderRoute: FounderRoute,
+  KnowledgeRoute: KnowledgeRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
+  SeoRoute: SeoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SocialRoute: SocialRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
@@ -672,13 +756,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
