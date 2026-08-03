@@ -30,7 +30,9 @@ import { Route as AnalystRouteImport } from './routes/analyst'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
+import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as CheckoutPlanIdRouteImport } from './routes/checkout.$planId'
 import { Route as BusinessUsageRouteImport } from './routes/business.usage'
@@ -149,10 +151,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/business/',
   path: '/business/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSlugRoute = DocsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DocsRoute,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
@@ -226,7 +238,7 @@ export interface FileRoutesByFullPath {
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
-  '/docs': typeof DocsRoute
+  '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
@@ -245,7 +257,9 @@ export interface FileRoutesByFullPath {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/business/': typeof BusinessIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -262,7 +276,6 @@ export interface FileRoutesByTo {
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
-  '/docs': typeof DocsRoute
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
@@ -281,7 +294,9 @@ export interface FileRoutesByTo {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/business': typeof BusinessIndexRoute
+  '/docs': typeof DocsIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -299,7 +314,7 @@ export interface FileRoutesById {
   '/automations': typeof AutomationsRoute
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
-  '/docs': typeof DocsRoute
+  '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
   '/pricing': typeof PricingRoute
@@ -318,7 +333,9 @@ export interface FileRoutesById {
   '/business/usage': typeof BusinessUsageRoute
   '/checkout/$planId': typeof CheckoutPlanIdRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/business/': typeof BusinessIndexRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/public/approve-payment': typeof ApiPublicApprovePaymentRoute
   '/api/public/try-ai': typeof ApiPublicTryAiRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -356,7 +373,9 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
+    | '/docs/$slug'
     | '/business/'
+    | '/docs/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/razorpay/webhook'
@@ -373,7 +392,6 @@ export interface FileRouteTypes {
     | '/automations'
     | '/code'
     | '/design'
-    | '/docs'
     | '/founder'
     | '/knowledge'
     | '/pricing'
@@ -392,7 +410,9 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
+    | '/docs/$slug'
     | '/business'
+    | '/docs'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/razorpay/webhook'
@@ -428,7 +448,9 @@ export interface FileRouteTypes {
     | '/business/usage'
     | '/checkout/$planId'
     | '/checkout/success'
+    | '/docs/$slug'
     | '/business/'
+    | '/docs/'
     | '/api/public/approve-payment'
     | '/api/public/try-ai'
     | '/api/public/razorpay/webhook'
@@ -446,7 +468,7 @@ export interface RootRouteChildren {
   AutomationsRoute: typeof AutomationsRoute
   CodeRoute: typeof CodeRoute
   DesignRoute: typeof DesignRoute
-  DocsRoute: typeof DocsRoute
+  DocsRoute: typeof DocsRouteWithChildren
   FounderRoute: typeof FounderRoute
   KnowledgeRoute: typeof KnowledgeRoute
   PricingRoute: typeof PricingRoute
@@ -623,12 +645,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/business/': {
       id: '/business/'
       path: '/business'
       fullPath: '/business/'
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/docs/$slug': {
+      id: '/docs/$slug'
+      path: '/$slug'
+      fullPath: '/docs/$slug'
+      preLoaderRoute: typeof DocsSlugRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/checkout/success': {
       id: '/checkout/success'
@@ -717,6 +753,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DocsRouteChildren {
+  DocsSlugRoute: typeof DocsSlugRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsSlugRoute: DocsSlugRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -726,7 +774,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomationsRoute: AutomationsRoute,
   CodeRoute: CodeRoute,
   DesignRoute: DesignRoute,
-  DocsRoute: DocsRoute,
+  DocsRoute: DocsRouteWithChildren,
   FounderRoute: FounderRoute,
   KnowledgeRoute: KnowledgeRoute,
   PricingRoute: PricingRoute,
