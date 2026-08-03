@@ -31,7 +31,7 @@ function DocsLayout() {
       <header className="sticky top-0 z-30 border-b border-[#0a2540]/8 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1240px] items-center gap-4 px-6 py-3.5 sm:px-8">
           <Link to="/" className="flex items-center" aria-label="Nive AI home">
-            <img src={niveLogo.src} alt="Nive AI" className="h-9 w-auto" />
+            <img src={niveLogo.url} alt="Nive AI" className="h-9 w-auto" />
           </Link>
           <span className="hidden text-[#425466] sm:inline">/</span>
           <Link to="/docs" className="hidden text-[14px] font-medium text-[#425466] hover:text-[#635bff] sm:inline">
