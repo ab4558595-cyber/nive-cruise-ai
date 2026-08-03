@@ -175,9 +175,15 @@
     letter-spacing: 0;
   }
 
-  h1, h2, h3, h4, h5 {
-    letter-spacing: -0.02em;
-    font-weight: 300;
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.015em;
+    font-weight: 400;
+  }
+
+  h4, h5 {
+    letter-spacing: -0.01em;
+    font-weight: 400;
   }
 
 
@@ -188,10 +194,17 @@
 }
 
 html, body {
-  background: var(--gradient-surface);
-  background-attachment: fixed;
+  background-color: #0a0a10;
+  background-image:
+    linear-gradient(180deg, rgba(10,10,16,0.62) 0%, rgba(10,10,16,0.82) 100%),
+    url("/__l5e/assets-v1/4b7af09e-13a9-4fd0-849c-8be87af8d815/aurora-bg.jpg");
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: fixed, fixed;
   color: var(--color-foreground);
 }
+
 
 /* Hide the "Edit with Lovable" / "Made with Lovable" badge everywhere */
 #lovable-badge,
