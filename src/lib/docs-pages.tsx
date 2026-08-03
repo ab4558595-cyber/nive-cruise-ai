@@ -47,7 +47,7 @@ export const DOC_BODIES: Record<string, () => React.ReactNode> = {
     <>
       <H2>1. Create an account</H2>
       <P>
-        Go to <Link to="/auth" className="underline">/auth</Link> and sign up with email or Google.
+        Go to <Link to="/auth" search={{}} className="underline">/auth</Link> and sign up with email or Google.
         Email sign-ups require confirmation — the link lands in your inbox within a minute.
         Anonymous sign-in is disabled, so every action is attributable to a real account.
       </P>
@@ -94,7 +94,7 @@ and localStorage persistence. Include a test file.`}</Pre>
       </P>
       <H2>Password reset</H2>
       <OL>
-        <li>On <Link to="/auth" className="underline">/auth</Link>, choose "Forgot password".</li>
+        <li>On <Link to="/auth" search={{}} className="underline">/auth</Link>, choose "Forgot password".</li>
         <li>Open the recovery email and follow the link back to the app.</li>
         <li>Set a new password; all other sessions keep working until they expire.</li>
       </OL>

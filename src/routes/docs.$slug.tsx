@@ -7,14 +7,14 @@ export const Route = createFileRoute("/docs/$slug")({
   head: ({ params }) => docHead(params.slug),
   loader: ({ params }) => {
     if (!DOC_BODIES[params.slug]) throw notFound();
-    return { slug: params.slug };
+    return null;
   },
   notFoundComponent: DocNotFound,
   component: DocRoute,
 });
 
 function DocRoute() {
-  const { slug } = Route.useLoaderData();
+  const { slug } = Route.useParams();
   const Body = DOC_BODIES[slug];
   return (
     <DocPage slug={slug}>

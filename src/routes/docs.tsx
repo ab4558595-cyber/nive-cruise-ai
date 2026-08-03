@@ -42,7 +42,7 @@ function DocsLayout() {
             <Link to="/business" className="hidden hover:text-[#635bff] sm:inline">Business</Link>
             <Link to="/pricing" className="hidden hover:text-[#635bff] sm:inline">Pricing</Link>
             <Link
-              to="/auth"
+              to="/auth" search={{}}
               className="rounded-full bg-[#635bff] px-4 py-2 text-white transition-colors hover:bg-[#5048d6]"
             >
               Sign in
