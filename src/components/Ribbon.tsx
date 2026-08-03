@@ -1,8 +1,7 @@
-import auroraAsset from "@/assets/aurora-bg.jpg.asset.json";
+import ribbonAsset from "@/assets/ribbon.png.asset.json";
 
 /**
- * Full-bleed decorative aurora backdrop with a soft fade toward the content side.
- * Props are kept for backwards compatibility with existing call sites.
+ * Static decorative ribbon image with a content-side fade overlay.
  */
 export function Ribbon({
   side = "right",
@@ -16,6 +15,18 @@ export function Ribbon({
   fadeClassName?: string;
 }) {
   const flipStyle = side === "left" ? { transform: "scaleX(-1)" } : undefined;
+  const fadeStyle =
+    side === "left"
+      ? {
+          background:
+            "linear-gradient(270deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.78) 28%, rgba(255,255,255,0.18) 56%, rgba(255,255,255,0) 78%)",
+          right: 0,
+          left: "auto",
+        }
+      : {
+          background:
+            "linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.78) 28%, rgba(255,255,255,0.18) 56%, rgba(255,255,255,0) 78%)",
+        };
 
   return (
     <div
@@ -28,22 +39,21 @@ export function Ribbon({
         maxWidth: "100vw",
       }}
     >
-      <div className={`absolute inset-0 ${shellClassName}`} style={flipStyle}>
+      <div
+        className={`absolute right-[-25%] top-0 h-full w-[140%] max-w-none sm:right-[-15%] sm:w-[115%] md:right-[-18%] md:w-[105%] lg:right-[-20%] lg:w-[110%] xl:right-[-18%] xl:w-[100%] ${shellClassName}`}
+        style={flipStyle}
+      >
         <img
-          src={auroraAsset.url}
+          src={ribbonAsset.url}
           alt=""
-          className="block h-full w-full select-none object-cover opacity-70 dark:opacity-45"
+          className="block h-full w-full object-cover select-none"
           draggable={false}
         />
       </div>
 
-      {/* Soft vignette so text stays legible on top of the gradient */}
       <div
-        className={`absolute inset-0 ${fadeClassName}`}
-        style={{
-          background:
-            "radial-gradient(120% 90% at 50% 0%, rgba(10,10,16,0) 0%, rgba(10,10,16,0.35) 45%, rgba(10,10,16,0.75) 100%)",
-        }}
+        className={`absolute inset-y-0 left-0 w-[72%] sm:w-[58%] md:w-1/2 lg:w-[36%] ${fadeClassName}`}
+        style={fadeStyle}
       />
     </div>
   );
