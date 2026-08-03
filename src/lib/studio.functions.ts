@@ -148,3 +148,28 @@ export const runCustomAgent = createServerFn({ method: "POST" })
     const text = await callModel(system, `${transcript}\n\nYou:`, false);
     return { text };
   });
+
+export const runStudioMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        mode: z.string().min(2).max(60),
+        input: z.string().min(4).max(20000),
+        context: z.string().max(4000).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { STUDIO_MODE_PROMPTS } = await import("./studio.server");
+    const cfg = STUDIO_MODE_PROMPTS[data.mode];
+    if (!cfg) throw new Error(`Unknown mode: ${data.mode}`);
+    const user = [
+      `Input:\n"""${data.input}"""`,
+      data.context ? `Extra context / constraints: ${data.context}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    const text = await callModel(cfg.system, user, false);
+    return { text, label: cfg.label };
+  });

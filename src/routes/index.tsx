@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import {
   Code2, Share2, Briefcase, Database, Megaphone, BarChart3, BookOpen, Tag,
   Mic, Palette, Workflow, Bot, ArrowRight, Sparkles, LogIn, Shield,
+  BookMarked, Search, LineChart, LifeBuoy,
 } from "lucide-react";
+
 import { Ribbon } from "@/components/Ribbon";
 import { BetaBanner } from "@/components/BetaBanner";
 import niveLogo from "@/assets/nive-logo.png.asset.json";
@@ -71,7 +73,12 @@ const TOOLS: Tool[] = [
   { title: "Voice Agents", desc: "Speak your brief and get back code, copy, a call script or clean notes — hands-free building.", href: "/voice", icon: Mic, accent: "#7a5cff", tag: "New" },
   { title: "Design Studio", desc: "Generate UI concepts, palettes, type pairings, hero art direction and ready-to-paste CSS tokens.", href: "/design", icon: Palette, accent: "#ff4d8d", tag: "New" },
   { title: "Automations", desc: "Chain Nive steps into workflows: brief → copy → schedule → report, each step feeding the next.", href: "/automations", icon: Workflow, accent: "#00b3d4", tag: "New" },
-  { title: "Custom Agents", desc: "Save prompts, skills and brand context as a reusable agent your whole team can run.", href: "/agents", icon: Bot, accent: "#0a2540", tag: "New" },
+  { title: "Custom Agents", desc: "Save prompts, skills and brand context as a reusable agent your whole team can run.", href: "/agents", icon: Bot, accent: "#0a2540" },
+  { title: "Docs & Knowledge", desc: "Turn specs, contracts and transcripts into summaries, grounded Q&A, wikis, FAQs and onboarding guides.", href: "/knowledge", icon: BookMarked, accent: "#0a7c66", tag: "New" },
+  { title: "SEO & Analytics", desc: "Keyword clusters, on-page audits, content briefs, technical checklists, JSON-LD and stakeholder reports.", href: "/seo", icon: Search, accent: "#ff8a00", tag: "New" },
+  { title: "Data Analyst", desc: "Paste a CSV and get insights, PostgreSQL, cleaning plans, chart specs, stats review and forecasts.", href: "/analyst", icon: LineChart, accent: "#2563eb", tag: "New" },
+  { title: "Support & Email", desc: "Ticket replies, macro libraries, escalation handoffs, tone rewrites and help-centre articles.", href: "/support", icon: LifeBuoy, accent: "#7c3aed", tag: "New" },
+
 ];
 
 function Home() {
