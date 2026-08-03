@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { DOC_FLAT } from "@/lib/docs-nav";
 
 const BASE_URL = "https://www.nive-ai.co.in";
 
@@ -17,8 +18,22 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/welcome", changefreq: "weekly", priority: "0.9" },
           { path: "/pricing", changefreq: "weekly", priority: "0.9" },
+          { path: "/code", changefreq: "weekly", priority: "0.9" },
+          { path: "/social", changefreq: "weekly", priority: "0.8" },
+          { path: "/business", changefreq: "weekly", priority: "0.8" },
+          { path: "/voice", changefreq: "monthly", priority: "0.7" },
+          { path: "/design", changefreq: "monthly", priority: "0.7" },
+          { path: "/automations", changefreq: "monthly", priority: "0.7" },
+          { path: "/agents", changefreq: "monthly", priority: "0.7" },
+          { path: "/knowledge", changefreq: "monthly", priority: "0.7" },
+          { path: "/seo", changefreq: "monthly", priority: "0.7" },
+          { path: "/analyst", changefreq: "monthly", priority: "0.7" },
+          { path: "/support", changefreq: "monthly", priority: "0.7" },
+          { path: "/docs", changefreq: "weekly", priority: "0.8" },
+          ...DOC_FLAT.map((d) => ({ path: `/docs/${d.slug}`, changefreq: "monthly" as const, priority: "0.6" })),
           { path: "/auth", changefreq: "monthly", priority: "0.5" },
         ];
+
 
         const urls = entries.map((e) =>
           [
