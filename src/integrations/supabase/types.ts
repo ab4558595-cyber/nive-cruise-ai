@@ -248,6 +248,92 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_installs: {
+        Row: {
+          created_at: string
+          id: string
+          item_key: string
+          listing_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_key: string
+          listing_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_key?: string
+          listing_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_installs_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_listings: {
+        Row: {
+          author_id: string
+          author_name: string | null
+          category: string
+          created_at: string
+          description: string | null
+          homepage: string | null
+          id: string
+          install_count: number
+          is_published: boolean
+          kind: string
+          name: string
+          prompt: string | null
+          tagline: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          author_name?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          homepage?: string | null
+          id?: string
+          install_count?: number
+          is_published?: boolean
+          kind?: string
+          name: string
+          prompt?: string | null
+          tagline: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          homepage?: string | null
+          id?: string
+          install_count?: number
+          is_published?: boolean
+          kind?: string
+          name?: string
+          prompt?: string | null
+          tagline?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           amount: number
@@ -550,6 +636,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bump_marketplace_installs: {
+        Args: { _listing_id: string }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
