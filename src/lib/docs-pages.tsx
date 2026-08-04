@@ -757,5 +757,157 @@ Keep the public API identical. Return only that file.`}</Pre>
         would break saved work gets a notice first.
       </P>
     </>
+  ),,
+
+  marketplace: () => (
+    <>
+      <P>
+        The <Link to="/marketplace" className="underline">Marketplace</Link> is the front door to the
+        whole ecosystem. It lists every first-party Nive studio, every integration, and every recipe
+        the community has published — all searchable in one grid.
+      </P>
+      <H2>Three kinds of listing</H2>
+      <Table
+        head={["Kind", "What it is", "What Install does"]}
+        rows={[
+          ["Tool", "A full Nive studio such as Code Studio or SEO & Analytics", "Pins it to your Installed tab for one-click opening"],
+          ["Agent", "A prompt recipe with instructions and brand context", "Saves it to your workspace; copy the prompt into Custom Agents"],
+          ["Integration", "A platform capability: payments, embedding, API, sign-in", "Marks it as in use and links to its setup docs"],
+        ]}
+      />
+      <H2>Installing</H2>
+      <OL>
+        <li>Search or filter by kind.</li>
+        <li>Press <strong>Install</strong>. You must be signed in — installs are stored against your account.</li>
+        <li>Open the <strong>Installed</strong> tab to see everything you use, then hit <C>Open</C>.</li>
+        <li><strong>Remove</strong> un-pins it. Nothing is deleted and no credits are spent.</li>
+      </OL>
+      <Note>
+        Installing is free on every plan. It changes what you see, not what you are billed for.
+      </Note>
+      <H2>Sharing your own</H2>
+      <P>
+        Press <strong>Share your agent</strong> and fill in a name, a one-line tagline, an optional
+        long description and — for agents — the prompt itself. Listings publish immediately and are
+        readable by anyone, so never paste API keys, customer data or private prompts you rely on
+        commercially.
+      </P>
+      <UL>
+        <li>You can edit or unpublish your own listings at any time from the card's bin icon.</li>
+        <li>Install counts are incremented server-side, so nobody can inflate their own numbers.</li>
+        <li>Listings that break the acceptable-use rules are removed without notice.</li>
+      </UL>
+      <H2>Data model</H2>
+      <Table
+        head={["Table", "Holds", "Who can read it"]}
+        rows={[
+          ["marketplace_listings", "Community listings and install counts", "Anyone, when published; authors always see their own"],
+          ["marketplace_installs", "Which items you installed", "Only you"],
+        ]}
+      />
+    </>
+  ),
+
+  legal: () => (
+    <>
+      <P>
+        The <Link to="/legal" className="underline">Legal &amp; Policy Agent</Link> is drafting
+        support for the paperwork around a product. It is <strong>not legal advice</strong> — every
+        output is written to be reviewed by a qualified lawyer in your jurisdiction.
+      </P>
+      <H2>Modes</H2>
+      <Table
+        head={["Mode", "Use it when", "You get"]}
+        rows={[
+          ["Draft policy", "You need terms, privacy or refund copy", "Numbered clauses with [BRACKET] placeholders"],
+          ["Clause review", "Someone sent you a contract", "Clause | meaning | risk | suggested redline"],
+          ["Plain English", "Nobody understands the current text", "A readable rewrite that keeps every obligation"],
+          ["Compliance checklist", "You are about to launch", "Must / should / consider items per area"],
+          ["Data mapping / DPA", "A customer asks how you process data", "Data categories, retention, sub-processors, DPA skeleton"],
+          ["Notice / letter", "You need to escalate formally", "A firm, factual notice with a deadline"],
+        ]}
+      />
+      <Note tone="warn">
+        Never paste signed contracts containing third-party personal data you are not allowed to
+        share with a processor. Redact names first.
+      </Note>
+    </>
+  ),
+
+  product: () => (
+    <>
+      <P>
+        <Link to="/product" className="underline">Product &amp; PRD Studio</Link> turns a rough idea
+        into artefacts a team can act on: a spec, a backlog, a roadmap and the notes that announce it.
+      </P>
+      <H2>Modes</H2>
+      <UL>
+        <li><strong>PRD</strong> — problem, user, metrics, in/out scope, stories, risks, phased rollout.</li>
+        <li><strong>User stories</strong> — as a / I want / so that, with Given-When-Then criteria and S/M/L sizing.</li>
+        <li><strong>Roadmap</strong> — now / next / later, each bet paired with the outcome it chases.</li>
+        <li><strong>Prioritisation</strong> — a RICE table with the arithmetic shown and assumptions declared.</li>
+        <li><strong>Research plan</strong> — hypotheses, method, recruiting criteria, non-leading questions.</li>
+        <li><strong>Release notes</strong> — highlights, fixes, breaking changes plus a short announcement.</li>
+      </UL>
+      <H2>Good chaining</H2>
+      <OL>
+        <li>Run <strong>PRD</strong> on the idea.</li>
+        <li>Paste the PRD into <strong>User stories</strong> to get the backlog.</li>
+        <li>Feed the shipped items into <strong>Release notes</strong>.</li>
+        <li>Freeze the whole sequence as a workflow in <Link to="/automations" className="underline">Automations</Link>.</li>
+      </OL>
+    </>
+  ),
+
+  translate: () => (
+    <>
+      <P>
+        <Link to="/translate" className="underline">Translation &amp; Localization</Link> covers the
+        whole path from raw string to shipped locale: translate, adapt to the market, transcreate the
+        marketing lines, lock terminology, QA the result and export keys.
+      </P>
+      <H2>Modes</H2>
+      <Table
+        head={["Mode", "Best for", "Notes"]}
+        rows={[
+          ["Translate", "Docs, emails, UI strings", "Preserves markdown and {{placeholders}}"],
+          ["Localise", "Anything with money, dates or units", "Returns a Before | After change table"],
+          ["Transcreate", "Headlines and ads", "3 options plus back-translations"],
+          ["Glossary & style", "Before a big localisation push", "Term table, formality, do-not-translate list"],
+          ["Translation QA", "Reviewing an agency delivery", "Findings table with severity plus a corrected version"],
+          ["i18n keys", "Handing copy to engineering", "Flat JSON per locale with dot-notation keys"],
+        ]}
+      />
+      <H2>Placeholder safety</H2>
+      <P>
+        Interpolation tokens are treated as opaque. If a target language needs a different word
+        order, the token moves with the phrase rather than being translated. Always run
+        <strong> Translation QA</strong> before shipping a locale file you generated in bulk.
+      </P>
+    </>
+  ),
+
+  hr: () => (
+    <>
+      <P>
+        <Link to="/hr" className="underline">People &amp; Hiring Agent</Link> brings structure to
+        hiring: the same scorecard for every candidate, questions mapped to competencies, and an
+        onboarding plan that ends in a shipped win rather than a reading list.
+      </P>
+      <H2>Modes</H2>
+      <UL>
+        <li><strong>Job post</strong> — bias-checked, specific, with must-have versus nice-to-have split out.</li>
+        <li><strong>Scorecard</strong> — outcomes, competencies, red flags and a 1-4 rubric.</li>
+        <li><strong>Interview kit</strong> — stage plan, 12 mapped questions, practical exercise with grading.</li>
+        <li><strong>Résumé screen</strong> — evidence per requirement, gaps, probes, advance/hold/decline.</li>
+        <li><strong>Offer &amp; comms</strong> — offers, rejections, keep-warms and reference requests.</li>
+        <li><strong>Onboarding plan</strong> — 30-60-90 goals, access list, first win, check-in questions.</li>
+      </UL>
+      <Note tone="warn">
+        Screens are decision <em>support</em>. A human makes every hiring decision, and only
+        job-relevant evidence is considered. Remove personal details you do not need before pasting a
+        résumé.
+      </Note>
+    </>
   ),
 };
