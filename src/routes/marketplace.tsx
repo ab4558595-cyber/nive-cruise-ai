@@ -338,7 +338,7 @@ function MarketplacePage() {
                       className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
                       style={{ backgroundColor: `${meta.accent}18`, color: meta.accent }}
                     >
-                      <Icon className="h-4.5 w-4.5" />
+                      <Icon className="h-[18px] w-[18px]" />
                     </span>
                     <div className="flex items-center gap-1.5">
                       <span className="rounded-full bg-[#f6f9fc] px-2.5 py-1 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-[#425466]">
