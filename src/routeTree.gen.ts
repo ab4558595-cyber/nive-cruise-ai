@@ -17,6 +17,7 @@ import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
+import { Route as ProductRouteImport } from './routes/product'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
@@ -86,6 +87,11 @@ const SeoRoute = SeoRouteImport.update({
 const RefundRoute = RefundRouteImport.update({
   id: '/refund',
   path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductRoute = ProductRouteImport.update({
+  id: '/product',
+  path: '/product',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
@@ -458,6 +469,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
@@ -499,6 +511,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProductRoute: typeof ProductRoute
   RefundRoute: typeof RefundRoute
   SeoRoute: typeof SeoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       path: '/refund'
       fullPath: '/refund'
       preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -821,6 +841,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProductRoute: ProductRoute,
   RefundRoute: RefundRoute,
   SeoRoute: SeoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
