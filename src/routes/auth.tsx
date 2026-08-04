@@ -95,10 +95,10 @@ function AuthPage() {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithProvider = async (provider: "google" | "apple") => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin + "/auth",
       });
       if (result.error) throw result.error;
@@ -111,7 +111,7 @@ function AuthPage() {
         navigate({ to: safeRedirect });
       }
     } catch (err: any) {
-      toast.error(err.message || "Google sign-in failed");
+      toast.error(err.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
     } finally {
       setLoading(false);
     }
