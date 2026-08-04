@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as TranslateRouteImport } from './routes/translate'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SocialRouteImport } from './routes/social'
@@ -57,6 +58,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TranslateRoute = TranslateRouteImport.update({
+  id: '/translate',
+  path: '/translate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -310,6 +317,7 @@ export interface FileRoutesByTo {
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -352,6 +360,7 @@ export interface FileRoutesById {
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -435,6 +445,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -518,6 +530,7 @@ export interface RootRouteChildren {
   SocialRoute: typeof SocialRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  TranslateRoute: typeof TranslateRoute
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   BusinessMarketingRoute: typeof BusinessMarketingRoute
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/voice'
       fullPath: '/voice'
       preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/translate': {
+      id: '/translate'
+      path: '/translate'
+      fullPath: '/translate'
+      preLoaderRoute: typeof TranslateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -848,6 +868,7 @@ const rootRouteChildren: RootRouteChildren = {
   SocialRoute: SocialRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  TranslateRoute: TranslateRoute,
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   BusinessMarketingRoute: BusinessMarketingRoute,
