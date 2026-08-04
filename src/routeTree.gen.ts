@@ -19,6 +19,7 @@ import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -94,6 +95,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeRoute = KnowledgeRouteImport.update({
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/design': typeof DesignRoute
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
   '/knowledge': typeof KnowledgeRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/founder'
     | '/knowledge'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
     | '/refund'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/founder'
     | '/knowledge'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
     | '/refund'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/founder'
     | '/knowledge'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
     | '/refund'
@@ -471,6 +483,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRouteWithChildren
   FounderRoute: typeof FounderRoute
   KnowledgeRoute: typeof KnowledgeRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
@@ -566,6 +579,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/knowledge': {
@@ -777,6 +797,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRouteWithChildren,
   FounderRoute: FounderRoute,
   KnowledgeRoute: KnowledgeRoute,
+  MarketplaceRoute: MarketplaceRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
