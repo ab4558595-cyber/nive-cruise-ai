@@ -11,15 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as TranslateRouteImport } from './routes/translate'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
+import { Route as ProductRouteImport } from './routes/product'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as HrRouteImport } from './routes/hr'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DesignRouteImport } from './routes/design'
@@ -56,6 +61,11 @@ const VoiceRoute = VoiceRouteImport.update({
   path: '/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TranslateRoute = TranslateRouteImport.update({
+  id: '/translate',
+  path: '/translate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -86,6 +96,11 @@ const RefundRoute = RefundRouteImport.update({
   path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductRoute = ProductRouteImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -96,9 +111,24 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KnowledgeRoute = KnowledgeRouteImport.update({
   id: '/knowledge',
   path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrRoute = HrRouteImport.update({
+  id: '/hr',
+  path: '/hr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FounderRoute = FounderRouteImport.update({
@@ -240,15 +270,20 @@ export interface FileRoutesByFullPath {
   '/design': typeof DesignRoute
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
+  '/legal': typeof LegalRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -277,15 +312,20 @@ export interface FileRoutesByTo {
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
+  '/legal': typeof LegalRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -316,15 +356,20 @@ export interface FileRoutesById {
   '/design': typeof DesignRoute
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
+  '/legal': typeof LegalRoute
+  '/marketplace': typeof MarketplaceRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/product': typeof ProductRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/translate': typeof TranslateRoute
   '/voice': typeof VoiceRoute
   '/welcome': typeof WelcomeRoute
   '/business/marketing': typeof BusinessMarketingRoute
@@ -356,15 +401,20 @@ export interface FileRouteTypes {
     | '/design'
     | '/docs'
     | '/founder'
+    | '/hr'
     | '/knowledge'
+    | '/legal'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -393,15 +443,20 @@ export interface FileRouteTypes {
     | '/code'
     | '/design'
     | '/founder'
+    | '/hr'
     | '/knowledge'
+    | '/legal'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -431,15 +486,20 @@ export interface FileRouteTypes {
     | '/design'
     | '/docs'
     | '/founder'
+    | '/hr'
     | '/knowledge'
+    | '/legal'
+    | '/marketplace'
     | '/pricing'
     | '/privacy'
+    | '/product'
     | '/refund'
     | '/seo'
     | '/sitemap.xml'
     | '/social'
     | '/support'
     | '/terms'
+    | '/translate'
     | '/voice'
     | '/welcome'
     | '/business/marketing'
@@ -470,15 +530,20 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   DocsRoute: typeof DocsRouteWithChildren
   FounderRoute: typeof FounderRoute
+  HrRoute: typeof HrRoute
   KnowledgeRoute: typeof KnowledgeRoute
+  LegalRoute: typeof LegalRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProductRoute: typeof ProductRoute
   RefundRoute: typeof RefundRoute
   SeoRoute: typeof SeoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SocialRoute: typeof SocialRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  TranslateRoute: typeof TranslateRoute
   VoiceRoute: typeof VoiceRoute
   WelcomeRoute: typeof WelcomeRoute
   BusinessMarketingRoute: typeof BusinessMarketingRoute
@@ -510,6 +575,13 @@ declare module '@tanstack/react-router' {
       path: '/voice'
       fullPath: '/voice'
       preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/translate': {
+      id: '/translate'
+      path: '/translate'
+      fullPath: '/translate'
+      preLoaderRoute: typeof TranslateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -554,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -568,11 +647,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/knowledge': {
       id: '/knowledge'
       path: '/knowledge'
       fullPath: '/knowledge'
       preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr': {
+      id: '/hr'
+      path: '/hr'
+      fullPath: '/hr'
+      preLoaderRoute: typeof HrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/founder': {
@@ -776,15 +876,20 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   DocsRoute: DocsRouteWithChildren,
   FounderRoute: FounderRoute,
+  HrRoute: HrRoute,
   KnowledgeRoute: KnowledgeRoute,
+  LegalRoute: LegalRoute,
+  MarketplaceRoute: MarketplaceRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProductRoute: ProductRoute,
   RefundRoute: RefundRoute,
   SeoRoute: SeoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SocialRoute: SocialRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  TranslateRoute: TranslateRoute,
   VoiceRoute: VoiceRoute,
   WelcomeRoute: WelcomeRoute,
   BusinessMarketingRoute: BusinessMarketingRoute,

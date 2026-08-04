@@ -95,10 +95,10 @@ function AuthPage() {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithProvider = async (provider: "google" | "apple") => {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin + "/auth",
       });
       if (result.error) throw result.error;
@@ -111,7 +111,7 @@ function AuthPage() {
         navigate({ to: safeRedirect });
       }
     } catch (err: any) {
-      toast.error(err.message || "Google sign-in failed");
+      toast.error(err.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
     } finally {
       setLoading(false);
     }
@@ -150,15 +150,26 @@ function AuthPage() {
             </p>
           )}
 
-          <button
-            type="button"
-            onClick={signInWithGoogle}
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
-          >
-            <GoogleG />
-            {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
-          </button>
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => signInWithProvider("google")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
+            >
+              <GoogleG />
+              {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
+            </button>
+            <button
+              type="button"
+              onClick={() => signInWithProvider("apple")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-black py-2.5 text-[14px] font-medium text-white transition-all hover:bg-[#1d1d1f] disabled:opacity-60"
+            >
+              <AppleLogo />
+              {mode === "signup" ? "Sign up with Apple" : "Sign in with Apple"}
+            </button>
+          </div>
 
           <div className="flex items-center gap-3 py-1">
             <div className="h-px flex-1 bg-[#e0e6eb]" />
@@ -254,3 +265,11 @@ function GoogleG() {
   );
 }
 
+
+function AppleLogo() {
+  return (
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M13.28 9.53c.02 2.42 2.12 3.22 2.15 3.24-.02.05-.34 1.15-1.11 2.28-.67.98-1.36 1.95-2.45 1.97-1.07.02-1.42-.63-2.65-.63-1.23 0-1.61.61-2.63.65-1.05.04-1.85-1.05-2.52-2.02C2.7 13.06 1.65 9.4 3.07 6.93c.7-1.23 1.96-2 3.32-2.02 1.03-.02 2 .69 2.62.69.62 0 1.8-.85 3.03-.73.52.02 1.97.19 2.9 1.42-.08.05-1.73 1.01-1.66 3.24zM11.2 3.2c.55-.66.92-1.58.82-2.5-.79.03-1.75.53-2.32 1.19-.51.58-.95 1.52-.83 2.42.88.07 1.78-.45 2.33-1.11z" />
+    </svg>
+  );
+}
