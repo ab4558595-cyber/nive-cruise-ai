@@ -150,15 +150,26 @@ function AuthPage() {
             </p>
           )}
 
-          <button
-            type="button"
-            onClick={signInWithGoogle}
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
-          >
-            <GoogleG />
-            {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
-          </button>
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => signInWithProvider("google")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-medium text-[#0a2540] shadow-[0_1px_2px_rgba(50,50,93,0.05)] transition-all hover:bg-[#f6f9fc] disabled:opacity-60"
+            >
+              <GoogleG />
+              {mode === "signup" ? "Sign up easily with Google" : "Sign in with Google"}
+            </button>
+            <button
+              type="button"
+              onClick={() => signInWithProvider("apple")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-black py-2.5 text-[14px] font-medium text-white transition-all hover:bg-[#1d1d1f] disabled:opacity-60"
+            >
+              <AppleLogo />
+              {mode === "signup" ? "Sign up with Apple" : "Sign in with Apple"}
+            </button>
+          </div>
 
           <div className="flex items-center gap-3 py-1">
             <div className="h-px flex-1 bg-[#e0e6eb]" />
