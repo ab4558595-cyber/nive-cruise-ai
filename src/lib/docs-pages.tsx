@@ -757,7 +757,7 @@ Keep the public API identical. Return only that file.`}</Pre>
         would break saved work gets a notice first.
       </P>
     </>
-  ),,
+  ),
 
   marketplace: () => (
     <>
