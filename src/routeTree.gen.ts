@@ -24,6 +24,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as HrRouteImport } from './routes/hr'
 import { Route as FounderRouteImport } from './routes/founder'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DesignRouteImport } from './routes/design'
@@ -123,6 +124,11 @@ const LegalRoute = LegalRouteImport.update({
 const KnowledgeRoute = KnowledgeRouteImport.update({
   id: '/knowledge',
   path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HrRoute = HrRouteImport.update({
+  id: '/hr',
+  path: '/hr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FounderRoute = FounderRouteImport.update({
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/design': typeof DesignRoute
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
   '/legal': typeof LegalRoute
   '/marketplace': typeof MarketplaceRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/code': typeof CodeRoute
   '/design': typeof DesignRoute
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
   '/legal': typeof LegalRoute
   '/marketplace': typeof MarketplaceRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/design': typeof DesignRoute
   '/docs': typeof DocsRouteWithChildren
   '/founder': typeof FounderRoute
+  '/hr': typeof HrRoute
   '/knowledge': typeof KnowledgeRoute
   '/legal': typeof LegalRoute
   '/marketplace': typeof MarketplaceRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/docs'
     | '/founder'
+    | '/hr'
     | '/knowledge'
     | '/legal'
     | '/marketplace'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/code'
     | '/design'
     | '/founder'
+    | '/hr'
     | '/knowledge'
     | '/legal'
     | '/marketplace'
@@ -475,6 +486,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/docs'
     | '/founder'
+    | '/hr'
     | '/knowledge'
     | '/legal'
     | '/marketplace'
@@ -518,6 +530,7 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   DocsRoute: typeof DocsRouteWithChildren
   FounderRoute: typeof FounderRoute
+  HrRoute: typeof HrRoute
   KnowledgeRoute: typeof KnowledgeRoute
   LegalRoute: typeof LegalRoute
   MarketplaceRoute: typeof MarketplaceRoute
@@ -653,6 +666,13 @@ declare module '@tanstack/react-router' {
       path: '/knowledge'
       fullPath: '/knowledge'
       preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hr': {
+      id: '/hr'
+      path: '/hr'
+      fullPath: '/hr'
+      preLoaderRoute: typeof HrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/founder': {
@@ -856,6 +876,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   DocsRoute: DocsRouteWithChildren,
   FounderRoute: FounderRoute,
+  HrRoute: HrRoute,
   KnowledgeRoute: KnowledgeRoute,
   LegalRoute: LegalRoute,
   MarketplaceRoute: MarketplaceRoute,

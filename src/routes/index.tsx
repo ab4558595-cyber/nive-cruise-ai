@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Code2, Share2, Briefcase, Database, Megaphone, BarChart3, BookOpen, Tag,
   Mic, Palette, Workflow, Bot, ArrowRight, Sparkles, LogIn, Shield,
-  BookMarked, Search, LineChart, LifeBuoy,
+  BookMarked, Search, LineChart, LifeBuoy, Blocks, Scale, ClipboardList, Languages, Users,
 } from "lucide-react";
 
 import { Ribbon } from "@/components/Ribbon";
@@ -78,6 +78,11 @@ const TOOLS: Tool[] = [
   { title: "SEO & Analytics", desc: "Keyword clusters, on-page audits, content briefs, technical checklists, JSON-LD and stakeholder reports.", href: "/seo", icon: Search, accent: "#ff8a00", tag: "New" },
   { title: "Data Analyst", desc: "Paste a CSV and get insights, PostgreSQL, cleaning plans, chart specs, stats review and forecasts.", href: "/analyst", icon: LineChart, accent: "#2563eb", tag: "New" },
   { title: "Support & Email", desc: "Ticket replies, macro libraries, escalation handoffs, tone rewrites and help-centre articles.", href: "/support", icon: LifeBuoy, accent: "#7c3aed", tag: "New" },
+  { title: "Marketplace", desc: "Browse every Nive tool, agent and integration — install what you use, publish your own agent recipes.", href: "/marketplace", icon: Blocks, accent: "#635bff", tag: "New" },
+  { title: "Legal & Policy", desc: "Draft policies and terms, review clauses with a risk table, rewrite legalese in plain English.", href: "/legal", icon: Scale, accent: "#0a2540", tag: "New" },
+  { title: "Product & PRD", desc: "PRDs, user stories with acceptance criteria, roadmaps, RICE scoring and release notes.", href: "/product", icon: ClipboardList, accent: "#2563eb", tag: "New" },
+  { title: "Translation & i18n", desc: "Translate, localise and transcreate copy, then export ready-to-import locale files.", href: "/translate", icon: Languages, accent: "#0a7c66", tag: "New" },
+  { title: "People & Hiring", desc: "Job posts, scorecards, interview kits, résumé screens, offers and onboarding plans.", href: "/hr", icon: Users, accent: "#7c3aed", tag: "New" },
 
 ];
 
@@ -107,6 +112,7 @@ function Home() {
             <Link to="/code" className="transition-colors hover:text-[#635bff]">Code</Link>
             <Link to="/social" className="transition-colors hover:text-[#635bff]">Social</Link>
             <Link to="/business" className="transition-colors hover:text-[#635bff]">Business</Link>
+            <Link to="/marketplace" className="transition-colors hover:text-[#635bff]">Marketplace</Link>
             <Link to="/docs" className="transition-colors hover:text-[#635bff]">Docs</Link>
             <Link to="/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
           </nav>

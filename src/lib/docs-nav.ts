@@ -32,11 +32,16 @@ export const DOC_NAV: DocGroup[] = [
       { slug: "seo", title: "SEO & Analytics Studio", description: "Clusters, audits, briefs, technical checklists, JSON-LD and reports." },
       { slug: "analyst", title: "Data Analyst", description: "Insights, SQL, cleaning plans, chart specs, stats and forecasts." },
       { slug: "support", title: "Support & Email Agent", description: "Replies, macros, escalations, tone rewrites and help-centre articles." },
+      { slug: "legal", title: "Legal & Policy Agent", description: "Policy drafts, clause reviews, plain-English rewrites and compliance checklists." },
+      { slug: "product", title: "Product & PRD Studio", description: "PRDs, user stories, roadmaps, RICE prioritisation and release notes." },
+      { slug: "translate", title: "Translation & Localization", description: "Translation, localisation, transcreation, glossaries, QA and i18n locale files." },
+      { slug: "hr", title: "People & Hiring Agent", description: "Job posts, scorecards, interview kits, screens, offers and onboarding plans." },
     ],
   },
   {
     group: "Platform",
     items: [
+      { slug: "marketplace", title: "Marketplace", description: "Browse, install and share tools, agents and integrations across the ecosystem." },
       { slug: "billing", title: "Plans & billing", description: "INR plans, Razorpay checkout, activation, webhooks and troubleshooting." },
       { slug: "security", title: "Security", description: "RLS, roles, rate limits, headers, webhook replay protection, disclosure." },
       { slug: "embedding", title: "Embedding Nive", description: "Iframe embedding, CSP frame-ancestors and storage-partitioning notes." },
