@@ -3,8 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag,
   LogIn, LogOut, Shield, PlayCircle, Download, Mic, MicOff, SlidersHorizontal,
-  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon,
+  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon, ArrowLeft,
+  UserCog,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,13 +33,16 @@ import { safeStorage } from "@/lib/safeStorage";
 export const Route = createFileRoute("/code")({
   head: () => ({
     meta: [
-      { title: "Nive AI — Elite coding copilot for any platform" },
+      { title: "Code Studio — Nive AI coding copilot" },
       { name: "description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
-      { property: "og:title", content: "Nive AI — Elite coding copilot for any platform" },
-      { property: "og:description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:title", content: "Code Studio — Nive AI coding copilot" },
+      { property: "og:description", content: "Generate production-quality multi-file code for web, mobile, embedded and ML projects, with live preview inside the Nive AI ecosystem." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/code" },
     ],
     links: [{ rel: "canonical", href: "/code" }],
+
   }),
   component: Index,
 });
@@ -389,16 +394,29 @@ function Index() {
                 <PanelLeftOpen className="h-4 w-4" />
               </Button>
             )}
+            <Link
+              to="/"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+              aria-label="Back to all Nive tools"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">All tools</span>
+            </Link>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground shadow-lg" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}>
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="min-w-0">
+              <p className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                <Link to="/" className="hover:text-foreground">Nive AI</Link>
+                <span aria-hidden>/</span>
+                <span className="text-foreground">Code Studio</span>
+              </p>
               <h1 className="truncate text-sm font-semibold leading-tight tracking-tight">
-                {store.active.title || "Nive AI — Elite coding copilot"}
+                {store.active.title || "New chat"}
               </h1>
-              <p className="text-[11px] text-muted-foreground">Nive AI · ⌘K for commands</p>
             </div>
           </div>
+
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" onClick={() => setPaletteOpen(true)} className="hidden sm:inline-flex text-muted-foreground hover:text-foreground" aria-label="Open command palette">
               <kbd className="hidden rounded border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] sm:inline-block">⌘K</kbd>
@@ -433,10 +451,16 @@ function Index() {
               </Button>
             )}
             {user ? (
-              <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
-              </Button>
+              <>
+                <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                  <Link to="/account"><UserCog className="h-4 w-4" /><span className="hidden sm:inline">Account</span></Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
+                  <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
+                </Button>
+              </>
             ) : (
+
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 <Link to="/auth"><LogIn className="h-4 w-4" /><span className="hidden sm:inline">Sign in</span></Link>
               </Button>
