@@ -451,10 +451,16 @@ function Index() {
               </Button>
             )}
             {user ? (
-              <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
-              </Button>
+              <>
+                <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                  <Link to="/account"><UserCog className="h-4 w-4" /><span className="hidden sm:inline">Account</span></Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-muted-foreground hover:text-foreground">
+                  <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Sign out</span>
+                </Button>
+              </>
             ) : (
+
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 <Link to="/auth"><LogIn className="h-4 w-4" /><span className="hidden sm:inline">Sign in</span></Link>
               </Button>
