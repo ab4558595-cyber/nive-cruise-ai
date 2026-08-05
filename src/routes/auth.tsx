@@ -6,8 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Ribbon } from "@/components/Ribbon";
 import { markTourPending } from "@/components/GuidedTour";
-import { isEmbedded } from "@/lib/safeStorage";
-
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -113,23 +111,11 @@ function AuthPage() {
         navigate({ to: safeRedirect });
       }
     } catch (err: any) {
-      const label = provider === "apple" ? "Apple" : "Google";
-      const msg = err?.message || `${label} sign-in failed`;
-      if (isEmbedded()) {
-        toast.error(`${msg} — embedded windows often block ${label} popups.`, {
-          action: {
-            label: "Open in new tab",
-            onClick: () => window.open(window.location.origin + "/auth", "_blank", "noopener"),
-          },
-        });
-      } else {
-        toast.error(msg);
-      }
+      toast.error(err.message || `${provider === "apple" ? "Apple" : "Google"} sign-in failed`);
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div

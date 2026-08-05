@@ -117,14 +117,7 @@ function Home() {
             <Link to="/pricing" className="transition-colors hover:text-[#635bff]">Pricing</Link>
           </nav>
           <div className="flex items-center gap-2.5">
-            {signedIn ? (
-              <Link
-                to="/account"
-                className="hidden items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#0a2540] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
-              >
-                <Shield className="h-4 w-4" /> Account
-              </Link>
-            ) : (
+            {!signedIn && (
               <Link
                 to="/auth"
                 className="hidden items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-4 py-2 text-[14px] font-medium text-[#0a2540] shadow-sm transition-shadow hover:shadow-md sm:inline-flex"
@@ -132,7 +125,6 @@ function Home() {
                 <LogIn className="h-4 w-4" /> Sign in
               </Link>
             )}
-
             <Link
               to="/code"
               className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[#635bff] px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#0a2540]"

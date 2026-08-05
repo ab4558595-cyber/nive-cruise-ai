@@ -32,19 +32,12 @@ function Business() {
 
         {/* Nav — Business product */}
         <header className="relative z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-6 py-5 sm:px-10">
-          <div className="flex items-center gap-6">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap text-[14px] font-medium text-[#425466] transition-colors hover:text-[#635bff]"
-            >
-              <span aria-hidden>←</span> All tools
-            </Link>
+          <div className="flex items-center gap-10">
             <Link to="/business" className="flex items-center gap-2 whitespace-nowrap">
               <span className="text-[22px] font-bold tracking-tight text-[#0a2540]">
                 nive<span className="ml-1 text-[#635bff]">/business</span>
               </span>
             </Link>
-
 
             <nav className="hidden items-center gap-6 text-[15px] font-medium text-[#0a2540] md:flex">
               <Link to="/business/synthetic-data" className="transition-colors hover:text-[#635bff]">Synthetic Data</Link>

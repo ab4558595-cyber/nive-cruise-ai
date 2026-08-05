@@ -85,21 +85,12 @@ and localStorage persistence. Include a test file.`}</Pre>
       <H2>Sign-in methods</H2>
       <UL>
         <li><strong>Email + password</strong> — confirmation email required before first use.</li>
-        <li><strong>Google</strong> — managed one-click sign-in, no password to manage.</li>
-        <li><strong>Apple</strong> — Sign in with Apple, including Hide My Email addresses.</li>
+        <li><strong>Google OAuth</strong> — one click, no password to manage.</li>
       </UL>
       <P>
         Sessions are stored by the auth client and refreshed automatically. When Nive is embedded in
         an iframe and the browser partitions third-party storage, Nive falls back to in-memory
-        storage for the session — you stay signed in for that tab but not across reloads. Embedded
-        windows also block provider popups; the sign-in screen offers an "Open in new tab" action
-        when that happens.
-      </P>
-      <H2>Managing connected logins</H2>
-      <P>
-        Open <Link to="/account" className="underline">Account settings</Link> to see which providers
-        are connected, connect a missing one, or unlink a provider you no longer use. At least one
-        sign-in method must stay connected, so connect a second provider before unlinking the first.
+        storage for the session — you stay signed in for that tab but not across reloads.
       </P>
       <H2>Password reset</H2>
       <OL>
@@ -107,7 +98,6 @@ and localStorage persistence. Include a test file.`}</Pre>
         <li>Open the recovery email and follow the link back to the app.</li>
         <li>Set a new password; all other sessions keep working until they expire.</li>
       </OL>
-
       <H2>What is stored against your account</H2>
       <Table
         head={["Data", "Why", "Deleted with account"]}
