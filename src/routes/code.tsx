@@ -389,16 +389,29 @@ function Index() {
                 <PanelLeftOpen className="h-4 w-4" />
               </Button>
             )}
+            <Link
+              to="/"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+              aria-label="Back to all Nive tools"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">All tools</span>
+            </Link>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground shadow-lg" style={{ background: "var(--gradient-brand)", boxShadow: "var(--shadow-glow)" }}>
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="min-w-0">
+              <p className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                <Link to="/" className="hover:text-foreground">Nive AI</Link>
+                <span aria-hidden>/</span>
+                <span className="text-foreground">Code Studio</span>
+              </p>
               <h1 className="truncate text-sm font-semibold leading-tight tracking-tight">
-                {store.active.title || "Nive AI — Elite coding copilot"}
+                {store.active.title || "New chat"}
               </h1>
-              <p className="text-[11px] text-muted-foreground">Nive AI · ⌘K for commands</p>
             </div>
           </div>
+
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" onClick={() => setPaletteOpen(true)} className="hidden sm:inline-flex text-muted-foreground hover:text-foreground" aria-label="Open command palette">
               <kbd className="hidden rounded border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] sm:inline-block">⌘K</kbd>
