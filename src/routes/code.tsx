@@ -3,8 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Send, Sparkles, Trash2, Cpu, Smartphone, Globe, Terminal, Square, Tag,
   LogIn, LogOut, Shield, PlayCircle, Download, Mic, MicOff, SlidersHorizontal,
-  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon,
+  PanelLeftOpen, Plus, MessageSquare, Sun, Paperclip, X, FileText, ImageIcon, ArrowLeft,
+  UserCog,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,13 +33,16 @@ import { safeStorage } from "@/lib/safeStorage";
 export const Route = createFileRoute("/code")({
   head: () => ({
     meta: [
-      { title: "Nive AI — Elite coding copilot for any platform" },
+      { title: "Code Studio — Nive AI coding copilot" },
       { name: "description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
-      { property: "og:title", content: "Nive AI — Elite coding copilot for any platform" },
-      { property: "og:description", content: "Chat with Nive AI to generate production-quality code for web, mobile, embedded, and ML projects — with live preview and multi-file output." },
+      { property: "og:title", content: "Code Studio — Nive AI coding copilot" },
+      { property: "og:description", content: "Generate production-quality multi-file code for web, mobile, embedded and ML projects, with live preview inside the Nive AI ecosystem." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/code" },
     ],
     links: [{ rel: "canonical", href: "/code" }],
+
   }),
   component: Index,
 });
