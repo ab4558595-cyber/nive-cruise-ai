@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, LogOut, RefreshCw, ShieldCheck, Unlink } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -80,7 +80,12 @@ function AccountPage() {
         toast.error(`${msg} — embedded windows often block provider popups.`, {
           action: {
             label: "Open in new tab",
-            onClick: () => window.open(window.location.origin + "/account", "_blank", "noopener"),
+            onClick: () =>
+              window.open(
+                `${window.location.origin}/account?connect=${provider}`,
+                "_blank",
+                "noopener",
+              ),
           },
         });
       } else {
@@ -109,9 +114,21 @@ function AccountPage() {
     }
   };
 
+  // Opened in a dedicated tab with ?connect=google|apple → start that flow now.
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || loading) return;
+    const p = new URLSearchParams(window.location.search).get("connect");
+    if (p !== "google" && p !== "apple") return;
+    autoRan.current = true;
+    window.history.replaceState({}, "", "/account");
+    void connect(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/auth", search: {}, replace: true });
   };
 
   return (

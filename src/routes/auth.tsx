@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,8 +10,11 @@ import { isEmbedded } from "@/lib/safeStorage";
 
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  validateSearch: (search: Record<string, unknown>): { redirect?: string; provider?: "google" | "apple" } => ({
+    ...(typeof search.redirect === "string" ? { redirect: search.redirect } : {}),
+    ...(search.provider === "google" || search.provider === "apple"
+      ? { provider: search.provider as "google" | "apple" }
+      : {}),
   }),
   head: () => ({
     meta: [
@@ -33,7 +36,7 @@ function AuthPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { redirect: redirectTo } = Route.useSearch();
+  const { redirect: redirectTo, provider: autoProvider } = Route.useSearch();
   const safeRedirect =
     redirectTo &&
     redirectTo.startsWith("/") &&
@@ -119,7 +122,12 @@ function AuthPage() {
         toast.error(`${msg} — embedded windows often block ${label} popups.`, {
           action: {
             label: "Open in new tab",
-            onClick: () => window.open(window.location.origin + "/auth", "_blank", "noopener"),
+            onClick: () => {
+              const url = new URL(window.location.origin + "/auth");
+              url.searchParams.set("provider", provider);
+              if (safeRedirect) url.searchParams.set("redirect", safeRedirect);
+              window.open(url.toString(), "_blank", "noopener");
+            },
           },
         });
       } else {
@@ -129,6 +137,15 @@ function AuthPage() {
       setLoading(false);
     }
   };
+
+  // When opened in a new tab with ?provider=…, start that provider flow straight away.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!autoProvider || autoStarted.current) return;
+    autoStarted.current = true;
+    void signInWithProvider(autoProvider);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoProvider]);
 
 
   return (
