@@ -182,9 +182,7 @@ export function AmbientAudio() {
       setOn(true);
       return;
     }
-    console.log('[audio] creating engine');
     const engine = createEngine();
-    console.log('[audio] engine', !!engine);
     if (!engine) return;
     engineRef.current = engine;
     void engine.ctx.resume();
