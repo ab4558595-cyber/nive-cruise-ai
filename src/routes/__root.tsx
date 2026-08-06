@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { AmbientAudio } from "@/components/AmbientAudio";
 
 function NotFoundComponent() {
   return (
