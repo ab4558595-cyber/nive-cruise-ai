@@ -114,9 +114,21 @@ function AccountPage() {
     }
   };
 
+  // Opened in a dedicated tab with ?connect=google|apple → start that flow now.
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || loading) return;
+    const p = new URLSearchParams(window.location.search).get("connect");
+    if (p !== "google" && p !== "apple") return;
+    autoRan.current = true;
+    window.history.replaceState({}, "", "/account");
+    void connect(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/auth", search: {}, replace: true });
   };
 
   return (
