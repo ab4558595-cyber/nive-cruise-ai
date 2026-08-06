@@ -10,8 +10,11 @@ import { isEmbedded } from "@/lib/safeStorage";
 
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  validateSearch: (search: Record<string, unknown>): { redirect?: string; provider?: "google" | "apple" } => ({
+    ...(typeof search.redirect === "string" ? { redirect: search.redirect } : {}),
+    ...(search.provider === "google" || search.provider === "apple"
+      ? { provider: search.provider as "google" | "apple" }
+      : {}),
   }),
   head: () => ({
     meta: [
