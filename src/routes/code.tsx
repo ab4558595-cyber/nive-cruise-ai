@@ -361,14 +361,14 @@ function Index() {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#635bff]/20 border-t-[#635bff]" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
       </div>
     );
   }
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-white text-[#0a2540]" style={{ fontFamily: "Inter, 'Sohne', system-ui, sans-serif" }}>
+    <div className="relative flex h-screen overflow-hidden bg-background text-foreground">
       <Toaster richColors position="top-center" />
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={palette} />
@@ -386,8 +386,8 @@ function Index() {
       />
 
       <GuidedTour />
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-white to-sky-50">
-        <header className="relative z-20 flex items-center justify-between border-b border-border/60 bg-white/95 px-3 py-2.5 backdrop-blur-md sm:px-5">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="relative z-20 flex items-center justify-between border-b border-border/60 bg-card/70 px-3 py-2.5 backdrop-blur-xl sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
             {sidebarCollapsed && (
               <Button variant="ghost" size="sm" onClick={() => setSidebarCollapsed(false)} className="hidden md:inline-flex h-8 w-8 p-0 text-muted-foreground hover:text-foreground" aria-label="Show sidebar">
@@ -475,8 +475,8 @@ function Index() {
               {messages.length === 0 ? (
                 <div className="relative z-10 mx-auto flex min-h-full max-w-3xl flex-col items-center justify-center px-4 py-12 text-center">
                   <h2
-                    className="mb-10 text-4xl font-normal leading-[1.1] tracking-tight text-[#1f1f1f] sm:text-5xl md:text-6xl"
-                    style={{ fontFamily: "'Google Sans', 'Product Sans', Inter, system-ui, sans-serif" }}
+                    className="mb-10 text-4xl font-light leading-[1.1] tracking-tight text-foreground sm:text-5xl md:text-6xl"
+                    style={{ fontFamily: "var(--font-serif)" }}
                   >
                     Any new ideas to explore?
                   </h2>
@@ -487,9 +487,9 @@ function Index() {
                         <button
                           key={s.label}
                           onClick={() => send(s.prompt)}
-                          className="group inline-flex items-center gap-2 rounded-full border border-[#e3e3e3] bg-white/80 px-4 py-2 text-sm text-[#444] backdrop-blur-sm transition-all hover:border-[#c8d8ff] hover:bg-white hover:text-[#1a1a1a] hover:shadow-sm"
+                          className="group inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 text-sm text-muted-foreground backdrop-blur-md transition-all hover:border-primary/40 hover:bg-card hover:text-foreground"
                         >
-                          <Icon className="h-3.5 w-3.5 text-[#5b8def]" />
+                          <Icon className="h-3.5 w-3.5 text-primary" />
                           <span>{s.label}</span>
                         </button>
                       );
@@ -534,8 +534,8 @@ function Index() {
                     {attachments.map((a, i) => {
                       const Icon = a.type.startsWith("image/") ? ImageIcon : FileText;
                       return (
-                        <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-[#e3e3e3] bg-white px-2.5 py-1 text-xs text-[#1f1f1f] shadow-sm">
-                          <Icon className="h-3 w-3 text-[#635bff]" />
+                        <span key={i} className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-2.5 py-1 text-xs text-foreground">
+                          <Icon className="h-3 w-3 text-primary" />
                           <span className="max-w-[180px] truncate">{a.name}</span>
                           <span className="text-muted-foreground">{Math.round(a.size / 1024)}KB</span>
                           <button onClick={() => removeAttachment(i)} className="ml-0.5 text-muted-foreground hover:text-destructive" aria-label={`Remove ${a.name}`}>
@@ -554,7 +554,7 @@ function Index() {
                   accept="image/*,audio/*,video/*,.pdf,.txt,.md,.json,.csv,.yaml,.yml,.ts,.tsx,.js,.jsx,.py,.go,.rs,.java,.c,.cpp,.h,.css,.html,.sh,.sql"
                   onChange={(e) => onPickFiles(e.target.files)}
                 />
-                <div className="relative flex items-end gap-2 rounded-[28px] border border-[#e3e3e3] bg-white px-3 py-2.5 shadow-[0_2px_14px_rgba(13,42,148,0.08)] transition-all focus-within:border-[#bcd0ff] focus-within:shadow-[0_4px_24px_rgba(91,141,239,0.18)]">
+                <div className="relative flex items-end gap-2 rounded-[28px] border border-border/60 bg-card/80 px-3 py-2.5 backdrop-blur-xl transition-all focus-within:border-primary/50" style={{ boxShadow: "var(--shadow-lg)" }}>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -599,7 +599,7 @@ function Index() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
                     placeholder={voiceOn ? "Listening…" : "Ask Nive"}
-                    className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-base text-[#1f1f1f] shadow-none placeholder:text-[#9aa0a6] focus-visible:ring-0"
+                    className="min-h-[44px] max-h-48 flex-1 resize-none border-0 bg-transparent text-base text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
                     disabled={isLoading}
                   />
 
