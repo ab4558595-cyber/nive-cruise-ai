@@ -122,7 +122,12 @@ function AuthPage() {
         toast.error(`${msg} — embedded windows often block ${label} popups.`, {
           action: {
             label: "Open in new tab",
-            onClick: () => window.open(window.location.origin + "/auth", "_blank", "noopener"),
+            onClick: () => {
+              const url = new URL(window.location.origin + "/auth");
+              url.searchParams.set("provider", provider);
+              if (safeRedirect) url.searchParams.set("redirect", safeRedirect);
+              window.open(url.toString(), "_blank", "noopener");
+            },
           },
         });
       } else {
@@ -132,6 +137,15 @@ function AuthPage() {
       setLoading(false);
     }
   };
+
+  // When opened in a new tab with ?provider=…, start that provider flow straight away.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!autoProvider || autoStarted.current) return;
+    autoStarted.current = true;
+    void signInWithProvider(autoProvider);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoProvider]);
 
 
   return (
