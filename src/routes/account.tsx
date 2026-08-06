@@ -80,7 +80,12 @@ function AccountPage() {
         toast.error(`${msg} — embedded windows often block provider popups.`, {
           action: {
             label: "Open in new tab",
-            onClick: () => window.open(window.location.origin + "/account", "_blank", "noopener"),
+            onClick: () =>
+              window.open(
+                `${window.location.origin}/account?connect=${provider}`,
+                "_blank",
+                "noopener",
+              ),
           },
         });
       } else {
