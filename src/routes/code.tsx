@@ -351,7 +351,7 @@ function Index() {
     } },
     { id: "sidebar", label: sidebarCollapsed ? "Show sidebar" : "Hide sidebar", group: "App", icon: PanelLeftOpen, run: () => setSidebarCollapsed((v) => !v) },
     { id: "pricing", label: "Go to Pricing", group: "Navigate", icon: Tag, run: () => navigate({ to: "/pricing" }) },
-    { id: "welcome", label: "Go to Welcome", group: "Navigate", icon: Sparkles, run: () => navigate({ to: "/welcome" }) },
+    { id: "home", label: "Go to All tools", group: "Navigate", icon: Sparkles, run: () => navigate({ to: "/" }) },
     ...(isAdmin ? [{ id: "admin", label: "Open Admin", group: "Navigate", icon: Shield, run: () => navigate({ to: "/admin" }) } as PaletteCommand] : []),
     ...(user ? [{ id: "signout", label: "Sign out", group: "Account", icon: LogOut, run: () => supabase.auth.signOut() } as PaletteCommand] : []),
   ];
