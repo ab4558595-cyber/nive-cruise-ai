@@ -155,7 +155,7 @@ function Index() {
     init();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setUser(s?.user ? { email: s.user.email } : null);
-      if (!s) { setIsAdmin(false); setActivePlan(null); window.location.replace("/welcome"); }
+      if (!s) { setIsAdmin(false); setActivePlan(null); navigate({ to: "/auth", search: { redirect: "/code" } }); }
     });
     return () => sub.subscription.unsubscribe();
   }, []);
