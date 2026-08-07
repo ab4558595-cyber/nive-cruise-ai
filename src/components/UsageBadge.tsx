@@ -49,8 +49,8 @@ export function UsageBadge({ usage, onTopupSuccess }: Props) {
     );
   }
 
-  const low = usage.remaining <= Math.max(1, Math.floor(usage.baseLimit * 0.2));
-  const empty = usage.remaining === 0;
+  const low = usage.remaining < usage.costPerRun * 5;
+  const empty = usage.remaining < usage.costPerRun;
 
   return (
     <div className="flex items-center gap-2">
@@ -62,12 +62,10 @@ export function UsageBadge({ usage, onTopupSuccess }: Props) {
             ? "bg-[#fff8e6] text-[#8a6100] ring-[#f5e2a8]"
             : "bg-[#f6f9fc] text-[#425466] ring-[#e3e8ee]"
         }`}
-        title={`Resets at ${new Date(usage.resetsAtUtc).toLocaleString()} (UTC midnight)${
-          usage.bonus > 0 ? ` · includes +${usage.bonus} bonus credits` : ""
-        }`}
+        title={`This tool costs ${usage.costPerRun} credit${usage.costPerRun === 1 ? "" : "s"} per run. Credits are shared across every Nive tool and never expire.`}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-current" />
-        {usage.remaining}/{usage.limit} {usage.tool === "synthetic" ? "synthetic" : "marketing"} runs left
+        {usage.remaining.toLocaleString()} credits · {usage.costPerRun}/run
       </span>
 
       {(low || empty) && (
@@ -81,7 +79,7 @@ export function UsageBadge({ usage, onTopupSuccess }: Props) {
           }`}
         >
           <Zap className="h-3 w-3" />
-          {empty ? "Get more credits" : "Top up"}
+          {empty ? "Out of credits — buy more" : "Top up"}
         </button>
       )}
 
@@ -93,15 +91,8 @@ export function UsageBadge({ usage, onTopupSuccess }: Props) {
         <History className="h-3.5 w-3.5" />
       </Link>
 
-      <TopupDialog
-        tool={usage.tool}
-        open={topupOpen}
-        onClose={() => setTopupOpen(false)}
-        onSuccess={(u) => {
-          setTopupOpen(false);
-          onTopupSuccess?.(u);
-        }}
-      />
+      <TopupDialog tool={usage.tool} open={topupOpen} onClose={() => setTopupOpen(false)} />
     </div>
   );
 }
+
