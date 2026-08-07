@@ -26,8 +26,8 @@ function Terms() {
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <header className="mx-auto flex max-w-[880px] items-center justify-between px-6 py-5">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight">nive</Link>
-        <Link to="/welcome" className="inline-flex items-center gap-1.5 text-[14px] text-[#0a2540]/70 hover:text-[#635bff]">
+        <Link to="/" className="text-[22px] font-bold tracking-tight">nive</Link>
+        <Link to="/" className="inline-flex items-center gap-1.5 text-[14px] text-[#0a2540]/70 hover:text-[#635bff]">
           <ArrowLeft className="h-4 w-4" /> Home
         </Link>
       </header>

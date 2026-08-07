@@ -47,7 +47,7 @@ function Pricing() {
       <Ribbon />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+        <Link to="/" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
           nive
         </Link>
         <Link to="/" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
