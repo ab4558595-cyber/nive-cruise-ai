@@ -40,6 +40,17 @@ export const Route = createFileRoute("/api/public/razorpay/webhook")({
                 { user_id: userId, plan_id: planId, active: true, expires_at: expiresAt },
                 { onConflict: "user_id" },
               );
+              const { creditsForPlan } = await import("@/lib/plans");
+              const credits = creditsForPlan(planId);
+              if (credits > 0) {
+                const { error: grantErr } = await supabaseAdmin.rpc("grant_credits", {
+                  _user_id: userId,
+                  _amount: credits,
+                  _reason: `purchase:${planId}`,
+                  _metadata: { payment_id: p.id } as never,
+                });
+                if (grantErr) console.error("credit grant failed", grantErr);
+              }
               await supabaseAdmin
                 .from("processed_webhook_events")
                 .insert({ event_id: p.id, source: "razorpay" });
