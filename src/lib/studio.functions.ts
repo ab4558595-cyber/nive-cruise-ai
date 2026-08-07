@@ -188,5 +188,6 @@ export const runStudioMode = createServerFn({ method: "POST" })
       .filter(Boolean)
       .join("\n\n");
     const text = await callModel(cfg.system, user, false);
-    return { text, label: cfg.label };
+    return { text, label: cfg.label, creditsLeft: balance };
   });
+
