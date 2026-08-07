@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
 import {
-  Workflow, Loader2, Play, Plus, Trash2, Check, GripVertical, Save, RotateCcw,
+  Workflow, Loader2, Play, Plus, Trash2, Check, GripVertical, Save, RotateCcw, Bot, Zap,
 } from "lucide-react";
 import { BusinessAuthGate } from "@/components/BusinessAuthGate";
 import { StudioShell, Card, ErrorNote } from "@/components/StudioShell";
 import { runAutomationStep } from "@/lib/studio.functions";
+import { runAutopilot, AUTOPILOT_COST, type AutopilotRun } from "@/lib/autopilot.functions";
 import { safeStorage } from "@/lib/safeStorage";
 
 export const Route = createFileRoute("/automations")({
@@ -76,6 +77,32 @@ function AutomationsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<Array<{ name: string; brief: string; steps: string[] }>>([]);
+
+  // --- Autopilot: the agent plans and runs the whole job itself ---
+  const autopilot = useServerFn(runAutopilot);
+  const [goal, setGoal] = useState("");
+  const [depth, setDepth] = useState<3 | 4 | 5>(4);
+  const [apBusy, setApBusy] = useState(false);
+  const [apError, setApError] = useState("");
+  const [apRun, setApRun] = useState<AutopilotRun | null>(null);
+
+  const launchAutopilot = async () => {
+    if (goal.trim().length < 10) {
+      setApError("Describe the outcome you want in a sentence or two.");
+      return;
+    }
+    setApError("");
+    setApBusy(true);
+    setApRun(null);
+    try {
+      const res = await autopilot({ data: { goal: goal.trim(), depth } });
+      setApRun(res);
+    } catch (e) {
+      setApError(e instanceof Error ? e.message : "Autopilot run failed");
+    } finally {
+      setApBusy(false);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -155,7 +182,101 @@ function AutomationsPage() {
       icon={Workflow}
       accent="#00b3d4"
     >
-      <div className="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
+      {/* Autopilot — one goal in, finished deliverable out */}
+      <Card>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#00b3d4]/12 text-[#00b3d4]">
+            <Bot className="h-4 w-4" />
+          </span>
+          <h2 className="text-[17px] font-semibold">Autopilot</h2>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#f6f9fc] px-2.5 py-1 text-[12px] font-semibold text-[#425466]">
+            <Zap className="h-3 w-3 text-[#00b3d4]" /> {AUTOPILOT_COST} credits
+          </span>
+        </div>
+        <p className="mt-2 text-[14px] leading-relaxed text-[#425466]">
+          Give it an outcome, not a prompt. Autopilot plans the steps itself, executes each one,
+          critiques its own work and hands back a single finished deliverable. Failed runs are
+          refunded automatically.
+        </p>
+        <textarea
+          value={goal}
+          onChange={(e) => setGoal(e.target.value)}
+          rows={3}
+          placeholder="e.g. Prepare a 4-week go-to-market plan and launch assets for our AI invoicing tool aimed at Indian SMB accountants."
+          className="mt-3 w-full resize-y rounded-xl border border-[#0a2540]/12 px-4 py-3 text-[15px] leading-relaxed outline-none focus:border-[#00b3d4]"
+        />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[13px] text-[#8792a2]">Depth</span>
+          {([3, 4, 5] as const).map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDepth(d)}
+              className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                depth === d
+                  ? "bg-[#00b3d4] text-white"
+                  : "border border-[#0a2540]/12 text-[#425466] hover:border-[#00b3d4]"
+              }`}
+            >
+              {d} steps
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={launchAutopilot}
+            disabled={apBusy}
+            className="ml-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#0a2540] px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#00b3d4] disabled:opacity-50"
+          >
+            {apBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+            {apBusy ? "Autopilot working…" : "Run autopilot"}
+          </button>
+        </div>
+        {apError && (
+          <div className="mt-4">
+            <ErrorNote message={apError} />
+          </div>
+        )}
+
+        {apRun && (
+          <div className="mt-5 border-t border-[#0a2540]/10 pt-5">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#8792a2]">
+              Objective
+            </p>
+            <p className="mt-1 text-[15px] font-medium">{apRun.objective}</p>
+
+            <div className="mt-4 space-y-2">
+              {apRun.steps.map((s, i) => (
+                <details
+                  key={`${s.title}-${i}`}
+                  className="rounded-xl border border-[#0a2540]/10 bg-[#f6f9fc] px-3 py-2"
+                >
+                  <summary className="cursor-pointer text-[14px] font-medium">
+                    Step {i + 1} — {s.title}
+                  </summary>
+                  <div className="prose prose-sm mt-3 max-w-none">
+                    <ReactMarkdown>{s.output}</ReactMarkdown>
+                  </div>
+                </details>
+              ))}
+              <details className="rounded-xl border border-[#0a2540]/10 px-3 py-2">
+                <summary className="cursor-pointer text-[14px] font-medium">Self-critique</summary>
+                <div className="prose prose-sm mt-3 max-w-none">
+                  <ReactMarkdown>{apRun.critique}</ReactMarkdown>
+                </div>
+              </details>
+            </div>
+
+            <p className="mt-5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[#8792a2]">
+              Final deliverable
+            </p>
+            <div className="prose prose-sm mt-2 max-w-none prose-pre:bg-[#0a2540] prose-pre:text-white">
+              <ReactMarkdown>{apRun.deliverable}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.15fr]">
         <Card>
           <label className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-[#8792a2]">
             Workflow brief

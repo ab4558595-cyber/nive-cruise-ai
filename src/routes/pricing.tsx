@@ -1,29 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowLeft, ShieldCheck, Zap, Globe, Layers, Sparkles } from "lucide-react";
-import { PLANS, plansForProduct } from "@/lib/plans";
-import { Ribbon } from "@/components/Ribbon";
-
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Check, ArrowLeft, Zap, Bot, Database, Sparkles, Infinity as InfinityIcon } from "lucide-react";
+import { CREDIT_PLANS, CREDIT_PACKS } from "@/lib/plans";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
+import { getCreditWallet } from "@/lib/credits.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { LegalFooter } from "@/components/LegalFooter";
-
-const CODE_PLANS = plansForProduct("code");
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Nive AI" },
-      { name: "description", content: "Simple, affordable plans for Nive AI — pay with UPI. Starter at ₹149/month and Pro at ₹299/month for unlimited prompts." },
-      { property: "og:title", content: "Nive AI Pricing — Starter & Pro plans" },
-      { property: "og:description", content: "Compare Nive AI plans. Higher limits, faster models, and unlimited prompts. UPI payments accepted." },
+      { title: "Credits & Pricing — Nive AI" },
+      {
+        name: "description",
+        content:
+          "One credit wallet powers every Nive AI tool — code, marketing, synthetic data, autopilot agents. Plans from ₹199 or top-up packs that never expire. Pay with UPI.",
+      },
+      { property: "og:title", content: "Nive AI Pricing — one wallet, every tool" },
+      {
+        property: "og:description",
+        content:
+          "Buy credits once and spend them across all 16 Nive studios and autonomous agent runs. Plans from ₹199/30 days.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/pricing" },
     ],
     links: [{ rel: "canonical", href: "/pricing" }],
-    scripts: PLANS.filter((p) => p.price > 0 && (p.product ?? "code") === "code").map((p) => ({
+    scripts: [...CREDIT_PLANS, ...CREDIT_PACKS].map((p) => ({
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Product",
-        name: `Nive AI ${p.name}`,
-        description: p.tagline,
+        name: `Nive AI — ${p.name}`,
+        description: `${p.credits} Nive credits. ${p.tagline}`,
         brand: { "@type": "Brand", name: "Nive AI" },
         offers: {
           "@type": "Offer",
@@ -37,125 +48,187 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
 });
 
+const COST_ROWS: Array<{ label: string; cost: number; icon: typeof Zap }> = [
+  { label: "Marketing / copy generation", cost: CREDIT_COSTS.marketing, icon: Sparkles },
+  { label: "Studio task (SEO, legal, support, analyst…)", cost: CREDIT_COSTS.studio_mode, icon: Bot },
+  { label: "Synthetic dataset run", cost: CREDIT_COSTS.synthetic, icon: Database },
+  { label: "Design concept + brand kit", cost: CREDIT_COSTS.design_concept, icon: Sparkles },
+  { label: "Workflow step (automations)", cost: CREDIT_COSTS.automation_step, icon: Zap },
+  { label: "Autopilot run (plan → research → draft → critique → deliver)", cost: CREDIT_COSTS.autopilot, icon: InfinityIcon },
+];
+
 function Pricing() {
+  const fetchWallet = useServerFn(getCreditWallet);
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      try {
+        const w = await fetchWallet();
+        if (!cancelled) setBalance(w.balance);
+      } catch {
+        /* not signed in / no wallet yet */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
-      className="relative min-h-screen overflow-hidden bg-white text-[#0a2540]"
-      style={{ fontFamily: "'Inter', 'Sohne', system-ui, -apple-system, sans-serif" }}
+      className="relative min-h-screen overflow-hidden bg-[#070b16] text-white"
+      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
     >
-      
-      <Ribbon />
+      <div className="pointer-events-none absolute -left-40 top-[-10%] h-[420px] w-[420px] rounded-full bg-[#635bff]/25 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-32 top-[30%] h-[380px] w-[380px] rounded-full bg-[#ec4899]/20 blur-[130px]" />
 
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+        <Link to="/" className="text-[22px] font-bold tracking-tight text-white">
           nive
         </Link>
-        <Link to="/" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]">
-          <ArrowLeft className="h-4 w-4" /> Back to chat
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-[14px] font-medium text-white/70 transition-colors hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" /> All tools
         </Link>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-8 sm:px-10 sm:pt-16">
-        {/* Launch offer banner */}
-        <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-xl bg-gradient-to-r from-[#635bff]/10 via-[#ec4899]/10 to-[#fb7185]/10 px-5 py-3 text-center text-[13px] font-medium text-[#0a2540] ring-1 ring-[#635bff]/20">
-          <Sparkles className="h-4 w-4 text-[#635bff]" />
-          <span>
-            <b>Launch pricing:</b> first 100 Pro subscribers locked in at <b>₹299/mo for life</b>.
-          </span>
-          <span className="text-[#697386]">Limited spots — once gone, regular pricing applies.</span>
-        </div>
-
-        <div className="mb-14 max-w-2xl">
-          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#635bff]">Pricing</p>
-          <h1 className="text-[40px] font-bold leading-[1.05] tracking-tight text-[#0a2540] sm:text-[56px]">
-            Choose your{" "}
+      <main className="relative z-10 mx-auto max-w-[1180px] px-6 pb-24 pt-6 sm:px-10 sm:pt-12">
+        <div className="mb-12 max-w-2xl">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-[#a78bfa]">
+            Credits
+          </p>
+          <h1 className="text-[40px] font-bold leading-[1.05] tracking-tight sm:text-[56px]">
+            One wallet.{" "}
             <span
               className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "linear-gradient(95deg, #635bff 0%, #ec4899 60%, #fb7185 100%)" }}
+              style={{ backgroundImage: "linear-gradient(95deg,#8b7dff 0%,#ec4899 60%,#fb7185 100%)" }}
             >
-              plan
+              Every tool.
             </span>
           </h1>
-          <p className="mt-4 text-[16px] text-[#425466]">
-            Simple, transparent pricing. Pay securely with UPI — access unlocks once your payment is approved.
+          <p className="mt-4 text-[16px] leading-relaxed text-white/70">
+            Buy credits once and spend them anywhere in Nive — Code Studio, marketing, synthetic
+            datasets, custom agents and autonomous autopilot runs. No per-tool limits, no daily
+            resets. Pay securely with UPI or card.
           </p>
+          {balance !== null && (
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[13px] font-semibold ring-1 ring-white/15">
+              <Zap className="h-3.5 w-3.5 text-[#a78bfa]" />
+              You have {balance.toLocaleString()} credits
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {CODE_PLANS.map((plan) => (
+          {CREDIT_PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`relative flex flex-col rounded-2xl bg-white p-7 transition-all hover:-translate-y-1 ${
+              className={`relative flex flex-col rounded-2xl p-7 backdrop-blur transition-all hover:-translate-y-1 ${
                 plan.highlight
-                  ? "shadow-[0_20px_60px_rgba(99,91,255,0.25),0_8px_24px_rgba(50,50,93,0.1)] ring-2 ring-[#635bff]"
-                  : "shadow-[0_15px_50px_rgba(50,50,93,0.1),0_5px_15px_rgba(0,0,0,0.05)] ring-1 ring-[#e3e8ee]"
+                  ? "bg-white/[0.08] ring-2 ring-[#8b7dff] shadow-[0_24px_70px_rgba(99,91,255,0.35)]"
+                  : "bg-white/[0.04] ring-1 ring-white/10"
               }`}
             >
-              {plan.highlight && (
+              {plan.badge && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#635bff] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-md">
-                  Most popular
+                  {plan.badge}
                 </span>
               )}
-              <h2 className="text-[18px] font-semibold text-[#0a2540]">{plan.name}</h2>
-              <p className="mt-1 text-[13px] text-[#697386]">{plan.tagline}</p>
+              <h2 className="text-[18px] font-semibold">{plan.name}</h2>
+              <p className="mt-1 text-[13px] text-white/60">{plan.tagline}</p>
               <div className="mt-5 flex items-baseline gap-1">
-                <span className="text-[42px] font-bold tracking-tight text-[#0a2540]">₹{plan.price}</span>
-                <span className="text-[14px] text-[#697386]">/ {plan.period}</span>
+                <span className="text-[42px] font-bold tracking-tight">₹{plan.price}</span>
+                <span className="text-[14px] text-white/50">/ {plan.period}</span>
               </div>
+              <p className="mt-1 text-[13px] font-semibold text-[#a78bfa]">
+                {plan.credits?.toLocaleString()} credits
+              </p>
               <ul className="mt-6 flex-1 space-y-2.5 text-[14px]">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#635bff]" />
-                    <span className="text-[#3c4257]">{f}</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#8b7dff]" />
+                    <span className="text-white/75">{f}</span>
                   </li>
                 ))}
               </ul>
-              {plan.price === 0 ? (
-                <Link
-                  to="/code"
-                  className="mt-7 inline-flex items-center justify-center rounded-md border border-[#e0e6eb] bg-white py-2.5 text-[14px] font-semibold text-[#0a2540] shadow-sm transition-all hover:border-[#cfd7df] hover:shadow"
-                >
-                  Use free
-                </Link>
-              ) : (
-                <Link
-                  to="/checkout/$planId"
-                  params={{ planId: plan.id }}
-                  className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white shadow-[0_2px_5px_rgba(99,91,255,0.25)] transition-all ${
-                    plan.highlight ? "bg-[#635bff] hover:bg-[#5048d6]" : "bg-[#0a2540] hover:bg-[#1a3a5c]"
-                  }`}
-                >
-                  Get {plan.name} — ₹{plan.price}
-                </Link>
-              )}
+              <Link
+                to="/checkout/$planId"
+                params={{ planId: plan.id }}
+                className={`mt-7 inline-flex items-center justify-center rounded-md py-2.5 text-[14px] font-semibold text-white transition-all ${
+                  plan.highlight
+                    ? "bg-[#635bff] hover:bg-[#5048d6] shadow-[0_2px_10px_rgba(99,91,255,0.45)]"
+                    : "bg-white/10 ring-1 ring-white/15 hover:bg-white/15"
+                }`}
+              >
+                Get {plan.name} — ₹{plan.price}
+              </Link>
             </div>
           ))}
         </div>
 
-        {/* Why upgrade — concrete value props */}
-        <section className="mt-20">
-          <h2 className="text-center text-[22px] font-bold tracking-tight text-[#0a2540] sm:text-[28px]">
-            Why builders upgrade
+        {/* Top-up packs */}
+        <section className="mt-16">
+          <h2 className="text-[22px] font-bold tracking-tight sm:text-[26px]">
+            Or top up as you go
           </h2>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: Zap, title: "Faster, smarter model", body: "Pro switches you to GPT-5.5-class reasoning for production-grade code." },
-              { icon: Layers, title: "Multi-file projects", body: "Full React apps, not just snippets. Files are previewed live as they stream." },
-              { icon: Globe, title: "Multilingual", body: "Build and chat in Tamil, Hindi, Spanish, Arabic — any language you write in." },
-              { icon: ShieldCheck, title: "No daily cap (Pro)", body: "Ship without watching a counter. Unlimited prompts, priority queue." },
-            ].map((b) => (
-              <div key={b.title} className="rounded-xl bg-white p-5 ring-1 ring-[#e3e8ee] shadow-[0_4px_14px_rgba(50,50,93,0.06)]">
-                <b.icon className="h-5 w-5 text-[#635bff]" />
-                <h3 className="mt-3 text-[15px] font-semibold text-[#0a2540]">{b.title}</h3>
-                <p className="mt-1 text-[13px] leading-relaxed text-[#425466]">{b.body}</p>
+          <p className="mt-2 text-[14px] text-white/60">
+            One-off packs. No subscription, and these credits never expire.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {CREDIT_PACKS.map((p) => (
+              <Link
+                key={p.id}
+                to="/checkout/$planId"
+                params={{ planId: p.id }}
+                className={`group flex items-center justify-between rounded-xl p-5 transition-all hover:-translate-y-0.5 ${
+                  p.highlight
+                    ? "bg-white/[0.08] ring-1 ring-[#8b7dff]/60"
+                    : "bg-white/[0.04] ring-1 ring-white/10"
+                }`}
+              >
+                <div>
+                  <div className="text-[16px] font-semibold">{p.name}</div>
+                  <div className="text-[12.5px] text-white/55">{p.tagline}</div>
+                </div>
+                <span className="text-[20px] font-bold">₹{p.price}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* What credits buy */}
+        <section className="mt-16 rounded-2xl bg-white/[0.04] p-7 ring-1 ring-white/10">
+          <h2 className="text-[22px] font-bold tracking-tight sm:text-[26px]">
+            What a credit buys
+          </h2>
+          <p className="mt-2 text-[14px] text-white/60">
+            Credits are spent per completed job, not per message. Failed runs are never charged.
+          </p>
+          <div className="mt-6 divide-y divide-white/10">
+            {COST_ROWS.map((r) => (
+              <div key={r.label} className="flex items-center justify-between gap-4 py-3">
+                <span className="flex items-center gap-3 text-[14px] text-white/80">
+                  <r.icon className="h-4 w-4 shrink-0 text-[#8b7dff]" />
+                  {r.label}
+                </span>
+                <span className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-[12.5px] font-semibold">
+                  {r.cost} {r.cost === 1 ? "credit" : "credits"}
+                </span>
               </div>
             ))}
           </div>
         </section>
 
-
-        <p className="mt-10 text-center text-[13px] text-[#697386]">
-          Plan activates the moment your payment is confirmed. No manual approval needed.
+        <p className="mt-10 text-center text-[13px] text-white/50">
+          Credits land in your wallet the moment your payment is confirmed. New accounts start with
+          200 free credits.
         </p>
       </main>
       <LegalFooter />

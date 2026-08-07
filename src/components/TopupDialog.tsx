@@ -1,46 +1,19 @@
-import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { Loader2, X, Zap, Check } from "lucide-react";
-import {
-  purchaseBusinessTopup,
-  TOPUP_PACKS,
-  type ToolKey,
-  type UsageSnapshot,
-  type TopupPackId,
-} from "@/lib/businessUsage.functions";
+import { Link } from "@tanstack/react-router";
+import { X, Zap, ArrowRight } from "lucide-react";
+import { CREDIT_PACKS } from "@/lib/plans";
+import type { ToolKey } from "@/lib/businessUsage.functions";
 
 type Props = {
   tool: ToolKey;
   open: boolean;
   onClose: () => void;
-  onSuccess: (usage: UsageSnapshot) => void;
 };
 
-export function TopupDialog({ tool, open, onClose, onSuccess }: Props) {
-  const purchase = useServerFn(purchaseBusinessTopup);
-  const [busy, setBusy] = useState<TopupPackId | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
+export function TopupDialog({ tool, open, onClose }: Props) {
   if (!open) return null;
 
-  const packs = (Object.entries(TOPUP_PACKS) as [TopupPackId, (typeof TOPUP_PACKS)[TopupPackId]][])
-    .filter(([, p]) => p.tool === tool);
-
-  const buy = async (id: TopupPackId) => {
-    setError(null);
-    setBusy(id);
-    try {
-      const usage = await purchase({ data: { pack: id } });
-      onSuccess(usage);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Purchase failed. Please try again.");
-    } finally {
-      setBusy(null);
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2540]/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2540]/60 p-4 backdrop-blur-sm">
       <div
         role="dialog"
         aria-modal="true"
@@ -58,50 +31,38 @@ export function TopupDialog({ tool, open, onClose, onSuccess }: Props) {
         <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#635bff]/10 text-[#635bff]">
           <Zap className="h-4 w-4" />
         </div>
-        <h3 className="text-[20px] font-bold tracking-tight text-[#0a2540]">
-          Top up {tool === "synthetic" ? "Synthetic Data" : "Marketing"} credits
-        </h3>
+        <h3 className="text-[20px] font-bold tracking-tight text-[#0a2540]">Buy more credits</h3>
         <p className="mt-1 text-[13.5px] text-[#697386]">
-          Add extra runs for today. Credits unlock instantly and expire at midnight UTC.
+          One wallet powers every Nive tool, including{" "}
+          {tool === "synthetic" ? "Synthetic Data" : "Marketing"}. Credit packs never expire.
         </p>
 
         <div className="mt-5 space-y-2.5">
-          {packs.map(([id, p]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => buy(id)}
-              disabled={busy !== null}
-              className="group flex w-full items-center justify-between rounded-lg border border-[#e3e8ee] bg-white px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-[#635bff] hover:shadow-[0_8px_24px_rgba(99,91,255,0.12)] disabled:cursor-not-allowed disabled:opacity-60"
+          {CREDIT_PACKS.map((p) => (
+            <Link
+              key={p.id}
+              to="/checkout/$planId"
+              params={{ planId: p.id }}
+              className="group flex w-full items-center justify-between rounded-lg border border-[#e3e8ee] bg-white px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-[#635bff] hover:shadow-[0_8px_24px_rgba(99,91,255,0.12)]"
             >
               <div>
-                <div className="text-[15px] font-semibold text-[#0a2540]">{p.label}</div>
-                <div className="text-[12px] text-[#697386]">
-                  {p.credits} more runs · today only
-                </div>
+                <div className="text-[15px] font-semibold text-[#0a2540]">{p.name}</div>
+                <div className="text-[12px] text-[#697386]">{p.tagline} · never expires</div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-bold text-[#0a2540]">₹{p.amount_inr}</span>
-                {busy === id ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-[#635bff]" />
-                ) : (
-                  <Check className="h-4 w-4 text-[#635bff] opacity-0 transition-opacity group-hover:opacity-100" />
-                )}
+                <span className="text-[16px] font-bold text-[#0a2540]">₹{p.price}</span>
+                <ArrowRight className="h-4 w-4 text-[#635bff] opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
-            </button>
+            </Link>
           ))}
         </div>
 
-        {error && (
-          <p className="mt-3 rounded-md bg-[#fff1f0] px-3 py-2 text-[12.5px] text-[#c0392b]">
-            {error}
-          </p>
-        )}
-
-        <p className="mt-4 text-[11.5px] leading-relaxed text-[#8898aa]">
-          Demo billing: credits are granted immediately for testing. Production builds gate this
-          behind UPI payment approval.
-        </p>
+        <Link
+          to="/pricing"
+          className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#635bff] hover:underline"
+        >
+          Compare monthly plans <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </div>
   );

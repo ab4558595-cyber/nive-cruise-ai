@@ -83,5 +83,23 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
       console.error("activate plan failed", error);
       throw new Error("Payment ok but plan activation failed. Contact support.");
     }
-    return { ok: true, planId: plan.id };
+    const credits = plan.credits ?? 0;
+    if (credits > 0) {
+      const { data: seen } = await supabaseAdmin
+        .from("processed_webhook_events")
+        .select("event_id")
+        .eq("event_id", data.razorpay_payment_id)
+        .maybeSingle();
+      if (!seen) {
+        const { giveCredits } = await import("./credits.server");
+        await giveCredits(userId, credits, `purchase:${plan.id}`, {
+          payment_id: data.razorpay_payment_id,
+        });
+        await supabaseAdmin
+          .from("processed_webhook_events")
+          .insert({ event_id: data.razorpay_payment_id, source: "razorpay-verify" });
+      }
+    }
+
+    return { ok: true, planId: plan.id, credits };
   });
