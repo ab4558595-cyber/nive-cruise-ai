@@ -35,7 +35,7 @@ export async function chargeCredits(
     _user_id: userId,
     _amount: amount,
     _reason: reason,
-    _tool: tool ?? null,
+    _tool: tool,
     _metadata: metadata as never,
   });
   if (error) {
@@ -61,7 +61,7 @@ export async function giveCredits(
     _user_id: userId,
     _amount: amount,
     _reason: reason,
-    _tool: null,
+    _tool: undefined,
     _metadata: metadata as never,
   });
   if (error) throw new Error(error.message);
