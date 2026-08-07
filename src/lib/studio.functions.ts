@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { CREDIT_COSTS } from "./credit-costs";
 import {
   callModel,
   parseJsonLoose,
@@ -10,6 +11,12 @@ import {
 } from "./studio.server";
 
 export type { VoiceOutput };
+
+/** Charge the shared credit wallet before running a model. */
+async function charge(userId: string, action: keyof typeof CREDIT_COSTS, meta: Record<string, unknown> = {}) {
+  const { chargeCredits } = await import("./credits.server");
+  return chargeCredits(userId, CREDIT_COSTS[action], `${action}_run`, action, meta);
+}
 
 export type DesignConcept = {
   name: string;
@@ -34,7 +41,9 @@ export const runVoiceBrief = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    const balance = await charge(userId, "voice_brief", { output: data.output });
     const cfg = VOICE_OUTPUTS[data.output as VoiceOutput];
     const user = [
       `Spoken transcript:\n"""${data.transcript}"""`,
@@ -43,7 +52,7 @@ export const runVoiceBrief = createServerFn({ method: "POST" })
       .filter(Boolean)
       .join("\n\n");
     const text = await callModel(cfg.system, user, false);
-    return { text, label: cfg.label };
+    return { text, label: cfg.label, creditsLeft: balance };
   });
 
 export const runDesignConcept = createServerFn({ method: "POST" })
@@ -57,7 +66,9 @@ export const runDesignConcept = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    await charge(userId, "design_concept", {});
     const system = `You are Nive Design Studio, a senior product designer and brand strategist.
 Return STRICT JSON matching this TypeScript type, nothing else:
 { name: string; tagline: string; vibe: string;
@@ -95,7 +106,9 @@ export const runAutomationStep = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    const balance = await charge(userId, "automation_step", { step: data.step });
     const cfg = AUTOMATION_STEP_PROMPTS[data.step];
     if (!cfg) throw new Error(`Unknown workflow step: ${data.step}`);
     const user = [
@@ -105,7 +118,7 @@ export const runAutomationStep = createServerFn({ method: "POST" })
       .filter(Boolean)
       .join("\n\n");
     const text = await callModel(cfg.system, user, false);
-    return { text, label: cfg.label };
+    return { text, label: cfg.label, creditsLeft: balance };
   });
 
 export const runCustomAgent = createServerFn({ method: "POST" })
@@ -129,7 +142,9 @@ export const runCustomAgent = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    const balance = await charge(userId, "custom_agent", { agent: data.name });
     const skills = (data.tools ?? []).join(", ");
     const system = [
       `You are "${data.name}", a custom agent inside Nive AI.`,
@@ -146,7 +161,7 @@ export const runCustomAgent = createServerFn({ method: "POST" })
       .join("\n\n");
 
     const text = await callModel(system, `${transcript}\n\nYou:`, false);
-    return { text };
+    return { text, creditsLeft: balance };
   });
 
 export const runStudioMode = createServerFn({ method: "POST" })
@@ -160,7 +175,9 @@ export const runStudioMode = createServerFn({ method: "POST" })
       })
       .parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    const balance = await charge(userId, "studio_mode", { mode: data.mode });
     const { STUDIO_MODE_PROMPTS } = await import("./studio.server");
     const cfg = STUDIO_MODE_PROMPTS[data.mode];
     if (!cfg) throw new Error(`Unknown mode: ${data.mode}`);
