@@ -190,6 +190,8 @@ export const LEGACY_PLANS: Plan[] = [
   },
 ];
 
+export const PLANS: Plan[] = [...CREDIT_PLANS, ...CREDIT_PACKS, ...LEGACY_PLANS];
+
 export function plansForProduct(product: ProductKey): Plan[] {
   return PLANS.filter((p) => (p.product ?? "code") === product);
 }
@@ -197,6 +199,12 @@ export function plansForProduct(product: ProductKey): Plan[] {
 export function getPlan(id: string): Plan | undefined {
   return PLANS.find((p) => p.id === id);
 }
+
+/** Credits granted for a purchased plan/pack id (0 for legacy plans). */
+export function creditsForPlan(id: string): number {
+  return getPlan(id)?.credits ?? 0;
+}
+
 
 
 export function buildUpiUri(amount: number, note: string): string {
