@@ -19,8 +19,8 @@ function FounderPage() {
   return (
     <div className="min-h-screen bg-white text-[#0a2540]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <header className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">nive</Link>
-        <Link to="/welcome" className="text-[14px] font-medium text-[#635bff] hover:text-[#0a2540]">← Back to home</Link>
+        <Link to="/" className="text-[22px] font-bold tracking-tight text-[#0a2540]">nive</Link>
+        <Link to="/" className="text-[14px] font-medium text-[#635bff] hover:text-[#0a2540]">← Back to home</Link>
       </header>
 
       <section className="mx-auto grid max-w-[1080px] gap-12 px-6 py-16 sm:px-10 md:grid-cols-2 md:items-center">
@@ -62,7 +62,7 @@ function FounderPage() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              to="/welcome"
+              to="/"
               className="inline-flex items-center gap-1.5 rounded-full bg-[#635bff] px-5 py-3 text-[15px] font-medium text-white shadow-[0_4px_14px_rgba(99,91,255,0.35)] transition-all hover:translate-y-[-1px] hover:bg-[#5048d6]"
             >
               Explore Nive AI <span aria-hidden>›</span>

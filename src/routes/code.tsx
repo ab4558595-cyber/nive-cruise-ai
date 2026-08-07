@@ -142,7 +142,7 @@ function Index() {
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) { window.location.replace("/welcome"); return; }
+      if (!session?.user) { navigate({ to: "/auth", search: { redirect: "/code" } }); return; }
       setUser({ email: session.user.email });
       const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
       setIsAdmin(!!roles?.some((r) => r.role === "admin"));
@@ -155,7 +155,7 @@ function Index() {
     init();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setUser(s?.user ? { email: s.user.email } : null);
-      if (!s) { setIsAdmin(false); setActivePlan(null); window.location.replace("/welcome"); }
+      if (!s) { setIsAdmin(false); setActivePlan(null); navigate({ to: "/auth", search: { redirect: "/code" } }); }
     });
     return () => sub.subscription.unsubscribe();
   }, []);

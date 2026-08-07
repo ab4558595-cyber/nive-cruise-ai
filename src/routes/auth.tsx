@@ -43,7 +43,7 @@ function AuthPage() {
     !redirectTo.startsWith("//") &&
     !redirectTo.startsWith("/auth")
       ? redirectTo
-      : "/welcome";
+      : "/";
 
   // If user is already signed in (e.g. returning from Google OAuth redirect), navigate away.
   useEffect(() => {
@@ -158,11 +158,11 @@ function AuthPage() {
 
       {/* Top brand */}
       <header className="relative z-10 mx-auto flex max-w-[1280px] items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/welcome" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
+        <Link to="/" className="text-[22px] font-bold tracking-tight text-[#0a2540]">
           nive
         </Link>
         <Link
-          to="/welcome"
+          to="/"
           className="text-[14px] font-medium text-[#0a2540]/70 transition-colors hover:text-[#635bff]"
         >
           ← Back
