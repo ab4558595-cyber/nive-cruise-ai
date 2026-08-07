@@ -173,3 +173,7 @@ export const getBusinessUsageHistory = createServerFn({ method: "GET" })
 
     return Array.from(byDay.values()).sort((a, b) => (a.day < b.day ? 1 : -1));
   });
+
+export function todayUtc(): string {
+  return new Date().toISOString().slice(0, 10);
+}
