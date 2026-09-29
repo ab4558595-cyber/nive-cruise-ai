@@ -41,6 +41,99 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_campaign_runs: {
+        Row: {
+          created_at: string
+          currency: string
+          days: number
+          goal: string
+          id: string
+          landing_url: string
+          plan: Json
+          results: Json
+          status: string
+          total_budget: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          days: number
+          goal: string
+          id?: string
+          landing_url: string
+          plan: Json
+          results?: Json
+          status?: string
+          total_budget: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          days?: number
+          goal?: string
+          id?: string
+          landing_url?: string
+          plan?: Json
+          results?: Json
+          status?: string
+          total_budget?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ad_connections: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          id: string
+          provider: string
+          refresh_token: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          provider: string
+          refresh_token: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          refresh_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ad_oauth_states: {
+        Row: {
+          created_at: string
+          provider: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          provider: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          provider?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brand_profiles: {
         Row: {
           audience: string | null
